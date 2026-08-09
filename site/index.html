@@ -137,15 +137,17 @@
     </script>
 
     <script>
-      // Set before first paint so a pinned dark preference never flashes light.
-      // Default is light: the screenshots are light and a dashboard that arrives
-      // dark reads as a different product than the one pictured.
+      // Set before first paint so a pinned preference never flashes the other way.
+      // Light is the default outright, not "light unless the OS says dark": a
+      // visitor on a dark desktop was arriving at a page that looked nothing like
+      // the one being linked to. Dark is one click away and it sticks.
       (function () {
         try {
-          var pinned = localStorage.getItem("openportfolio-theme");
-          if (pinned === "dark" || pinned === "light") document.documentElement.dataset.theme = pinned;
-          else document.documentElement.removeAttribute("data-theme");
-        } catch (e) {}
+          document.documentElement.dataset.theme =
+            localStorage.getItem("openportfolio-theme") === "dark" ? "dark" : "light";
+        } catch (e) {
+          document.documentElement.dataset.theme = "light";
+        }
       })();
     </script>
   </head>
@@ -197,15 +199,101 @@
           </p>
           <p class="hero-note">git clone · pnpm install · npx convex dev</p>
 
-          <img
-            class="shot"
-            src="/assets/net-worth.png"
-            width="2720"
-            height="1800"
-            alt="The openportfolio net worth view: a single total in pounds, then breakdowns by venue and by asset class, then the full position table"
-            fetchpriority="high"
-          />
-          <p class="hero-note">Screenshots show the demo book. Every figure in them is invented.</p>
+          <div class="panel">
+            <div class="panel-bar">
+              <div class="panel-tabs">
+                <span class="on">Net worth</span><span>Flows</span><span>Track record</span><span>Decisions</span>
+              </div>
+              <span class="panel-who">Demo book · viewer</span>
+            </div>
+            <div class="panel-body">
+              <p class="panel-total"><b>£186,136.74</b> <small>5 accounts · 30 snapshots · base GBP</small></p>
+
+              <span class="panel-label">By asset class</span>
+              <div
+                class="alloc"
+                role="img"
+                aria-label="ETF 38.6 percent, equity 34.9, pension 14.2, crypto 9.5, cash 2.8"
+              >
+                <i style="width: 38.6%"></i><i style="width: 34.9%"></i><i style="width: 14.2%"></i
+                ><i style="width: 9.5%"></i><i style="width: 2.8%"></i>
+              </div>
+              <div class="alloc-key">
+                <span><i></i>ETF <b>38.6%</b></span
+                ><span><i></i>Equity <b>34.9%</b></span
+                ><span><i></i>Pension <b>14.2%</b></span
+                ><span><i></i>Crypto <b>9.5%</b></span
+                ><span><i></i>Cash <b>2.8%</b></span>
+              </div>
+
+              <span class="panel-label">Positions</span>
+              <div class="panel-scroll">
+                <table class="pt">
+                  <thead>
+                    <tr>
+                      <th scope="col">Symbol</th>
+                      <th scope="col">Account</th>
+                      <th scope="col">Venue</th>
+                      <th scope="col" class="r">Qty</th>
+                      <th scope="col" class="r">Price</th>
+                      <th scope="col" class="r">Value</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td class="sym">VWRL</td>
+                      <td class="dim">isa</td>
+                      <td class="dim">ibkr</td>
+                      <td class="r">340</td>
+                      <td class="r">£118.20</td>
+                      <td class="r">£40,188.00</td>
+                    </tr>
+                    <tr>
+                      <td class="sym">CSPX</td>
+                      <td class="dim">isa</td>
+                      <td class="dim">ibkr</td>
+                      <td class="r">42</td>
+                      <td class="r">£754.10</td>
+                      <td class="r">£31,672.20</td>
+                    </tr>
+                    <tr>
+                      <td class="sym">WORKPLACE-DC</td>
+                      <td class="dim">pension</td>
+                      <td class="dim">manual</td>
+                      <td class="r">1</td>
+                      <td class="r">£26,500</td>
+                      <td class="r">£26,500.00</td>
+                    </tr>
+                    <tr>
+                      <td class="sym">MSFT</td>
+                      <td class="dim">gia</td>
+                      <td class="dim">ibkr</td>
+                      <td class="r">60</td>
+                      <td class="r">$526.40</td>
+                      <td class="r">£23,466.90</td>
+                    </tr>
+                    <tr>
+                      <td class="sym">035420</td>
+                      <td class="dim">gia</td>
+                      <td class="dim">ibkr</td>
+                      <td class="r">210</td>
+                      <td class="r">₩197,500</td>
+                      <td class="r">£23,093.30</td>
+                    </tr>
+                    <tr>
+                      <td class="sym">ASML</td>
+                      <td class="dim">gia</td>
+                      <td class="dim">ibkr</td>
+                      <td class="r">18</td>
+                      <td class="r">€812.40</td>
+                      <td class="r">£12,184.00</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <p class="panel-cap">6 of 10 rows · every figure on this page is invented</p>
+            </div>
+          </div>
         </section>
 
         <section id="why">
@@ -267,13 +355,122 @@
               </ul>
             </div>
             <figure>
-              <img
-                src="/assets/track-record.png"
-                width="2720"
-                height="1800"
-                loading="lazy"
-                alt="The track record view showing a mean Brier score of 0.187 over 74 scored calls, with a reliability table comparing forecast probability against observed rate in five buckets"
-              />
+              <div class="panel">
+                <div class="panel-bar">
+                  <div class="panel-tabs">
+                    <span>Net worth</span><span>Flows</span><span class="on">Track record</span><span>Decisions</span>
+                  </div>
+                  <span class="panel-who">Demo book · viewer</span>
+                </div>
+                <div class="panel-body">
+                  <p class="panel-total">
+                    <b>0.187</b>
+                    <small>mean Brier over 74 scored calls · coin flip is 0.25 · calibration error 6.8%</small>
+                  </p>
+
+                  <span class="panel-label">Reliability</span>
+                  <div class="panel-scroll">
+                    <table class="pt">
+                      <thead>
+                        <tr>
+                          <th scope="col">Said</th>
+                          <th scope="col" class="r">Calls</th>
+                          <th scope="col" class="r">Happened</th>
+                          <th scope="col">Said <span class="dim">vs</span> happened</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>0% to 20%</td>
+                          <td class="r">9</td>
+                          <td class="r">11.1%</td>
+                          <td class="relcell">
+                            <span class="rel"><i style="width: 12%"></i><i style="width: 11.1%"></i></span>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>20% to 40%</td>
+                          <td class="r">14</td>
+                          <td class="r">28.6%</td>
+                          <td class="relcell">
+                            <span class="rel"><i style="width: 31%"></i><i style="width: 28.6%"></i></span>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>40% to 60%</td>
+                          <td class="r">19</td>
+                          <td class="r">52.6%</td>
+                          <td class="relcell">
+                            <span class="rel"><i style="width: 51%"></i><i style="width: 52.6%"></i></span>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>60% to 80%</td>
+                          <td class="r">21</td>
+                          <td class="r">61.9%</td>
+                          <td class="relcell">
+                            <span class="rel"><i style="width: 68%"></i><i style="width: 61.9%"></i></span>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>80% to 100%</td>
+                          <td class="r">11</td>
+                          <td class="r">72.7%</td>
+                          <td class="relcell">
+                            <span class="rel"><i style="width: 87%"></i><i style="width: 72.7%"></i></span>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <span class="panel-label">Calls</span>
+                  <div class="panel-scroll">
+                    <table class="pt">
+                      <thead>
+                        <tr>
+                          <th scope="col">Subject</th>
+                          <th scope="col">Criterion</th>
+                          <th scope="col" class="r">Said</th>
+                          <th scope="col" class="r">Brier</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td class="sym">MSFT</td>
+                          <td class="dim">MSFT close &gt; 520.00</td>
+                          <td class="r">55%</td>
+                          <td class="r">0.203</td>
+                        </tr>
+                        <tr>
+                          <td class="sym">Euro area CPI</td>
+                          <td class="dim">HICP yoy &lt; 2.2</td>
+                          <td class="r">66%</td>
+                          <td class="r">0.116</td>
+                        </tr>
+                        <tr>
+                          <td class="sym">ASML</td>
+                          <td class="dim">bookings beat consensus</td>
+                          <td class="r">58%</td>
+                          <td class="r">0.176</td>
+                        </tr>
+                        <tr>
+                          <td class="sym">VWRL</td>
+                          <td class="dim">VWRL close &gt; 124.00</td>
+                          <td class="r">61%</td>
+                          <td class="r dim">open</td>
+                        </tr>
+                        <tr>
+                          <td class="sym">ETH</td>
+                          <td class="dim">ETHUSD &gt; 4000</td>
+                          <td class="r">37%</td>
+                          <td class="r dim">open</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
             </figure>
           </div>
 
@@ -293,13 +490,101 @@
               </ul>
             </div>
             <figure>
-              <img
-                src="/assets/flows.png"
-                width="2720"
-                height="1800"
-                loading="lazy"
-                alt="The flows view showing net buying by investor type over thirty sessions and a table of individual sessions with net and turnover columns"
-              />
+              <div class="panel">
+                <div class="panel-bar">
+                  <div class="panel-tabs">
+                    <span>Net worth</span><span class="on">Flows</span><span>Track record</span><span>Decisions</span>
+                  </div>
+                  <span class="panel-who">Demo book · viewer</span>
+                </div>
+                <div class="panel-body">
+                  <p class="panel-total">
+                    <span class="chip">KOSPI</span>
+                    <small>net buying over the last 30 sessions</small>
+                  </p>
+
+                  <div class="panel-scroll">
+                    <table class="pt">
+                      <thead>
+                        <tr>
+                          <th scope="col">Investor</th>
+                          <th scope="col" class="r">Net bought (₩bn)</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td class="sym">individual</td>
+                          <td class="r up">+7,218</td>
+                        </tr>
+                        <tr>
+                          <td class="sym">institution</td>
+                          <td class="r dn">−1,884</td>
+                        </tr>
+                        <tr>
+                          <td class="sym">foreigner</td>
+                          <td class="r dn">−5,602</td>
+                        </tr>
+                        <tr>
+                          <td class="sym">other_corporation</td>
+                          <td class="r up">+268</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <span class="panel-label">Sessions</span>
+                  <div class="panel-scroll">
+                    <table class="pt">
+                      <thead>
+                        <tr>
+                          <th scope="col">Date</th>
+                          <th scope="col">Investor</th>
+                          <th scope="col" class="r">Net (₩bn)</th>
+                          <th scope="col" class="r">Turnover (₩bn)</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td class="dim" data-sess="1">2026-08-07</td>
+                          <td>foreigner</td>
+                          <td class="r dn">−811.4</td>
+                          <td class="r dim">37,412</td>
+                        </tr>
+                        <tr>
+                          <td class="dim" data-sess="1">2026-08-07</td>
+                          <td>individual</td>
+                          <td class="r up">+206.9</td>
+                          <td class="r dim">37,412</td>
+                        </tr>
+                        <tr>
+                          <td class="dim" data-sess="1">2026-08-07</td>
+                          <td>institution</td>
+                          <td class="r up">+598.3</td>
+                          <td class="r dim">37,412</td>
+                        </tr>
+                        <tr>
+                          <td class="dim" data-sess="2">2026-08-06</td>
+                          <td>foreigner</td>
+                          <td class="r dn">−2,967.5</td>
+                          <td class="r dim">41,265</td>
+                        </tr>
+                        <tr>
+                          <td class="dim" data-sess="2">2026-08-06</td>
+                          <td>individual</td>
+                          <td class="r up">+3,104.8</td>
+                          <td class="r dim">41,265</td>
+                        </tr>
+                        <tr>
+                          <td class="dim" data-sess="2">2026-08-06</td>
+                          <td>institution</td>
+                          <td class="r dn">−241.6</td>
+                          <td class="r dim">41,265</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
             </figure>
           </div>
 
@@ -318,13 +603,42 @@
               </ul>
             </div>
             <figure>
-              <img
-                src="/assets/decisions.png"
-                width="2720"
-                height="1800"
-                loading="lazy"
-                alt="The decisions view listing open deferred decisions with trigger conditions and due dates, one row highlighted as overdue, and a table of upcoming catalysts"
-              />
+              <div class="panel">
+                <div class="panel-bar">
+                  <div class="panel-tabs">
+                    <span>Net worth</span><span>Flows</span><span>Track record</span><span class="on">Decisions</span>
+                  </div>
+                  <span class="panel-who">Demo book · viewer</span>
+                </div>
+                <div class="panel-body">
+                  <div class="queue">
+                    <div>
+                      <h4>Semiconductor hold review</h4>
+                      <span class="late">6 days overdue</span>
+                      <p>Held until the book is at cost plus the target, not until one name recovers.</p>
+                      <span class="when">trigger · first of each month</span>
+                    </div>
+                    <div>
+                      <h4>Re-enter the metals tranche after CPI</h4>
+                      <span class="when">in 2 days</span>
+                      <p>Deferred once already. Deferring twice is a decision to skip it.</p>
+                      <span class="when">trigger · CPI print clears</span>
+                    </div>
+                    <div>
+                      <h4>Consolidate the old workplace pension</h4>
+                      <span class="when">in 17 days</span>
+                      <p>Manual row until the provider exposes an API.</p>
+                      <span class="when">trigger · provider statement arrives</span>
+                    </div>
+                    <div>
+                      <h4>Trim the ETF overweight</h4>
+                      <span class="when">in 44 days</span>
+                      <p>ETF share is above the band written at the last review.</p>
+                      <span class="when">trigger · quarterly rebalance</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </figure>
           </div>
         </section>
@@ -542,26 +856,41 @@ npx tsx sync-worker.mts --once</code></pre>
 
     <script>
       (function () {
-        var btn = document.getElementById("theme");
-        if (!btn) return;
         var root = document.documentElement;
-        function label() {
-          var dark =
-            root.dataset.theme === "dark" ||
-            (!root.dataset.theme && window.matchMedia("(prefers-color-scheme: dark)").matches);
-          btn.textContent = dark ? "Light" : "Dark";
-        }
-        label();
-        btn.addEventListener("click", function () {
-          var dark =
-            root.dataset.theme === "dark" ||
-            (!root.dataset.theme && window.matchMedia("(prefers-color-scheme: dark)").matches);
-          root.dataset.theme = dark ? "light" : "dark";
-          try {
-            localStorage.setItem("openportfolio-theme", root.dataset.theme);
-          } catch (e) {}
+        var btn = document.getElementById("theme");
+        if (btn) {
+          var label = function () {
+            btn.textContent = root.dataset.theme === "dark" ? "Light" : "Dark";
+          };
           label();
-        });
+          btn.addEventListener("click", function () {
+            root.dataset.theme = root.dataset.theme === "dark" ? "light" : "dark";
+            try {
+              localStorage.setItem("openportfolio-theme", root.dataset.theme);
+            } catch (e) {}
+            label();
+          });
+        }
+
+        // The flow panel shows exchange sessions, and an exchange is shut at the
+        // weekend. Count back weekdays from today so the panel never claims a
+        // Saturday print. The markup carries a real date as the no-JS fallback.
+        var now = new Date();
+        var walk = function (back) {
+          var d = new Date(now);
+          while (back > 0) {
+            d.setDate(d.getDate() - 1);
+            if (d.getDay() !== 0 && d.getDay() !== 6) back--;
+          }
+          return d.toISOString().slice(0, 10);
+        };
+        var cache = {};
+        var cells = document.querySelectorAll("[data-sess]");
+        for (var i = 0; i < cells.length; i++) {
+          var n = cells[i].getAttribute("data-sess");
+          if (!cache[n]) cache[n] = walk(Number(n));
+          cells[i].textContent = cache[n];
+        }
       })();
     </script>
   </body>

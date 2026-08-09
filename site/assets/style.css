@@ -1,6 +1,9 @@
 /* openportfolio.app
    Same tokens as the app itself, so the site and the product are visibly one
-   thing. Light is the default; dark is opt-in through the toggle or the OS. */
+   thing. Light is the default outright: the document carries data-theme="light"
+   in the markup and the pre-paint script only overrides it for a visitor who
+   pinned dark. The prefers-color-scheme block below is the fallback for a
+   document that somehow carries no theme at all. */
 
 :root {
   --paper: #f3f4f8;
@@ -98,8 +101,11 @@ a:hover {
   text-decoration: underline;
 }
 
+/* height:auto or the intrinsic width/height attributes win and stretch the
+   image to its natural height inside a width-constrained box. */
 img,
 svg {
+  height: auto;
   max-width: 100%;
 }
 
@@ -310,16 +316,6 @@ h1 em {
   margin-top: 18px;
 }
 
-.shot {
-  border: 1px solid var(--rule);
-  border-radius: 14px;
-  box-shadow: var(--shadow-lg);
-  display: block;
-  margin: 52px auto 0;
-  overflow: hidden;
-  width: 100%;
-}
-
 /* ---------- sections ---------- */
 
 section {
@@ -390,6 +386,13 @@ h3 {
   margin-top: 90px;
 }
 
+/* order:-1 moves the figure into the FIRST grid column, which is the 5fr one,
+   so a flipped row silently rendered its panel narrower than its neighbours.
+   Swap the track too. */
+.feature.flip {
+  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+}
+
 .feature.flip > figure {
   order: -1;
 }
@@ -405,14 +408,6 @@ h3 {
 
 .feature figure {
   margin: 0;
-}
-
-.feature img {
-  border: 1px solid var(--rule);
-  border-radius: 12px;
-  box-shadow: var(--shadow);
-  display: block;
-  width: 100%;
 }
 
 .tag {
@@ -738,7 +733,10 @@ details p {
 }
 
 @media (max-width: 860px) {
+  /* .feature.flip is more specific than .feature, so it has to be named here
+     or the flipped row keeps its two-column track while the others stack. */
   .feature,
+  .feature.flip,
   .docs {
     grid-template-columns: minmax(0, 1fr);
     gap: 28px;
@@ -769,4 +767,378 @@ details p {
   position: absolute;
   white-space: nowrap;
   width: 1px;
+}
+
+/* ---------- product panels ----------
+   These views used to be PNG screenshots, which was the worst of both: 930 KB
+   of payload, soft at any density the capture did not match, locked to the
+   theme it was shot in, and not one character of it selectable or readable by
+   a crawler. They are the same views rebuilt in markup against the tokens
+   above, so they stay sharp everywhere, follow the theme, and the numbers are
+   text. Figures mirror browser/demo/fixtures.ts; every one is invented. */
+
+.panel {
+  background: var(--paper-warm);
+  border: 1px solid var(--rule);
+  border-radius: 14px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.hero .panel {
+  box-shadow: var(--shadow-lg);
+  margin-top: 52px;
+}
+
+.panel-bar {
+  align-items: center;
+  background: var(--paper);
+  border-bottom: 1px solid var(--rule-light);
+  display: flex;
+  gap: 14px;
+  justify-content: space-between;
+  padding: 10px 14px;
+}
+
+.panel-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+}
+
+.panel-tabs span {
+  border-radius: 7px;
+  color: var(--ink-3);
+  font-size: 12.5px;
+  padding: 4px 10px;
+  white-space: nowrap;
+}
+
+.panel-tabs .on {
+  background: var(--paper-warm);
+  box-shadow: var(--shadow-sm);
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.panel-who {
+  color: var(--ink-4);
+  font-family: var(--mono);
+  font-size: 11.5px;
+  white-space: nowrap;
+}
+
+.panel-body {
+  padding: 20px 18px;
+}
+
+.panel-total {
+  align-items: baseline;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+/* Instrument Serif carries no currency glyph, so the pound falls back mid-run
+   and tabular-nums then collides it into the first digit. Neither here. */
+.panel-total b {
+  font-family: var(--serif);
+  font-size: clamp(32px, 5.4vw, 50px);
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: 1;
+}
+
+.panel-total small {
+  color: var(--ink-3);
+  font-size: 13px;
+}
+
+.panel-label {
+  color: var(--ink-3);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.panel-body .panel-label {
+  display: block;
+  margin: 22px 0 10px;
+}
+
+.panel-body > .panel-label:first-child {
+  margin-top: 0;
+}
+
+.alloc {
+  border-radius: 5px;
+  display: flex;
+  gap: 2px;
+  height: 10px;
+  overflow: hidden;
+}
+
+.alloc i {
+  background: var(--accent);
+  display: block;
+}
+
+.alloc i:nth-child(2) {
+  background: var(--accent-2);
+}
+
+.alloc i:nth-child(3) {
+  background: var(--gain);
+}
+
+.alloc i:nth-child(4) {
+  background: var(--ink-3);
+}
+
+.alloc i:nth-child(5) {
+  background: var(--ink-4);
+}
+
+.alloc-key {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  margin-top: 12px;
+}
+
+.alloc-key span {
+  align-items: center;
+  color: var(--ink-2);
+  display: flex;
+  font-size: 12.5px;
+  gap: 7px;
+}
+
+.alloc-key i {
+  background: var(--accent);
+  border-radius: 3px;
+  height: 9px;
+  width: 9px;
+}
+
+.alloc-key span:nth-child(2) i {
+  background: var(--accent-2);
+}
+
+.alloc-key span:nth-child(3) i {
+  background: var(--gain);
+}
+
+.alloc-key span:nth-child(4) i {
+  background: var(--ink-3);
+}
+
+.alloc-key span:nth-child(5) i {
+  background: var(--ink-4);
+}
+
+.alloc-key b {
+  color: var(--ink-3);
+  font-family: var(--mono);
+  font-size: 11.5px;
+  font-weight: 500;
+}
+
+.panel-scroll {
+  margin: 0 -18px;
+  overflow-x: auto;
+  padding: 0 18px;
+}
+
+table.pt {
+  border-collapse: collapse;
+  font-size: 13px;
+  width: 100%;
+}
+
+table.pt th {
+  color: var(--ink-3);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  padding: 0 0 9px;
+  text-align: left;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+table.pt td {
+  border-top: 1px solid var(--rule-light);
+  padding: 9px 0;
+  white-space: nowrap;
+}
+
+table.pt th + th,
+table.pt td + td {
+  padding-left: 18px;
+}
+
+table.pt .r {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+table.pt th.r {
+  text-align: right;
+}
+
+table.pt .sym {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+table.pt .dim {
+  color: var(--ink-3);
+}
+
+table.pt .up {
+  color: var(--gain);
+}
+
+table.pt .dn {
+  color: var(--loss);
+}
+
+/* reliability: said against happened, one pair of bars per bucket */
+.rel {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 110px;
+}
+
+.rel i {
+  background: var(--accent);
+  border-radius: 2px;
+  display: block;
+  height: 5px;
+  min-width: 2px;
+}
+
+.rel i + i {
+  background: var(--gain);
+}
+
+td.relcell {
+  padding-left: 18px;
+  width: 40%;
+}
+
+.queue {
+  display: flex;
+  flex-direction: column;
+}
+
+.queue > div {
+  align-items: baseline;
+  border-top: 1px solid var(--rule-light);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  padding: 13px 0;
+}
+
+.queue > div:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.queue h4 {
+  font-size: 14px;
+  margin: 0;
+}
+
+.queue p {
+  color: var(--ink-3);
+  font-size: 12.5px;
+  margin: 0;
+  width: 100%;
+}
+
+.queue .when {
+  color: var(--ink-3);
+  font-family: var(--mono);
+  font-size: 11.5px;
+  margin-left: auto;
+}
+
+.queue .late {
+  background: color-mix(in srgb, var(--loss) 14%, transparent);
+  border-radius: 5px;
+  color: var(--loss);
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 500;
+  margin-left: auto;
+  padding: 2px 7px;
+}
+
+.chip {
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 7px;
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 5px 11px;
+}
+
+.panel-cap {
+  color: var(--ink-3);
+  font-family: var(--mono);
+  font-size: 12px;
+  margin: 14px 0 0;
+}
+
+@media (max-width: 860px) {
+  .panel-body {
+    padding: 16px 14px;
+  }
+
+  .panel-scroll {
+    margin: 0 -14px;
+    padding: 0 14px;
+  }
+
+  .panel-who {
+    display: none;
+  }
+}
+
+/* The header runs 424px wide at its natural size, so it pushed a 10px
+   horizontal scroll onto every phone. Tighten the gutter and the hit padding
+   rather than dropping links: four targets still fit above 360px. */
+@media (max-width: 440px) {
+  .wrap {
+    padding: 0 16px;
+  }
+
+  .brand {
+    font-size: 19px;
+  }
+
+  .site-nav {
+    gap: 1px;
+  }
+
+  .site-nav a,
+  .theme-toggle {
+    font-size: 13.5px;
+    padding: 8px 7px;
+  }
+}
+
+@media (max-width: 360px) {
+  .site-nav a,
+  .theme-toggle {
+    font-size: 13px;
+    padding: 8px 5px;
+  }
 }

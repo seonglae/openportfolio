@@ -53,12 +53,14 @@
       }
     </script>
     <script>
+      // Light is the default outright, not "light unless the OS says dark".
       (function () {
         try {
-          var p = localStorage.getItem("openportfolio-theme");
-          if (p === "dark" || p === "light") document.documentElement.dataset.theme = p;
-          else document.documentElement.removeAttribute("data-theme");
-        } catch (e) {}
+          document.documentElement.dataset.theme =
+            localStorage.getItem("openportfolio-theme") === "dark" ? "dark" : "light";
+        } catch (e) {
+          document.documentElement.dataset.theme = "light";
+        }
       })();
     </script>
   </head>
@@ -183,18 +185,12 @@
         var btn = document.getElementById("theme");
         if (!btn) return;
         var root = document.documentElement;
-        function dark() {
-          return (
-            root.dataset.theme === "dark" ||
-            (!root.dataset.theme && window.matchMedia("(prefers-color-scheme: dark)").matches)
-          );
-        }
         function label() {
-          btn.textContent = dark() ? "Light" : "Dark";
+          btn.textContent = root.dataset.theme === "dark" ? "Light" : "Dark";
         }
         label();
         btn.addEventListener("click", function () {
-          root.dataset.theme = dark() ? "light" : "dark";
+          root.dataset.theme = root.dataset.theme === "dark" ? "light" : "dark";
           try {
             localStorage.setItem("openportfolio-theme", root.dataset.theme);
           } catch (e) {}
