@@ -14,8 +14,9 @@
     "typecheck": "tsc -p tsconfig.json && tsc -p tsconfig.test.json && pnpm --filter @openportfolio/core typecheck && pnpm --filter @openportfolio/domain typecheck && pnpm --filter @openportfolio/node typecheck && tsc -p convex/tsconfig.json && tsc -p convex/tsconfig.test.json && pnpm --filter openportfolio-browser typecheck",
     "site:demo": "pnpm --filter openportfolio-browser build:demo && rm -rf site/demo && cp -R browser/dist-demo site/demo",
     "site:docs": "python3 site/build-docs.py && prettier --write 'site/docs/*.html' 'site/*.html' --log-level warn",
-    "site:build": "pnpm site:docs && pnpm site:demo",
-    "site:deploy": "pnpm site:build && wrangler pages deploy site --project-name=openportfolio --branch=main --commit-dirty=true"
+    "site:build": "pnpm site:css && pnpm site:docs && pnpm site:demo",
+    "site:deploy": "pnpm site:build && wrangler pages deploy site --project-name=openportfolio --branch=main --commit-dirty=true",
+    "site:css": "pnpm --filter openportfolio-browser exec vite build --config vite.site.config.ts"
   },
   "repository": {
     "type": "git",

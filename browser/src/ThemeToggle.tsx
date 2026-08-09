@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { Moon, Sun } from "lucide-react";
 
 const STORAGE_KEY = "openportfolio-theme";
 
@@ -29,13 +28,35 @@ export function ThemeToggle() {
     else setTheme("dark");
   }
 
-  // Both glyphs render and CSS picks one off [data-theme], which is the same
-  // mechanism the static marketing pages use. Branching here instead would
-  // need a second mechanism for the same control.
+  // Hand-drawn rather than pulled from an icon set: the crescent every set
+  // ships now is two arcs that land within a stroke width of each other at this
+  // size and renders as a bitten circle. This markup is character-identical to
+  // the copy in the static pages, which cannot import a component, so the one
+  // control looks the same on every surface.
+  // Both glyphs render and CSS picks one off [data-theme], so the icon is right
+  // at first paint instead of after the effect below runs.
   return (
-    <button className="theme-toggle glass" type="button" onClick={flip} title="Toggle dark mode" aria-label="Toggle dark mode">
-      <Moon className="i-light" size={17} strokeWidth={1.7} aria-hidden="true" />
-      <Sun className="i-dark" size={17} strokeWidth={1.7} aria-hidden="true" />
+    <button
+      className="theme-toggle glass"
+      type="button"
+      onClick={flip}
+      title="Toggle dark mode"
+      aria-label="Toggle dark mode"
+    >
+      <svg className="i-light" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+      </svg>
+      <svg className="i-dark" viewBox="0 0 24 24" aria-hidden="true">
+        <circle cx="12" cy="12" r="4" />
+        <path d="M12 2v2" />
+        <path d="M12 20v2" />
+        <path d="m4.93 4.93 1.41 1.41" />
+        <path d="m17.66 17.66 1.41 1.41" />
+        <path d="M2 12h2" />
+        <path d="M20 12h2" />
+        <path d="m6.34 17.66-1.41 1.41" />
+        <path d="m19.07 4.93-1.41 1.41" />
+      </svg>
     </button>
   );
 }

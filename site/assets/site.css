@@ -1,0 +1,1113 @@
+/* Marketing pages and docs. Tailwind first, then the shared foundation that the
+   app entry also imports, then the shapes that exist only on these pages.
+   Generated output is site/assets/style.css -- edit THIS file, then run
+   `pnpm site:css` (pnpm site:build does it for you).
+
+   @source is needed because these pages are static HTML that Tailwind would not
+   otherwise scan for class names.
+
+   The site-only block below is intentionally unlayered. It was authored as
+   components before Tailwind was here, so leaving it outside @layer keeps it
+   winning against utilities exactly as it does today. Move a rule into
+   @layer components when its page starts using utilities that should override it. */
+
+@import "tailwindcss";
+@import "../../styles/foundation.css";
+
+@source "../**/*.html";
+
+/* Tokens that only these pages need: the code-block palette, the marketing
+   shadow scale and the content measure. Everything else comes from @theme in the
+   foundation. */
+:root {
+  --shadow-sm: 0 1px 2px rgba(24, 26, 32, 0.04);
+  --shadow: 0 1px 2px rgba(24, 26, 32, 0.04), 0 10px 30px -14px rgba(24, 26, 32, 0.18);
+  --shadow-lg: 0 2px 4px rgba(24, 26, 32, 0.04), 0 30px 70px -30px rgba(24, 26, 32, 0.3);
+  --code-bg: #14161c;
+  --code-ink: #dfe3ec;
+  --wrap: 1120px;
+}
+
+:root[data-theme="dark"] {
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 10px 30px -14px rgba(0, 0, 0, 0.7);
+  --shadow-lg: 0 2px 4px rgba(0, 0, 0, 0.5), 0 30px 70px -30px rgba(0, 0, 0, 0.9);
+  --code-bg: #05070b;
+}
+
+/* Prose wants a larger base than a dashboard does, and the foundation sets the
+   dashboard's 15px. The docs measure and the hero type scale are both tuned
+   against 16px, so it is restated here rather than pushed onto the app.
+   overflow-x is the marketing page's own concern: a few sections bleed a
+   decorative element past the measure on purpose. */
+body {
+  font-size: 16px;
+  line-height: 1.65;
+  overflow-x: hidden;
+}
+
+/* One definition per frosted tier, every surface points at it instead of each
+   restating blur and tint. Placed before the component blocks on purpose: each
+   surface keeps its own border, radius and shadow, and only the fill and the
+   blur come from here.
+   Nesting matters. A blurred surface inside another blurred surface samples only
+   its parent's already-composited render, so it reads flat. Anything that lives
+   inside a panel or the header gets the tint without a second blur. */
+.eyebrow,
+.btn-ghost,
+.card,
+details,
+.cta-band,
+.panel,
+.site-head {
+  background: var(--glass-tint);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+}
+
+/* Text and figures need more opacity behind them than a decorative card does.
+   Code blocks are deliberately absent: they carry an opaque dark fill for
+   contrast, so a blur behind them costs compositing and shows nothing. */
+table.cmp,
+.prose table {
+  background: var(--glass-tint-strong);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+}
+
+a {
+  color: var(--color-accent);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* height:auto or the intrinsic width/height attributes win and stretch the
+   image to its natural height inside a width-constrained box. */
+img,
+svg {
+  height: auto;
+  max-width: 100%;
+}
+
+.wrap {
+  margin: 0 auto;
+  max-width: var(--wrap);
+  padding: 0 24px;
+}
+
+.skip {
+  background: var(--color-paper-warm);
+  border-radius: 8px;
+  left: 12px;
+  padding: 10px 16px;
+  position: absolute;
+  top: -80px;
+  transition: top 0.15s ease;
+  z-index: 100;
+}
+
+.skip:focus {
+  top: 12px;
+}
+
+/* ---------- header ---------- */
+
+/* Fill and blur come from the shared glass tier above. A sticky rail wants the
+   heavier tint, because body text scrolls underneath it. */
+.site-head {
+  background: var(--glass-tint-strong);
+  border-bottom: 1px solid var(--color-rule);
+  position: sticky;
+  top: 0;
+  z-index: 40;
+}
+
+.site-head .wrap {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+  height: 62px;
+}
+
+.brand {
+  align-items: center;
+  color: var(--color-ink);
+  display: flex;
+  font: 400 21px/1 var(--font-serif);
+  gap: 9px;
+  letter-spacing: -0.01em;
+}
+
+.brand:hover {
+  text-decoration: none;
+}
+
+.brand svg {
+  height: 24px;
+  width: 24px;
+}
+
+.site-nav {
+  align-items: center;
+  display: flex;
+  gap: 4px;
+  margin-left: auto;
+}
+
+.site-nav a {
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  color: var(--color-ink-2);
+  cursor: pointer;
+  font: 500 14px/1 var(--font-sans);
+  padding: 9px 12px;
+}
+
+.site-nav a.cta {
+  background: var(--color-ink);
+  border-color: var(--color-ink);
+  color: var(--color-paper);
+}
+
+.site-nav a.cta:hover {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: #fff;
+}
+
+/* ---------- hero ---------- */
+
+.hero {
+  padding: 76px 0 8px;
+  position: relative;
+  text-align: center;
+}
+
+/* One soft indigo wash behind the hero. No animation, no second paint. */
+.hero::before {
+  background: radial-gradient(58% 42% at 50% 0%, color-mix(in srgb, var(--color-accent) 20%, transparent), transparent 72%);
+  content: "";
+  inset: -80px 0 auto;
+  height: 460px;
+  pointer-events: none;
+  position: absolute;
+  z-index: -1;
+}
+
+.eyebrow {
+  align-items: center;
+  border: 1px solid var(--color-rule);
+  border-radius: 999px;
+  box-shadow: var(--shadow-sm);
+  color: var(--color-ink-2);
+  display: inline-flex;
+  font-size: 13px;
+  font-weight: 500;
+  gap: 8px;
+  margin-bottom: 26px;
+  padding: 6px 14px;
+}
+
+.eyebrow .dot {
+  background: var(--color-gain);
+  border-radius: 50%;
+  height: 7px;
+  width: 7px;
+}
+
+h1 {
+  font: 400 clamp(38px, 6.4vw, 68px) / 1.06 var(--font-serif);
+  letter-spacing: -0.02em;
+  margin: 0 auto 20px;
+  max-width: 20ch;
+}
+
+h1 em {
+  color: var(--color-accent);
+  font-style: italic;
+}
+
+.lede {
+  color: var(--color-ink-2);
+  font-size: clamp(16px, 2vw, 19px);
+  margin: 0 auto 32px;
+  max-width: 62ch;
+}
+
+.btn-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+}
+
+.btn {
+  border: 1px solid var(--color-rule);
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font: 600 15px/1 var(--font-sans);
+  padding: 13px 20px;
+}
+
+.btn:hover {
+  text-decoration: none;
+}
+
+.btn-primary {
+  background: var(--color-ink);
+  border-color: var(--color-ink);
+  color: var(--color-paper);
+}
+
+.btn-primary:hover {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: #fff;
+}
+
+.btn-ghost {
+  box-shadow: var(--shadow-sm);
+  color: var(--color-ink);
+}
+
+.btn-ghost:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.hero-note {
+  color: var(--color-ink-3);
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  margin-top: 18px;
+}
+
+/* ---------- sections ---------- */
+
+section {
+  padding: 84px 0;
+}
+
+.section-head {
+  margin: 0 auto 44px;
+  max-width: 60ch;
+  text-align: center;
+}
+
+h2 {
+  font: 400 clamp(28px, 4vw, 40px) / 1.15 var(--font-serif);
+  letter-spacing: -0.015em;
+  margin: 0 0 14px;
+}
+
+.section-head p {
+  color: var(--color-ink-2);
+  margin: 0;
+}
+
+h3 {
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  margin: 0 0 8px;
+}
+
+.grid-3 {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+}
+
+.card {
+  border: 1px solid var(--color-rule);
+  border-radius: 14px;
+  box-shadow: var(--shadow-sm);
+  padding: 26px;
+}
+
+.card p {
+  color: var(--color-ink-2);
+  font-size: 15px;
+  margin: 0;
+}
+
+.card .num {
+  color: var(--color-accent);
+  display: block;
+  font: 400 26px/1 var(--font-serif);
+  margin-bottom: 12px;
+}
+
+/* ---------- feature rows ---------- */
+
+.feature {
+  align-items: center;
+  display: grid;
+  gap: 48px;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+}
+
+.feature + .feature {
+  margin-top: 90px;
+}
+
+/* order:-1 moves the figure into the FIRST grid column, which is the 5fr one,
+   so a flipped row silently rendered its panel narrower than its neighbours.
+   Swap the track too. */
+.feature.flip {
+  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+}
+
+.feature.flip > figure {
+  order: -1;
+}
+
+.feature h2 {
+  font-size: clamp(25px, 3.2vw, 33px);
+}
+
+.feature p {
+  color: var(--color-ink-2);
+  margin: 0 0 14px;
+}
+
+.feature figure {
+  margin: 0;
+}
+
+.tag {
+  color: var(--color-accent);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+}
+
+ul.ticks {
+  list-style: none;
+  margin: 18px 0 0;
+  padding: 0;
+}
+
+ul.ticks li {
+  color: var(--color-ink-2);
+  font-size: 15px;
+  padding: 5px 0 5px 26px;
+  position: relative;
+}
+
+ul.ticks li::before {
+  color: var(--color-gain);
+  content: "✓";
+  font-weight: 700;
+  left: 0;
+  position: absolute;
+}
+
+/* ---------- code ---------- */
+
+pre {
+  background: var(--code-bg);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  color: var(--code-ink);
+  font: 400 13.5px/1.75 var(--font-mono);
+  margin: 0;
+  overflow-x: auto;
+  padding: 22px 24px;
+}
+
+pre .c {
+  color: #7f8798;
+}
+
+pre .k {
+  color: #9db2ff;
+}
+
+code {
+  background: color-mix(in srgb, var(--color-ink) 7%, transparent);
+  border-radius: 5px;
+  font: 400 0.9em/1 var(--font-mono);
+  padding: 2px 5px;
+}
+
+pre code {
+  background: none;
+  font-size: inherit;
+  padding: 0;
+}
+
+/* ---------- table ---------- */
+
+.table-scroll {
+  overflow-x: auto;
+}
+
+table.cmp {
+  border: 1px solid var(--color-rule);
+  border-collapse: separate;
+  border-radius: 12px;
+  border-spacing: 0;
+  min-width: 640px;
+  overflow: hidden;
+  width: 100%;
+}
+
+table.cmp th,
+table.cmp td {
+  border-bottom: 1px solid var(--color-rule-light);
+  padding: 13px 16px;
+  text-align: left;
+}
+
+table.cmp tbody tr:last-child td {
+  border-bottom: none;
+}
+
+table.cmp thead th {
+  background: color-mix(in srgb, var(--color-ink) 3%, transparent);
+  color: var(--color-ink-3);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+table.cmp td.y {
+  color: var(--color-gain);
+  font-weight: 600;
+}
+
+table.cmp td.n {
+  color: var(--color-ink-4);
+}
+
+/* ---------- faq ---------- */
+
+details {
+  border: 1px solid var(--color-rule);
+  border-radius: 12px;
+  margin-bottom: 10px;
+  padding: 0 20px;
+}
+
+details summary {
+  cursor: pointer;
+  font-weight: 600;
+  list-style: none;
+  padding: 17px 0;
+}
+
+details summary::-webkit-details-marker {
+  display: none;
+}
+
+details summary::after {
+  color: var(--color-ink-3);
+  content: "+";
+  float: right;
+  font-weight: 400;
+}
+
+details[open] summary::after {
+  content: "−";
+}
+
+details p {
+  color: var(--color-ink-2);
+  margin: 0 0 18px;
+}
+
+/* ---------- cta + footer ---------- */
+
+.cta-band {
+  border: 1px solid var(--color-rule);
+  border-radius: 18px;
+  box-shadow: var(--shadow);
+  padding: 60px 32px;
+  text-align: center;
+}
+
+.site-foot {
+  border-top: 1px solid var(--color-rule);
+  color: var(--color-ink-3);
+  font-size: 14px;
+  margin-top: 90px;
+  padding: 36px 0 60px;
+}
+
+.site-foot .wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px 26px;
+}
+
+.site-foot nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  margin-left: auto;
+}
+
+.site-foot a {
+  color: var(--color-ink-2);
+}
+
+/* ---------- docs ---------- */
+
+.docs {
+  display: grid;
+  gap: 52px;
+  grid-template-columns: 210px minmax(0, 1fr);
+  padding: 52px 0 0;
+}
+
+.docs-nav {
+  align-self: start;
+  position: sticky;
+  top: 86px;
+}
+
+.docs-nav strong {
+  color: var(--color-ink-3);
+  display: block;
+  font-size: 11px;
+  letter-spacing: 0.09em;
+  margin: 22px 0 8px;
+  text-transform: uppercase;
+}
+
+.docs-nav strong:first-child {
+  margin-top: 0;
+}
+
+.docs-nav a {
+  border-radius: 7px;
+  color: var(--color-ink-2);
+  display: block;
+  font-size: 14.5px;
+  margin-left: -10px;
+  padding: 6px 10px;
+}
+
+.docs-nav a:hover {
+  text-decoration: none;
+}
+
+.docs-nav a[aria-current="page"] {
+  border: 1px solid var(--color-rule);
+  color: var(--color-ink);
+  font-weight: 600;
+}
+
+.prose {
+  max-width: 72ch;
+  padding-bottom: 60px;
+}
+
+.prose h1 {
+  font-size: clamp(32px, 5vw, 46px);
+  margin: 0 0 16px;
+  max-width: none;
+  text-align: left;
+}
+
+.prose h2 {
+  border-top: 1px solid var(--color-rule);
+  font-size: 28px;
+  margin: 52px 0 16px;
+  padding-top: 34px;
+}
+
+.prose h3 {
+  font-size: 17px;
+  margin: 32px 0 8px;
+}
+
+.prose p,
+.prose li {
+  color: var(--color-ink-2);
+}
+
+.prose ul,
+.prose ol {
+  padding-left: 22px;
+}
+
+.prose li {
+  margin: 6px 0;
+}
+
+.prose pre {
+  margin: 18px 0;
+}
+
+.prose table {
+  border: 1px solid var(--color-rule);
+  border-collapse: separate;
+  border-radius: 12px;
+  border-spacing: 0;
+  margin: 20px 0;
+  overflow: hidden;
+  width: 100%;
+}
+
+.prose th,
+.prose td {
+  border-bottom: 1px solid var(--color-rule-light);
+  font-size: 14.5px;
+  padding: 10px 14px;
+  text-align: left;
+}
+
+.prose tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.prose thead th {
+  background: color-mix(in srgb, var(--color-ink) 3%, transparent);
+  color: var(--color-ink-3);
+  font-size: 11.5px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.callout {
+  background: color-mix(in srgb, var(--color-accent) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-accent) 24%, transparent);
+  border-radius: 12px;
+  margin: 22px 0;
+  padding: 16px 20px;
+}
+
+.callout p {
+  margin: 0;
+}
+
+.callout strong {
+  color: var(--color-ink);
+}
+
+@media (max-width: 860px) {
+  /* .feature.flip is more specific than .feature, so it has to be named here
+     or the flipped row keeps its two-column track while the others stack. */
+  .feature,
+  .feature.flip,
+  .docs {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 28px;
+  }
+
+  .feature.flip > figure {
+    order: 0;
+  }
+
+  .docs-nav {
+    position: static;
+  }
+
+  section {
+    padding: 58px 0;
+  }
+
+  .hero {
+    padding-top: 52px;
+  }
+}
+
+.visually-hidden {
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  height: 1px;
+  overflow: hidden;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
+}
+
+/* ---------- product panels ----------
+   These views used to be PNG screenshots, which was the worst of both: 930 KB
+   of payload, soft at any density the capture did not match, locked to the
+   theme it was shot in, and not one character of it selectable or readable by
+   a crawler. They are the same views rebuilt in markup against the tokens
+   above, so they stay sharp everywhere, follow the theme, and the numbers are
+   text. Figures mirror browser/demo/fixtures.ts; every one is invented. */
+
+.panel {
+  border: 1px solid var(--color-rule);
+  border-radius: 14px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.hero .panel {
+  box-shadow: var(--shadow-lg);
+  margin-top: 52px;
+}
+
+.panel-bar {
+  align-items: center;
+  background: var(--color-paper);
+  border-bottom: 1px solid var(--color-rule-light);
+  display: flex;
+  gap: 14px;
+  justify-content: space-between;
+  padding: 10px 14px;
+}
+
+.panel-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+}
+
+.panel-tabs span {
+  border-radius: 7px;
+  color: var(--color-ink-3);
+  font-size: 12.5px;
+  padding: 4px 10px;
+  white-space: nowrap;
+}
+
+.panel-tabs .on {
+  box-shadow: var(--shadow-sm);
+  color: var(--color-ink);
+  font-weight: 600;
+}
+
+.panel-who {
+  color: var(--color-ink-4);
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  white-space: nowrap;
+}
+
+.panel-body {
+  padding: 20px 18px;
+}
+
+.panel-total {
+  align-items: baseline;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+/* Instrument Serif carries no currency glyph, so the pound falls back to Georgia
+   mid-run. Dropping tabular-nums is necessary but not sufficient: Georgia's "£"
+   ink overruns its own advance width, and a font fallback has no kerning pair to
+   pull the digit clear. Measured at 44px the advances are flush at the same
+   pixel, so the gap has to be added explicitly. */
+.panel-total b {
+  font-family: var(--font-serif);
+  font-size: clamp(32px, 5.4vw, 50px);
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: 1;
+}
+
+.panel-total .sym {
+  margin-right: 0.055em;
+}
+
+.panel-total small {
+  color: var(--color-ink-3);
+  font-size: 13px;
+}
+
+.panel-label {
+  color: var(--color-ink-3);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.panel-body .panel-label {
+  display: block;
+  margin: 22px 0 10px;
+}
+
+.panel-body > .panel-label:first-child {
+  margin-top: 0;
+}
+
+.alloc {
+  border-radius: 5px;
+  display: flex;
+  gap: 2px;
+  height: 10px;
+  overflow: hidden;
+}
+
+.alloc i {
+  background: var(--color-accent);
+  display: block;
+}
+
+.alloc i:nth-child(2) {
+  background: var(--color-accent-2);
+}
+
+.alloc i:nth-child(3) {
+  background: var(--color-gain);
+}
+
+.alloc i:nth-child(4) {
+  background: var(--color-ink-3);
+}
+
+.alloc i:nth-child(5) {
+  background: var(--color-ink-4);
+}
+
+.alloc-key {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  margin-top: 12px;
+}
+
+.alloc-key span {
+  align-items: center;
+  color: var(--color-ink-2);
+  display: flex;
+  font-size: 12.5px;
+  gap: 7px;
+}
+
+.alloc-key i {
+  background: var(--color-accent);
+  border-radius: 3px;
+  height: 9px;
+  width: 9px;
+}
+
+.alloc-key span:nth-child(2) i {
+  background: var(--color-accent-2);
+}
+
+.alloc-key span:nth-child(3) i {
+  background: var(--color-gain);
+}
+
+.alloc-key span:nth-child(4) i {
+  background: var(--color-ink-3);
+}
+
+.alloc-key span:nth-child(5) i {
+  background: var(--color-ink-4);
+}
+
+.alloc-key b {
+  color: var(--color-ink-3);
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-weight: 500;
+}
+
+.panel-scroll {
+  margin: 0 -18px;
+  overflow-x: auto;
+  padding: 0 18px;
+}
+
+table.pt {
+  border-collapse: collapse;
+  font-size: 13px;
+  width: 100%;
+}
+
+table.pt th {
+  color: var(--color-ink-3);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  padding: 0 0 9px;
+  text-align: left;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+table.pt td {
+  border-top: 1px solid var(--color-rule-light);
+  padding: 9px 0;
+  white-space: nowrap;
+}
+
+table.pt th + th,
+table.pt td + td {
+  padding-left: 18px;
+}
+
+table.pt .r {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+table.pt th.r {
+  text-align: right;
+}
+
+table.pt .sym {
+  color: var(--color-ink);
+  font-weight: 600;
+}
+
+table.pt .dim {
+  color: var(--color-ink-3);
+}
+
+table.pt .up {
+  color: var(--color-gain);
+}
+
+table.pt .dn {
+  color: var(--color-loss);
+}
+
+/* reliability: said against happened, one pair of bars per bucket */
+.rel {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 110px;
+}
+
+.rel i {
+  background: var(--color-accent);
+  border-radius: 2px;
+  display: block;
+  height: 5px;
+  min-width: 2px;
+}
+
+.rel i + i {
+  background: var(--color-gain);
+}
+
+td.relcell {
+  padding-left: 18px;
+  width: 40%;
+}
+
+.queue {
+  display: flex;
+  flex-direction: column;
+}
+
+.queue > div {
+  align-items: baseline;
+  border-top: 1px solid var(--color-rule-light);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  padding: 13px 0;
+}
+
+.queue > div:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.queue h4 {
+  font-size: 14px;
+  margin: 0;
+}
+
+.queue p {
+  color: var(--color-ink-3);
+  font-size: 12.5px;
+  margin: 0;
+  width: 100%;
+}
+
+.queue .when {
+  color: var(--color-ink-3);
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  margin-left: auto;
+}
+
+.queue .late {
+  background: color-mix(in srgb, var(--color-loss) 14%, transparent);
+  border-radius: 5px;
+  color: var(--color-loss);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  margin-left: auto;
+  padding: 2px 7px;
+}
+
+.chip {
+  background: var(--color-paper);
+  border: 1px solid var(--color-rule);
+  border-radius: 7px;
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 5px 11px;
+}
+
+.panel-cap {
+  color: var(--color-ink-3);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  margin: 14px 0 0;
+}
+
+@media (max-width: 860px) {
+  .panel-body {
+    padding: 16px 14px;
+  }
+
+  .panel-scroll {
+    margin: 0 -14px;
+    padding: 0 14px;
+  }
+
+  .panel-who {
+    display: none;
+  }
+}
+
+/* The header runs 424px wide at its natural size, so it pushed a 10px
+   horizontal scroll onto every phone. Tighten the gutter and the hit padding
+   rather than dropping links: four targets still fit above 360px. */
+@media (max-width: 440px) {
+  .wrap {
+    padding: 0 16px;
+  }
+
+  .brand {
+    font-size: 19px;
+  }
+
+  .site-nav {
+    gap: 1px;
+  }
+
+  /* The toggle is a fixed square now, so only the text links shrink. Handing it
+     a padding here would deform the circle. */
+  .site-nav a {
+    font-size: 13.5px;
+    padding: 8px 7px;
+  }
+
+  }
+
+@media (max-width: 360px) {
+  .site-nav a {
+    font-size: 13px;
+    padding: 8px 5px;
+  }
+}
