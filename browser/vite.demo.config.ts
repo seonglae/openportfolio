@@ -1,6 +1,7 @@
 import { resolve } from "node:path";
 
 import react from "@vitejs/plugin-react";
+import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "vite";
 
 // The demo build swaps the Convex client for a fixture table, so the four views
@@ -11,7 +12,7 @@ import { defineConfig } from "vite";
 // deployed site is the marketing stylesheet and screenshots.
 export default defineConfig({
   base: "/demo/",
-  plugins: [react()],
+  plugins: [react(), tailwindcss()],
   resolve: {
     alias: { "convex/react": resolve(import.meta.dirname, "demo/convex-react.ts") },
   },

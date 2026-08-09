@@ -3,7 +3,7 @@
 // slab, which is what makes it read as one object rather than three.
 export function Mark({ size = 26 }: { size?: number }) {
   return (
-    <svg className="mark" viewBox="0 0 64 64" width={size} height={size} role="img" aria-label="openportfolio">
+    <svg className="block" viewBox="0 0 64 64" width={size} height={size} role="img" aria-label="openportfolio">
       <defs>
         <linearGradient id="mark-facet" gradientUnits="userSpaceOnUse" x1="6" y1="6" x2="46" y2="58">
           <stop offset="0" stopColor="#8b9cff" />

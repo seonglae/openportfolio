@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { Mark } from "./Mark.tsx";
+import { ThemeToggle } from "./ThemeToggle.tsx";
 import { NetWorthView } from "./views/NetWorthView.tsx";
 import { RecordView } from "./views/RecordView.tsx";
 import { DecisionsView } from "./views/DecisionsView.tsx";
@@ -24,24 +25,40 @@ const PANEL: Record<TabKey, () => React.ReactElement> = {
   decisions: DecisionsView,
 };
 
+const TAB_BASE = "rounded-lg px-3.5 py-2 text-sm font-medium leading-none transition-colors";
+
+// The selected tab takes its border from .glass. Handing the base string a
+// border utility instead would win the cascade against it, because Tailwind
+// utilities sit in a later layer than the component classes.
+const TAB_STATE: Record<"on" | "off", string> = {
+  on: "glass text-ink",
+  off: "border border-transparent text-ink-3 hover:text-ink",
+};
+
 export function App() {
   const [tab, setTab] = useState<TabKey>("worth");
   const me = useQuery(api.tenants.whoami, {});
   const Panel = PANEL[tab];
 
   return (
-    <div className="app">
-      <header>
+    <div className="mx-auto max-w-[1120px] px-6 pt-7 pb-20">
+      <header className="flex items-center gap-3 border-b border-rule pb-3.5">
         <Mark />
-        <h1>openportfolio</h1>
-        <span className="tenant">{me ? `${me.tenantName ?? me.tenantSlug} · ${me.role}` : "resolving tenant"}</span>
+        <h1 className="serif text-[25px] leading-none font-normal tracking-[-0.01em]">openportfolio</h1>
+        <span className="ml-auto font-mono text-xs text-ink-3">
+          {me ? `${me.tenantName ?? me.tenantSlug} · ${me.role}` : "resolving tenant"}
+        </span>
+        <ThemeToggle />
       </header>
-      <nav>
-        {TABS.map((entry) => (
-          <button key={entry.key} className={entry.key === tab ? "on" : ""} onClick={() => setTab(entry.key)}>
-            {entry.label}
-          </button>
-        ))}
+      <nav className="mt-[18px] mb-1 flex gap-0.5">
+        {TABS.map((entry) => {
+          const state = entry.key === tab ? "on" : "off";
+          return (
+            <button key={entry.key} className={`${TAB_BASE} ${TAB_STATE[state]}`} onClick={() => setTab(entry.key)}>
+              {entry.label}
+            </button>
+          );
+        })}
       </nav>
       <main>
         <Panel />

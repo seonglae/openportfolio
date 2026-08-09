@@ -10,7 +10,7 @@ export function DecisionsView() {
   const overdue = useQuery(api.decisions.overdue, {});
   const catalysts = useQuery(api.catalysts.upcoming, { windowDays: 60 });
 
-  if (!open) return <p className="muted">loading</p>;
+  if (!open) return <p className="text-ink-3">loading</p>;
 
   const now = Date.now();
   const overdueKeys = new Set((overdue ?? []).map((row) => row.key));
@@ -24,11 +24,11 @@ export function DecisionsView() {
   return (
     <section>
       <div className="headline">
-        <span className="total">{rows.length}</span>
-        <span className="muted">open decisions · {overdueKeys.size} past their date</span>
+        <span className="headline-figure">{rows.length}</span>
+        <span className="text-ink-3">open decisions · {overdueKeys.size} past their date</span>
       </div>
 
-      <table>
+      <table className="sheet glass-strong">
         <thead>
           <tr>
             <th>Decision</th>
@@ -41,7 +41,7 @@ export function DecisionsView() {
             <tr key={row.key} className={overdueKeys.has(row.key) ? "late" : ""}>
               <td>
                 <strong>{row.title}</strong>
-                {row.detail && <div className="muted">{row.detail}</div>}
+                {row.detail && <div className="text-ink-3">{row.detail}</div>}
               </td>
               <td>{row.triggerCondition}</td>
               <td className="num">{row.dueAt === undefined ? "no date" : formatRelativeDays(row.dueAt, now)}</td>
@@ -49,10 +49,10 @@ export function DecisionsView() {
           ))}
         </tbody>
       </table>
-      {rows.length === 0 && <p className="muted">Nothing deferred.</p>}
+      {rows.length === 0 && <p className="text-ink-3">Nothing deferred.</p>}
 
-      <h2>Catalysts ahead</h2>
-      <table>
+      <h2 className="section-title">Catalysts ahead</h2>
+      <table className="sheet glass-strong">
         <thead>
           <tr>
             <th>Event</th>
@@ -70,7 +70,7 @@ export function DecisionsView() {
           ))}
         </tbody>
       </table>
-      {(catalysts ?? []).length === 0 && <p className="muted">No dated events in the next 60 days.</p>}
+      {(catalysts ?? []).length === 0 && <p className="text-ink-3">No dated events in the next 60 days.</p>}
     </section>
   );
 }

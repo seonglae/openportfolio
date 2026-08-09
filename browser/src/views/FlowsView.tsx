@@ -16,12 +16,12 @@ export function FlowsView() {
     <section>
       <div className="headline">
         <input value={market} onChange={(e) => setMarket(e.target.value)} aria-label="market" />
-        <span className="muted">
+        <span className="text-ink-3">
           net buying over the last {net?.sessions ?? 0} sessions{net?.currency ? ` (${net.currency})` : ""}
         </span>
       </div>
 
-      <table>
+      <table className="sheet glass-strong">
         <thead>
           <tr>
             <th>Investor</th>
@@ -32,17 +32,17 @@ export function FlowsView() {
           {(net?.byInvestor ?? []).map((row) => (
             <tr key={row.investorType}>
               <td>{row.investorType}</td>
-              <td className={row.netBuyValue < 0 ? "num negative" : "num"}>{row.netBuyValue.toLocaleString()}</td>
+              <td className={row.netBuyValue < 0 ? "num text-loss" : "num"}>{row.netBuyValue.toLocaleString()}</td>
             </tr>
           ))}
         </tbody>
       </table>
       {(net?.byInvestor ?? []).length === 0 && (
-        <p className="muted">No flow recorded for {market}. Feed it with the record_flow tool or the MCP server.</p>
+        <p className="text-ink-3">No flow recorded for {market}. Feed it with the record_flow tool or the MCP server.</p>
       )}
 
-      <h2>Sessions</h2>
-      <table>
+      <h2 className="section-title">Sessions</h2>
+      <table className="sheet glass-strong">
         <thead>
           <tr>
             <th>Date</th>
@@ -57,9 +57,9 @@ export function FlowsView() {
             <tr key={row._id}>
               <td>{row.date}</td>
               <td>{row.investorType}</td>
-              <td className={row.netBuyValue < 0 ? "num negative" : "num"}>{row.netBuyValue.toLocaleString()}</td>
+              <td className={row.netBuyValue < 0 ? "num text-loss" : "num"}>{row.netBuyValue.toLocaleString()}</td>
               <td className="num">{row.turnoverValue?.toLocaleString() ?? "-"}</td>
-              <td className="muted">{row.source}</td>
+              <td className="text-ink-3">{row.source}</td>
             </tr>
           ))}
         </tbody>

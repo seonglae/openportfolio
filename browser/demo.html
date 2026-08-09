@@ -12,6 +12,17 @@
       href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@400;500&display=swap"
       rel="stylesheet"
     />
+    <script>
+      // Before first paint, or a visitor who chose dark gets a white flash and
+      // a sun icon for one frame. Light is the default outright rather than
+      // following the OS: the marketing page is light, and a dashboard that
+      // flips on load reads as a different product than the one linked to.
+      try {
+        if (localStorage.getItem("openportfolio-theme") === "dark") {
+          document.documentElement.dataset.theme = "dark";
+        }
+      } catch (e) {}
+    </script>
   </head>
   <body>
     <div id="root"></div>

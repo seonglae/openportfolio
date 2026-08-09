@@ -11,20 +11,20 @@ export function RecordView() {
   const record = useQuery(api.forecasts.calibration, {});
   const forecasts = useQuery(api.forecasts.list, { limit: 50 });
 
-  if (!record) return <p className="muted">loading</p>;
+  if (!record) return <p className="text-ink-3">loading</p>;
 
   return (
     <section>
       <div className="headline">
-        <span className="total">{formatBrier(record.meanBrier)}</span>
-        <span className="muted">
+        <span className="headline-figure">{formatBrier(record.meanBrier)}</span>
+        <span className="text-ink-3">
           mean Brier over {record.n} scored calls · coin flip is {record.randomBaseline} · calibration error{" "}
           {formatPercent(record.expectedCalibrationError)}
         </span>
       </div>
 
-      <h2>Reliability</h2>
-      <table>
+      <h2 className="section-title">Reliability</h2>
+      <table className="sheet glass-strong">
         <thead>
           <tr>
             <th>Said</th>
@@ -43,15 +43,15 @@ export function RecordView() {
               <td className="num">{bucket.count === 0 ? "-" : formatPercent(bucket.observedRate)}</td>
               <td>
                 <span className="bar" style={{ width: `${bucket.meanProbability * BAR_WIDTH}px` }} />
-                <span className="bar observed" style={{ width: `${bucket.observedRate * BAR_WIDTH}px` }} />
+                <span className="bar bar-observed" style={{ width: `${bucket.observedRate * BAR_WIDTH}px` }} />
               </td>
             </tr>
           ))}
         </tbody>
       </table>
 
-      <h2>Calls</h2>
-      <table>
+      <h2 className="section-title">Calls</h2>
+      <table className="sheet glass-strong">
         <thead>
           <tr>
             <th>Subject</th>
@@ -76,7 +76,7 @@ export function RecordView() {
         </tbody>
       </table>
       {(forecasts ?? []).length === 0 && (
-        <p className="muted">No calls registered yet. Every claim worth making is worth scoring.</p>
+        <p className="text-ink-3">No calls registered yet. Every claim worth making is worth scoring.</p>
       )}
     </section>
   );

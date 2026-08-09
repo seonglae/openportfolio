@@ -1,258 +1,310 @@
-/* Design tokens. Light is the default and dark is a flip of the same names, so
-   every rule below is written once. Editorial rather than dashboard: a serif
-   for the one number that matters, a mono for anything the machine wrote. */
+@import "tailwindcss";
 
-:root {
-  --paper: #f3f4f8;
-  --paper-warm: #ffffff;
-  --ink: #181a20;
-  --ink-2: #3f434d;
-  --ink-3: #7a8090;
-  --ink-4: #aab0bd;
-  --rule: #d8dbe3;
-  --rule-light: #e8eaf0;
-  --accent: #5b6cf0;
-  --accent-2: #7c5cf0;
-  --gain: #3f9576;
-  --loss: #cf6257;
-  --late: #fdf3e0;
-  --shadow: 0 1px 2px rgba(24, 26, 32, 0.04), 0 8px 24px -12px rgba(24, 26, 32, 0.12);
+/* Design tokens. Names and values are deliberately the same set the other
+   dashboards in this stack use, so a component can move between them without a
+   rename pass. Light is the default and dark re-points the same names, which is
+   why nothing below this block ever branches on theme. */
+@theme {
+  --color-paper: #f3f4f8;
+  --color-paper-warm: #ffffff;
+  --color-ink: #181a20;
+  --color-ink-2: #3f434d;
+  --color-ink-3: #7a8090;
+  --color-ink-4: #aab0bd;
+  --color-rule: #d8dbe3;
+  --color-rule-light: #e8eaf0;
+  --color-accent: #5b6cf0;
+  --color-accent-2: #7c5cf0;
+  --color-gain: #3f9576;
+  --color-loss: #cf6257;
+  --color-late: #fdf3e0;
 
-  --sans: "Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --serif: "Instrument Serif", Georgia, serif;
-  --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
-
-  color-scheme: light;
+  --font-sans: "Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-serif: "Instrument Serif", Georgia, serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
-/* Dark follows the OS unless the toggle has pinned a choice. Both selectors
-   assign the same names, so nothing downstream branches on theme. */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --paper: #0c0e13;
-    --paper-warm: #161a22;
-    --ink: #e8eaf0;
-    --ink-2: #c2c6d1;
-    --ink-3: #868c9c;
-    --ink-4: #565c6b;
-    --rule: #2a2f3b;
-    --rule-light: #20242e;
-    --accent: #7d8cff;
-    --accent-2: #9b7cff;
-    --gain: #5fb89a;
-    --loss: #e0857b;
-    --late: #2e2716;
+@layer base {
+  /* Frosted-surface tokens. The tint derives from the elevated surface rather
+     than being a colour of its own, so only the ambient gradient underneath
+     supplies hue and a theme flip carries the whole system along. */
+  :root {
+    --glass-blur: 20px;
+    --glass-saturate: 180%;
+    --glass-tint: color-mix(in srgb, var(--color-paper-warm) 42%, transparent);
+    --glass-tint-strong: color-mix(in srgb, var(--color-paper-warm) 78%, transparent);
+    --glass-border: color-mix(in srgb, var(--color-ink) 14%, transparent);
+    --glass-highlight: rgba(255, 255, 255, 0.22);
+    --gradient-strength: 0.5;
+    --shadow: 0 1px 2px rgba(24, 26, 32, 0.04), 0 8px 24px -12px rgba(24, 26, 32, 0.12);
+    color-scheme: light;
+  }
+
+  /* Attribute rather than a class, because the marketing site and the docs are
+     static HTML that set it in a pre-paint inline script. */
+  :root[data-theme="dark"] {
+    --color-paper: #0c0e13;
+    --color-paper-warm: #161a22;
+    --color-ink: #e8eaf0;
+    --color-ink-2: #c2c6d1;
+    --color-ink-3: #868c9c;
+    --color-ink-4: #565c6b;
+    --color-rule: #2a2f3b;
+    --color-rule-light: #20242e;
+    --color-accent: #7d8cff;
+    --color-accent-2: #9b7cff;
+    --color-gain: #5fb89a;
+    --color-loss: #e0857b;
+    --color-late: #2e2716;
+    --glass-tint: color-mix(in srgb, var(--color-paper-warm) 36%, transparent);
+    --glass-tint-strong: color-mix(in srgb, var(--color-paper-warm) 68%, transparent);
+    --glass-border: color-mix(in srgb, #fff 10%, transparent);
+    --glass-highlight: rgba(255, 255, 255, 0.05);
+    --gradient-strength: 0.38;
     --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px -12px rgba(0, 0, 0, 0.6);
     color-scheme: dark;
   }
+
+  html {
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    min-height: 100vh;
+    position: relative;
+    isolation: isolate;
+
+    /* Blob hues derive from the accent, so a theme flip carries them too. */
+    --blob-1: var(--color-accent);
+    --blob-2: color-mix(in srgb, var(--color-accent) 55%, #b06bd6);
+    --blob-3: color-mix(in srgb, var(--color-accent) 55%, #4fb39a);
+    --blob-4: color-mix(in srgb, var(--color-accent) 55%, #e06bb0);
+  }
+
+  /* Frosted glass needs something behind it to refract; over a flat fill it is
+     only a paler rectangle. Two of the six blobs sit mid-canvas because
+     corner-only placement leaves the middle of a long page with nothing to
+     blur, and the tables that carry the numbers are in the middle. */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    opacity: var(--gradient-strength);
+    background-image:
+      radial-gradient(70% 60% at 10% 2%, color-mix(in srgb, var(--blob-1) 55%, transparent), transparent 62%),
+      radial-gradient(65% 55% at 95% 5%, color-mix(in srgb, var(--blob-2) 48%, transparent), transparent 60%),
+      radial-gradient(72% 66% at 93% 98%, color-mix(in srgb, var(--blob-3) 45%, transparent), transparent 62%),
+      radial-gradient(66% 60% at 3% 98%, color-mix(in srgb, var(--blob-4) 40%, transparent), transparent 62%),
+      radial-gradient(55% 45% at 38% 42%, color-mix(in srgb, var(--blob-2) 26%, transparent), transparent 65%),
+      radial-gradient(50% 42% at 68% 64%, color-mix(in srgb, var(--blob-3) 24%, transparent), transparent 65%);
+  }
+
+  button {
+    background: transparent;
+    border: none;
+    color: inherit;
+    cursor: pointer;
+    font: inherit;
+  }
+
+  input {
+    color: inherit;
+    font: inherit;
+  }
+
+  ::selection {
+    background: var(--color-accent);
+    color: var(--color-paper);
+  }
+
+  ::-webkit-scrollbar {
+    height: 8px;
+    width: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-ink-4);
+    background-clip: content-box;
+    border: 2px solid transparent;
+    border-radius: 8px;
+  }
+  * {
+    scrollbar-color: var(--color-ink-4) transparent;
+    scrollbar-width: thin;
+  }
 }
 
-:root[data-theme="dark"] {
-  --paper: #0c0e13;
-  --paper-warm: #161a22;
-  --ink: #e8eaf0;
-  --ink-2: #c2c6d1;
-  --ink-3: #868c9c;
-  --ink-4: #565c6b;
-  --rule: #2a2f3b;
-  --rule-light: #20242e;
-  --accent: #7d8cff;
-  --accent-2: #9b7cff;
-  --gain: #5fb89a;
-  --loss: #e0857b;
-  --late: #2e2716;
-  --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px -12px rgba(0, 0, 0, 0.6);
-  color-scheme: dark;
-}
+@layer components {
+  /* tint + blur + hairline + inset top sheen. No drop shadow: an
+     overflow-hidden ancestor hard-clips it into a square halo on WebKit and
+     Chromium, and the tables here are overflow-hidden for their radius. */
+  .glass,
+  .glass-strong {
+    background: var(--glass-tint);
+    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+    border: 1px solid var(--glass-border);
+    box-shadow: inset 0 1px 0 0 var(--glass-highlight);
+  }
 
-* {
-  box-sizing: border-box;
-}
+  /* Dense figures: the ambient gradient reads through a 42% panel enough to
+     cost legibility on small mono text. */
+  .glass-strong {
+    background: var(--glass-tint-strong);
+  }
 
-body {
-  margin: 0;
-  background: var(--paper);
-  color: var(--ink);
-  font: 400 15px/1.6 var(--sans);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+  /* Edge rails: translucent and blurred but with no border or sheen, so they
+     read as part of the frame rather than a card floating on it. */
+  .glass-bar {
+    background: var(--glass-tint);
+    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  }
 
-.app {
-  max-width: 1120px;
-  margin: 0 auto;
-  padding: 28px 24px 80px;
-}
+  .mono {
+    font-family: var(--font-mono);
+    font-size: 0.92em;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.03em;
+  }
 
-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  border-bottom: 1px solid var(--rule);
-  padding-bottom: 14px;
-}
+  .serif {
+    font-family: var(--font-serif);
+  }
 
-header .mark {
-  display: block;
-  height: 26px;
-  width: 26px;
-}
+  /* Both glyphs ship and this picks one off the attribute, so the icon is
+     correct on first paint instead of after the theme effect runs. */
+  .theme-toggle {
+    align-items: center;
+    border-radius: 9999px;
+    color: var(--color-ink-3);
+    display: grid;
+    height: 34px;
+    justify-items: center;
+    transition:
+      color 0.12s ease,
+      border-color 0.12s ease;
+    width: 34px;
+  }
 
-h1 {
-  font: 400 25px/1 var(--serif);
-  letter-spacing: -0.01em;
-  margin: 0;
-}
+  .theme-toggle:hover {
+    border-color: color-mix(in srgb, var(--color-accent) 45%, var(--glass-border));
+    color: var(--color-ink);
+  }
 
-.tenant {
-  color: var(--ink-3);
-  font-family: var(--mono);
-  font-size: 12px;
-  margin-left: auto;
-}
+  .theme-toggle .i-dark {
+    display: none;
+  }
 
-h2 {
-  color: var(--ink-3);
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.09em;
-  margin: 36px 0 10px;
-  text-transform: uppercase;
-}
+  :root[data-theme="dark"] .theme-toggle .i-dark {
+    display: block;
+  }
 
-nav {
-  display: flex;
-  gap: 2px;
-  margin: 18px 0 4px;
-}
+  :root[data-theme="dark"] .theme-toggle .i-light {
+    display: none;
+  }
 
-nav button {
-  background: none;
-  border: 1px solid transparent;
-  border-radius: 8px;
-  color: var(--ink-3);
-  cursor: pointer;
-  font: 500 14px/1 var(--sans);
-  padding: 8px 14px;
-  transition:
-    color 0.12s ease,
-    background 0.12s ease;
-}
+  /* The number a view exists to show, and the line it sits on. Both repeat in
+     every view, so they are classes rather than the same utilities retyped. */
+  .headline {
+    align-items: baseline;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin: 26px 0 8px;
+  }
 
-nav button:hover {
-  color: var(--ink);
-}
+  /* No tabular-nums: it forces a uniform advance, which is what collides a
+     fallback currency glyph into the first digit. Tabular figures earn their
+     keep in a column and this is a single statement. */
+  .headline-figure {
+    font-family: var(--font-serif);
+    font-size: 44px;
+    font-weight: 400;
+    letter-spacing: 0;
+    line-height: 1.15;
+  }
 
-nav button.on {
-  background: var(--paper-warm);
-  border-color: var(--rule);
-  box-shadow: var(--shadow);
-  color: var(--ink);
-}
+  .headline-figure .sym {
+    margin-right: 0.055em;
+  }
 
-.headline {
-  align-items: baseline;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 14px;
-  margin: 26px 0 8px;
-}
+  /* Eight identical section headings across four views, so it is a class rather
+     than the same six utilities copied eight times. */
+  .section-title {
+    color: var(--color-ink-3);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.09em;
+    margin: 36px 0 10px;
+    text-transform: uppercase;
+  }
 
-/* The one number the page exists to show. Serif, because it is a statement and
-   not a readout.
-   No tabular-nums here: Instrument Serif has no currency glyphs, so "£" falls
-   back to Georgia mid-run and the forced tabular advance collides the symbol
-   into the first digit. Tabular figures matter in a column, and this is not one. */
-.total {
-  font: 400 44px/1.15 var(--serif);
-  letter-spacing: 0;
-}
+  /* One shape, four views. Rows are hairline-separated rather than boxed: a
+     grid of borders competes with the figures for attention. */
+  .sheet {
+    border-collapse: separate;
+    border-spacing: 0;
+    border-radius: 10px;
+    overflow: hidden;
+    width: 100%;
+  }
 
-.muted {
-  color: var(--ink-3);
-}
+  .sheet th,
+  .sheet td {
+    border-bottom: 1px solid var(--color-rule-light);
+    padding: 9px 13px;
+    text-align: left;
+    vertical-align: top;
+  }
 
-.mono {
-  font-family: var(--mono);
-  font-size: 12px;
-}
+  .sheet tbody tr:last-child td {
+    border-bottom: none;
+  }
 
-.negative {
-  color: var(--loss);
-}
+  .sheet th {
+    background: color-mix(in srgb, var(--color-ink) 3%, transparent);
+    color: var(--color-ink-3);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
 
-input {
-  background: var(--paper-warm);
-  border: 1px solid var(--rule);
-  border-radius: 8px;
-  color: inherit;
-  font: 500 14px/1 var(--sans);
-  padding: 8px 12px;
-}
+  .sheet .num {
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+  }
 
-input:focus-visible {
-  border-color: var(--accent);
-  outline: 2px solid color-mix(in srgb, var(--accent) 28%, transparent);
-  outline-offset: 1px;
-}
+  .sheet td.num {
+    font-family: var(--font-mono);
+    font-size: 13px;
+  }
 
-table {
-  background: var(--paper-warm);
-  border: 1px solid var(--rule);
-  border-radius: 10px;
-  border-collapse: separate;
-  border-spacing: 0;
-  overflow: hidden;
-  width: 100%;
-}
+  .sheet tr.late td {
+    background: var(--color-late);
+  }
 
-th,
-td {
-  border-bottom: 1px solid var(--rule-light);
-  padding: 9px 13px;
-  text-align: left;
-  vertical-align: top;
-}
+  /* Two overlaid bars per bucket: what was said, and what happened. The gap
+     between them is the entire point of a reliability diagram. */
+  .bar {
+    background: var(--color-accent);
+    border-radius: 3px;
+    display: block;
+    height: 7px;
+    min-width: 2px;
+  }
 
-tbody tr:last-child td {
-  border-bottom: none;
-}
-
-th {
-  background: color-mix(in srgb, var(--ink) 3%, transparent);
-  color: var(--ink-3);
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-
-td.num,
-th.num {
-  font-variant-numeric: tabular-nums;
-  text-align: right;
-}
-
-td.num {
-  font-family: var(--mono);
-  font-size: 13px;
-}
-
-tr.late td {
-  background: var(--late);
-}
-
-/* Two overlaid bars per bucket: what was said, and what happened. The gap
-   between them is the entire point of a reliability diagram. */
-.bar {
-  background: var(--accent);
-  border-radius: 3px;
-  display: block;
-  height: 7px;
-  min-width: 2px;
-}
-
-.bar.observed {
-  background: var(--gain);
-  margin-top: 3px;
+  .bar-observed {
+    background: var(--color-gain);
+    margin-top: 3px;
+  }
 }

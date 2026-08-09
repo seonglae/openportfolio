@@ -1,7 +1,7 @@
 import { useQuery } from "convex/react";
 import { weight } from "@openportfolio/core";
 import { api } from "../../../convex/_generated/api";
-import { formatDate, formatMoney, formatPercent, formatQty } from "../lib/format.ts";
+import { formatDate, formatMoney, formatPercent, formatQty, splitMoney } from "../lib/format.ts";
 
 // Pillar one: the scattered accounts as one number, and then immediately the
 // breakdown, because a single number with no attribution is a number nobody
@@ -12,23 +12,27 @@ export function NetWorthView() {
   const balances = useQuery(api.balances.list, {});
   const history = useQuery(api.netWorth.history, { limit: 30 });
 
-  if (!totals) return <p className="muted">loading</p>;
+  if (!totals) return <p className="text-ink-3">loading</p>;
 
   const currency = totals.baseCurrency;
+  const headline = splitMoney(totals.totalBase, currency);
   const venueOf = new Map((accounts ?? []).map((account) => [account.accountKey, account.venue]));
   const positions = [...(balances ?? [])].sort((a, b) => b.valueBase - a.valueBase);
 
   return (
     <section>
       <div className="headline">
-        <span className="total">{formatMoney(totals.totalBase, currency)}</span>
-        <span className="muted">
+        <span className="headline-figure">
+          <span className="sym">{headline.symbol}</span>
+          {headline.rest}
+        </span>
+        <span className="text-ink-3">
           {totals.accountCount} accounts · {history?.length ?? 0} snapshots
         </span>
       </div>
 
-      <h2>By venue</h2>
-      <table>
+      <h2 className="section-title">By venue</h2>
+      <table className="sheet glass-strong">
         <thead>
           <tr>
             <th>Venue</th>
@@ -47,8 +51,8 @@ export function NetWorthView() {
         </tbody>
       </table>
 
-      <h2>By asset class</h2>
-      <table>
+      <h2 className="section-title">By asset class</h2>
+      <table className="sheet glass-strong">
         <thead>
           <tr>
             <th>Class</th>
@@ -67,8 +71,8 @@ export function NetWorthView() {
         </tbody>
       </table>
 
-      <h2>Positions</h2>
-      <table>
+      <h2 className="section-title">Positions</h2>
+      <table className="sheet glass-strong">
         <thead>
           <tr>
             <th>Symbol</th>
@@ -94,7 +98,7 @@ export function NetWorthView() {
           ))}
         </tbody>
       </table>
-      {positions.length === 0 && <p className="muted">No positions yet. Link an account and run the sync worker.</p>}
+      {positions.length === 0 && <p className="text-ink-3">No positions yet. Link an account and run the sync worker.</p>}
     </section>
   );
 }

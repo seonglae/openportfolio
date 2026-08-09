@@ -27,6 +27,29 @@ export function formatMoney(value: number, currency: string): string {
   }
 }
 
+// Instrument Serif ships no currency glyph, so "£" or "₩" falls back to Georgia
+// mid-run. Georgia's symbol ink overruns its advance width and touches the first
+// digit, and a font fallback has no kerning pair to correct that. Handing the
+// parts back lets the one place that sets money in the display face space the
+// symbol itself; every other figure is set in a font that has the glyph.
+// A locale that puts the symbol last needs no gap, so it stays unsplit.
+export function splitMoney(value: number, currency: string): { symbol: string; rest: string } {
+  const text = formatMoney(value, currency);
+  try {
+    const parts = new Intl.NumberFormat(undefined, {
+      style: "currency",
+      currency: currency.toUpperCase(),
+    }).formatToParts(value);
+    const first = parts[0];
+    if (first !== undefined && first.type === "currency" && text.startsWith(first.value)) {
+      return { symbol: first.value, rest: text.slice(first.value.length) };
+    }
+  } catch {
+    return { symbol: "", rest: text };
+  }
+  return { symbol: "", rest: text };
+}
+
 export function formatQty(value: number): string {
   if (!Number.isFinite(value)) return "-";
   return new Intl.NumberFormat(undefined, { maximumFractionDigits: 8 }).format(value);

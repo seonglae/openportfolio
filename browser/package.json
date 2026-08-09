@@ -13,9 +13,12 @@
   "dependencies": {
     "@openportfolio/core": "workspace:*",
     "@openportfolio/domain": "workspace:*",
+    "@tailwindcss/vite": "^4.3.3",
     "convex": "^1.42.3",
+    "lucide-react": "^0.563.0",
     "react": "^19.2.0",
-    "react-dom": "^19.2.0"
+    "react-dom": "^19.2.0",
+    "tailwindcss": "^4.3.3"
   },
   "devDependencies": {
     "@types/node": "^25.7.0",
