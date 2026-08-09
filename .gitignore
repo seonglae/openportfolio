@@ -21,3 +21,4 @@ tmp/
 .codex-home/
 browser/dist-demo/
 browser/.vite-temp-demo/
+site/sitesrv.pid

@@ -16,7 +16,21 @@ today.setUTCHours(16, 30, 0, 0);
 const NOW = today.getTime();
 
 const day = (offset: number) => NOW + offset * DAY;
-const isoDay = (offset: number) => new Date(day(offset)).toISOString().slice(0, 10);
+
+// Flow rows are exchange sessions, and an exchange is shut at the weekend. Counting
+// back calendar days puts a Saturday print on the page whenever the demo is opened
+// early in the week, so count back weekdays instead. Holidays are out of scope: this
+// is a fixture, not a trading calendar.
+const sessionDay = (sessionsBack: number) => {
+  const d = new Date(NOW);
+  let remaining = sessionsBack;
+  while (remaining > 0) {
+    d.setUTCDate(d.getUTCDate() - 1);
+    const dow = d.getUTCDay();
+    if (dow !== 0 && dow !== 6) remaining -= 1;
+  }
+  return d.toISOString().slice(0, 10);
+};
 
 export type DemoPosition = {
   accountKey: string;
@@ -55,9 +69,9 @@ const POSITIONS: DemoPosition[] = [
     symbol: "NVDA",
     assetClass: "equity",
     qty: 45,
-    lastPrice: 223.96,
+    lastPrice: 186.4,
     currency: "USD",
-    valueBase: 7489.14,
+    valueBase: 6232.28,
     asOf: day(0),
   },
   {
@@ -65,9 +79,9 @@ const POSITIONS: DemoPosition[] = [
     symbol: "MSFT",
     assetClass: "equity",
     qty: 60,
-    lastPrice: 354.3,
+    lastPrice: 526.4,
     currency: "USD",
-    valueBase: 15794.72,
+    valueBase: 23466.9,
     asOf: day(0),
   },
   {
@@ -77,7 +91,7 @@ const POSITIONS: DemoPosition[] = [
     qty: 18,
     lastPrice: 812.4,
     currency: "EUR",
-    valueBase: 12184.15,
+    valueBase: 12184,
     asOf: day(0),
   },
   {
@@ -85,9 +99,9 @@ const POSITIONS: DemoPosition[] = [
     symbol: "035420",
     assetClass: "equity",
     qty: 210,
-    lastPrice: 231000,
+    lastPrice: 197500,
     currency: "KRW",
-    valueBase: 27012.19,
+    valueBase: 23093.3,
     asOf: day(0),
   },
   {
@@ -95,9 +109,9 @@ const POSITIONS: DemoPosition[] = [
     symbol: "BTC",
     assetClass: "crypto",
     qty: 0.184,
-    lastPrice: 65012,
+    lastPrice: 71940,
     currency: "USD",
-    valueBase: 8892.03,
+    valueBase: 9835.06,
     asOf: day(0),
   },
   {
@@ -105,9 +119,9 @@ const POSITIONS: DemoPosition[] = [
     symbol: "ETH",
     assetClass: "crypto",
     qty: 3.2,
-    lastPrice: 3410,
+    lastPrice: 3268,
     currency: "USD",
-    valueBase: 8112.51,
+    valueBase: 7770,
     asOf: day(0),
   },
   {
@@ -199,7 +213,7 @@ export const FIXTURES: Record<string, unknown> = {
   "flows:list": [
     {
       _id: "f1",
-      date: isoDay(-1),
+      date: sessionDay(1),
       investorType: "foreigner",
       netBuyValue: -811_400_000_000,
       turnoverValue: 37_412_000_000_000,
@@ -207,7 +221,7 @@ export const FIXTURES: Record<string, unknown> = {
     },
     {
       _id: "f2",
-      date: isoDay(-1),
+      date: sessionDay(1),
       investorType: "individual",
       netBuyValue: 206_900_000_000,
       turnoverValue: 37_412_000_000_000,
@@ -215,7 +229,7 @@ export const FIXTURES: Record<string, unknown> = {
     },
     {
       _id: "f3",
-      date: isoDay(-1),
+      date: sessionDay(1),
       investorType: "institution",
       netBuyValue: 598_300_000_000,
       turnoverValue: 37_412_000_000_000,
@@ -223,7 +237,7 @@ export const FIXTURES: Record<string, unknown> = {
     },
     {
       _id: "f4",
-      date: isoDay(-2),
+      date: sessionDay(2),
       investorType: "foreigner",
       netBuyValue: -2_967_500_000_000,
       turnoverValue: 41_265_000_000_000,
@@ -231,7 +245,7 @@ export const FIXTURES: Record<string, unknown> = {
     },
     {
       _id: "f5",
-      date: isoDay(-2),
+      date: sessionDay(2),
       investorType: "individual",
       netBuyValue: 3_104_800_000_000,
       turnoverValue: 41_265_000_000_000,
@@ -239,7 +253,7 @@ export const FIXTURES: Record<string, unknown> = {
     },
     {
       _id: "f6",
-      date: isoDay(-2),
+      date: sessionDay(2),
       investorType: "institution",
       netBuyValue: -241_600_000_000,
       turnoverValue: 41_265_000_000_000,
@@ -247,7 +261,7 @@ export const FIXTURES: Record<string, unknown> = {
     },
     {
       _id: "f7",
-      date: isoDay(-3),
+      date: sessionDay(3),
       investorType: "foreigner",
       netBuyValue: 1_744_200_000_000,
       turnoverValue: 43_118_000_000_000,
@@ -255,7 +269,7 @@ export const FIXTURES: Record<string, unknown> = {
     },
     {
       _id: "f8",
-      date: isoDay(-3),
+      date: sessionDay(3),
       investorType: "individual",
       netBuyValue: -1_602_700_000_000,
       turnoverValue: 43_118_000_000_000,
@@ -263,7 +277,7 @@ export const FIXTURES: Record<string, unknown> = {
     },
     {
       _id: "f9",
-      date: isoDay(-3),
+      date: sessionDay(3),
       investorType: "institution",
       netBuyValue: -133_900_000_000,
       turnoverValue: 43_118_000_000_000,
@@ -271,7 +285,7 @@ export const FIXTURES: Record<string, unknown> = {
     },
     {
       _id: "f10",
-      date: isoDay(-4),
+      date: sessionDay(4),
       investorType: "foreigner",
       netBuyValue: -722_100_000_000,
       turnoverValue: 45_007_000_000_000,
@@ -279,7 +293,7 @@ export const FIXTURES: Record<string, unknown> = {
     },
     {
       _id: "f11",
-      date: isoDay(-4),
+      date: sessionDay(4),
       investorType: "individual",
       netBuyValue: 934_600_000_000,
       turnoverValue: 45_007_000_000_000,
@@ -287,7 +301,7 @@ export const FIXTURES: Record<string, unknown> = {
     },
     {
       _id: "f12",
-      date: isoDay(-4),
+      date: sessionDay(4),
       investorType: "institution",
       netBuyValue: -286_400_000_000,
       turnoverValue: 45_007_000_000_000,
