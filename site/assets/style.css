@@ -174,8 +174,7 @@ svg {
   margin-left: auto;
 }
 
-.site-nav a,
-.theme-toggle {
+.site-nav a {
   background: none;
   border: 1px solid transparent;
   border-radius: 8px;
@@ -183,6 +182,48 @@ svg {
   cursor: pointer;
   font: 500 14px/1 var(--sans);
   padding: 9px 12px;
+}
+
+/* An icon, not the word "Dark". The label described the machinery; the glyph is
+   the affordance. Both glyphs ship and the theme attribute picks one, so the
+   right icon is on screen at first paint rather than after the script runs.
+   Same lucide glyphs the app header uses, inlined because these pages carry no
+   bundle. */
+.theme-toggle {
+  align-items: center;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 9999px;
+  color: var(--ink-3);
+  cursor: pointer;
+  display: inline-grid;
+  height: 34px;
+  justify-items: center;
+  padding: 0;
+  width: 34px;
+}
+
+.theme-toggle svg {
+  display: block;
+  fill: none;
+  height: 17px;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.7;
+  width: 17px;
+}
+
+.theme-toggle .i-dark {
+  display: none;
+}
+
+:root[data-theme="dark"] .theme-toggle .i-dark {
+  display: block;
+}
+
+:root[data-theme="dark"] .theme-toggle .i-light {
+  display: none;
 }
 
 .site-nav a:hover,
@@ -840,14 +881,21 @@ details p {
   margin-bottom: 20px;
 }
 
-/* Instrument Serif carries no currency glyph, so the pound falls back mid-run
-   and tabular-nums then collides it into the first digit. Neither here. */
+/* Instrument Serif carries no currency glyph, so the pound falls back to Georgia
+   mid-run. Dropping tabular-nums is necessary but not sufficient: Georgia's "£"
+   ink overruns its own advance width, and a font fallback has no kerning pair to
+   pull the digit clear. Measured at 44px the advances are flush at the same
+   pixel, so the gap has to be added explicitly. */
 .panel-total b {
   font-family: var(--serif);
   font-size: clamp(32px, 5.4vw, 50px);
   font-weight: 400;
   letter-spacing: 0;
   line-height: 1;
+}
+
+.panel-total .sym {
+  margin-right: 0.055em;
 }
 
 .panel-total small {
@@ -1128,16 +1176,21 @@ td.relcell {
     gap: 1px;
   }
 
-  .site-nav a,
-  .theme-toggle {
+  /* The toggle is a fixed square now, so only the text links shrink. Handing it
+     a padding here would deform the circle. */
+  .site-nav a {
     font-size: 13.5px;
     padding: 8px 7px;
+  }
+
+  .theme-toggle {
+    height: 30px;
+    width: 30px;
   }
 }
 
 @media (max-width: 360px) {
-  .site-nav a,
-  .theme-toggle {
+  .site-nav a {
     font-size: 13px;
     padding: 8px 5px;
   }
