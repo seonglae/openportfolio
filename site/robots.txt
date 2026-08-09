@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+
+# /demo/ is intentionally crawlable. It carries <meta name="robots" content="noindex">,
+# and a Disallow here would stop crawlers reaching the page to read that tag, which
+# is how a URL ends up indexed with no content behind it.
+
+Sitemap: https://openportfolio.app/sitemap.xml

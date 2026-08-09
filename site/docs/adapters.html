@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>Venue adapters · openportfolio docs</title>
+    <meta
+      name="description"
+      content="The adapter contract, the two adapters that ship, and how to add a keyed broker without putting a credential anywhere near the backend or the repository."
+    />
+    <link rel="canonical" href="https://openportfolio.app/docs/adapters" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="openportfolio" />
+    <meta property="og:url" content="https://openportfolio.app/docs/adapters" />
+    <meta property="og:title" content="Venue adapters · openportfolio docs" />
+    <meta
+      property="og:description"
+      content="The adapter contract, the two adapters that ship, and how to add a keyed broker without putting a credential anywhere near the backend or the repository."
+    />
+    <meta property="og:image" content="https://openportfolio.app/og.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="https://openportfolio.app/og.png" />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/assets/style.css" />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "TechArticle",
+        "headline": "Venue adapters",
+        "description": "The adapter contract, the two adapters that ship, and how to add a keyed broker without putting a credential anywhere near the backend or the repository.",
+        "url": "https://openportfolio.app/docs/adapters",
+        "isPartOf": { "@type": "WebSite", "name": "openportfolio", "url": "https://openportfolio.app/" },
+        "author": { "@type": "Person", "name": "Seonglae Cho" },
+        "license": "https://www.apache.org/licenses/LICENSE-2.0",
+        "breadcrumb": {
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://openportfolio.app/" },
+            { "@type": "ListItem", "position": 2, "name": "Docs", "item": "https://openportfolio.app/docs/" },
+            { "@type": "ListItem", "position": 3, "name": "Venue adapters" }
+          ]
+        }
+      }
+    </script>
+    <script>
+      (function () {
+        try {
+          var p = localStorage.getItem("openportfolio-theme");
+          if (p === "dark" || p === "light") document.documentElement.dataset.theme = p;
+          else document.documentElement.removeAttribute("data-theme");
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <header class="site-head">
+      <div class="wrap">
+        <a class="brand" href="/" aria-label="openportfolio home"
+          ><svg viewBox="0 0 64 64" aria-hidden="true">
+            <defs>
+              <linearGradient id="hm" gradientUnits="userSpaceOnUse" x1="6" y1="6" x2="46" y2="58">
+                <stop offset="0" stop-color="#8b9cff" />
+                <stop offset=".55" stop-color="#5b6cf0" />
+                <stop offset="1" stop-color="#7c5cf0" />
+              </linearGradient>
+            </defs>
+            <g fill="url(#hm)">
+              <rect x="4" y="38" width="14" height="20" rx="3" opacity=".55" />
+              <rect x="25" y="24" width="14" height="34" rx="3" opacity=".78" />
+              <rect x="46" y="8" width="14" height="50" rx="3" />
+            </g>
+          </svg>
+          openportfolio</a
+        >
+        <nav class="site-nav" aria-label="Primary">
+          <a href="/docs/">Docs</a>
+          <a href="/demo/">Demo</a>
+          <button class="theme-toggle" type="button" id="theme" aria-label="Toggle dark mode">Dark</button>
+          <a class="cta" href="https://github.com/seonglae/openportfolio">GitHub</a>
+        </nav>
+      </div>
+    </header>
+    <div class="wrap">
+      <div class="docs">
+        <nav class="docs-nav" aria-label="Documentation">
+          <strong>Start</strong><a href="/docs/">Overview</a><a href="/docs/quickstart">Quick start</a
+          ><a href="/docs/configuration">Configuration</a><strong>Concepts</strong
+          ><a href="/docs/forecasts">Forecasts and Brier</a><a href="/docs/flows">Flows and catalysts</a
+          ><a href="/docs/multi-tenancy">Multi-tenancy</a><strong>Extend</strong
+          ><a href="/docs/adapters" aria-current="page">Venue adapters</a><a href="/docs/mcp">MCP and agents</a>
+        </nav>
+        <article class="prose" id="main">
+          <h1>Venue adapters</h1>
+          <p>An adapter declares what it can do and implements only that.</p>
+          <pre><code>type VenueAdapter = {
+  venue: string;
+  kind: AccountKind;
+  capabilities: { canReadBalances: boolean; canReadQuotes: boolean; canPlaceOrders: boolean };
+  readBalances(request: ReadBalancesRequest): Promise&lt;AdapterBalance[]&gt;;
+  readQuote(request: ReadQuoteRequest): Promise&lt;AdapterQuote&gt;;
+  placeOrder?(request: PlaceOrderRequest): Promise&lt;OrderReceipt&gt;;
+};</code></pre>
+
+          <h2>What ships</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Adapter</th>
+                <th>Reads balances</th>
+                <th>Reads quotes</th>
+                <th>Key</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>coingecko</code></td>
+                <td>No, on purpose</td>
+                <td>Yes</td>
+                <td>None</td>
+              </tr>
+              <tr>
+                <td><code>manual</code></td>
+                <td>Yes, from a JSON file</td>
+                <td>No</td>
+                <td>None</td>
+              </tr>
+            </tbody>
+          </table>
+          <p>
+            <code>coingecko</code> refuses balances rather than returning an empty list, because a price source does not
+            know what you hold and an empty list reads as "you hold nothing".
+          </p>
+
+          <h2>Adding a keyed broker</h2>
+          <ol>
+            <li>Write a module in <code>packages/node/src/adapters/</code>.</li>
+            <li>Take the credential from the <strong>worker's</strong> environment.</li>
+            <li>Register it in <code>defaultRegistry()</code>.</li>
+          </ol>
+          <div class="callout">
+            <p>
+              <strong>Keep the credential in the worker process.</strong> The backend never sees it and neither does
+              this repository. That is why no keyed adapter ships: the useful ones all need a secret, and a public tree
+              is the wrong place to normalise putting one.
+            </p>
+          </div>
+
+          <h2>If you implement placeOrder</h2>
+          <pre><code>type PlaceOrderRequest = {
+  <span class="c">// ...</span>
+  confirmation: OrderConfirmation;   <span class="c">// { confirmedBy, confirmedAt }</span>
+};</code></pre>
+          <p>
+            <code>OrderConfirmation</code> has no default. An order that no human confirmed cannot be constructed, which
+            is a type error rather than a policy someone can forget.
+          </p>
+        </article>
+      </div>
+    </div>
+    <footer class="site-foot">
+      <div class="wrap">
+        <span>openportfolio · Apache-2.0 · built by <a href="https://github.com/seonglae">Seonglae Cho</a></span>
+        <nav aria-label="Footer">
+          <a href="/docs/">Docs</a>
+          <a href="/demo/">Demo</a>
+          <a href="https://github.com/seonglae/openportfolio">GitHub</a>
+        </nav>
+      </div>
+    </footer>
+    <script>
+      (function () {
+        var btn = document.getElementById("theme");
+        if (!btn) return;
+        var root = document.documentElement;
+        function dark() {
+          return (
+            root.dataset.theme === "dark" ||
+            (!root.dataset.theme && window.matchMedia("(prefers-color-scheme: dark)").matches)
+          );
+        }
+        function label() {
+          btn.textContent = dark() ? "Light" : "Dark";
+        }
+        label();
+        btn.addEventListener("click", function () {
+          root.dataset.theme = dark() ? "light" : "dark";
+          try {
+            localStorage.setItem("openportfolio-theme", root.dataset.theme);
+          } catch (e) {}
+          label();
+        });
+      })();
+    </script>
+  </body>
+</html>

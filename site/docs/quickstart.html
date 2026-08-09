@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>Quick start · openportfolio docs</title>
+    <meta
+      name="description"
+      content="Clone, install, create a Convex deployment, create the first book, and get a real net worth on screen from a manual holdings file."
+    />
+    <link rel="canonical" href="https://openportfolio.app/docs/quickstart" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="openportfolio" />
+    <meta property="og:url" content="https://openportfolio.app/docs/quickstart" />
+    <meta property="og:title" content="Quick start · openportfolio docs" />
+    <meta
+      property="og:description"
+      content="Clone, install, create a Convex deployment, create the first book, and get a real net worth on screen from a manual holdings file."
+    />
+    <meta property="og:image" content="https://openportfolio.app/og.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="https://openportfolio.app/og.png" />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/assets/style.css" />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "TechArticle",
+        "headline": "Quick start",
+        "description": "Clone, install, create a Convex deployment, create the first book, and get a real net worth on screen from a manual holdings file.",
+        "url": "https://openportfolio.app/docs/quickstart",
+        "isPartOf": { "@type": "WebSite", "name": "openportfolio", "url": "https://openportfolio.app/" },
+        "author": { "@type": "Person", "name": "Seonglae Cho" },
+        "license": "https://www.apache.org/licenses/LICENSE-2.0",
+        "breadcrumb": {
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://openportfolio.app/" },
+            { "@type": "ListItem", "position": 2, "name": "Docs", "item": "https://openportfolio.app/docs/" },
+            { "@type": "ListItem", "position": 3, "name": "Quick start" }
+          ]
+        }
+      }
+    </script>
+    <script>
+      (function () {
+        try {
+          var p = localStorage.getItem("openportfolio-theme");
+          if (p === "dark" || p === "light") document.documentElement.dataset.theme = p;
+          else document.documentElement.removeAttribute("data-theme");
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <header class="site-head">
+      <div class="wrap">
+        <a class="brand" href="/" aria-label="openportfolio home"
+          ><svg viewBox="0 0 64 64" aria-hidden="true">
+            <defs>
+              <linearGradient id="hm" gradientUnits="userSpaceOnUse" x1="6" y1="6" x2="46" y2="58">
+                <stop offset="0" stop-color="#8b9cff" />
+                <stop offset=".55" stop-color="#5b6cf0" />
+                <stop offset="1" stop-color="#7c5cf0" />
+              </linearGradient>
+            </defs>
+            <g fill="url(#hm)">
+              <rect x="4" y="38" width="14" height="20" rx="3" opacity=".55" />
+              <rect x="25" y="24" width="14" height="34" rx="3" opacity=".78" />
+              <rect x="46" y="8" width="14" height="50" rx="3" />
+            </g>
+          </svg>
+          openportfolio</a
+        >
+        <nav class="site-nav" aria-label="Primary">
+          <a href="/docs/">Docs</a>
+          <a href="/demo/">Demo</a>
+          <button class="theme-toggle" type="button" id="theme" aria-label="Toggle dark mode">Dark</button>
+          <a class="cta" href="https://github.com/seonglae/openportfolio">GitHub</a>
+        </nav>
+      </div>
+    </header>
+    <div class="wrap">
+      <div class="docs">
+        <nav class="docs-nav" aria-label="Documentation">
+          <strong>Start</strong><a href="/docs/">Overview</a
+          ><a href="/docs/quickstart" aria-current="page">Quick start</a><a href="/docs/configuration">Configuration</a
+          ><strong>Concepts</strong><a href="/docs/forecasts">Forecasts and Brier</a
+          ><a href="/docs/flows">Flows and catalysts</a><a href="/docs/multi-tenancy">Multi-tenancy</a
+          ><strong>Extend</strong><a href="/docs/adapters">Venue adapters</a><a href="/docs/mcp">MCP and agents</a>
+        </nav>
+        <article class="prose" id="main">
+          <h1>Quick start</h1>
+          <p>Node 22+, pnpm, and a <a href="https://convex.dev">Convex</a> account. The free tier is enough.</p>
+
+          <h2>1. Install</h2>
+          <pre><code>git clone https://github.com/seonglae/openportfolio.git
+cd openportfolio
+pnpm install
+
+cp .env.example .env.local
+npx convex dev --once          <span class="c"># creates the deployment</span></code></pre>
+
+          <h2>2. Create the first book</h2>
+          <p>
+            On localhost with no identity provider configured, the deployment will only create the tenant named by
+            <code>OPENPORTFOLIO_DEV_TENANT</code>.
+          </p>
+          <pre><code>npx convex env set OPENPORTFOLIO_DEV_TENANT home
+npx convex run tenants:create '{"slug":"home","name":"Home","baseCurrency":"GBP"}'</code></pre>
+
+          <h2>3. Start the UI</h2>
+          <pre><code>cp browser/.env.local.example browser/.env.local   <span class="c"># set VITE_CONVEX_URL</span>
+pnpm --filter openportfolio-browser dev            <span class="c"># http://localhost:6101</span></code></pre>
+
+          <h2>4. Sync</h2>
+          <pre><code>npx tsx sync-worker.mts --once</code></pre>
+          <p>
+            With nothing linked it registers the venues it can serve and records a net worth of zero, which is correct.
+          </p>
+
+          <h2>5. Put something in it</h2>
+          <p>
+            A manual holdings file is how a pension, a property or an unlisted holding gets into the total instead of
+            being left out of it.
+          </p>
+          <pre><code><span class="c">// holdings.json</span>
+[
+  { "accountKey": "isa",    "symbol": "VWRL", "assetClass": "etf",    "qty": 40,   "price": 118.2, "currency": "GBP" },
+  { "accountKey": "wallet", "symbol": "BTC",  "assetClass": "crypto", "qty": 0.15, "price": 0,     "currency": "USD" }
+]</code></pre>
+          <pre><code>export OPENPORTFOLIO_MANUAL_HOLDINGS=$PWD/holdings.json
+npx convex run accounts:link '{"accountKey":"isa","venue":"manual","kind":"brokerage","label":"ISA","currency":"GBP"}'
+npx convex run accounts:link '{"accountKey":"wallet","venue":"manual","kind":"wallet","label":"Wallet","currency":"USD"}'
+npx tsx sync-worker.mts --once</code></pre>
+          <p>
+            The BTC row is priced at 0 on purpose: the worker re-quotes crypto through the keyless CoinGecko adapter,
+            converts both rows into GBP, and writes one total.
+          </p>
+
+          <h2>6. Before exposing it</h2>
+          <div class="callout">
+            <p>
+              <strong>Two things are open on localhost.</strong> While <code>OPENPORTFOLIO_DEV_TENANT</code> is set, any
+              unauthenticated caller is scoped to that tenant. Unset it and configure Clerk before the deployment is
+              reachable from the internet.
+            </p>
+          </div>
+          <pre><code>npx convex env set CLERK_ISSUER_URL https://your-app.clerk.accounts.dev
+npx convex env unset OPENPORTFOLIO_DEV_TENANT
+
+KEY="$(openssl rand -hex 32)"
+npx convex run tenants:issueServiceKey "{\"key\":\"$KEY\",\"label\":\"sync-worker\",\"role\":\"member\"}"
+echo "OPENPORTFOLIO_SERVICE_KEY=$KEY" >> .env.local</code></pre>
+          <p>
+            Keys are stored as hashes. One key maps to exactly one tenant and carries its own role, so a worker that
+            only reads can be issued a <code>viewer</code> key and will be refused every write.
+          </p>
+        </article>
+      </div>
+    </div>
+    <footer class="site-foot">
+      <div class="wrap">
+        <span>openportfolio · Apache-2.0 · built by <a href="https://github.com/seonglae">Seonglae Cho</a></span>
+        <nav aria-label="Footer">
+          <a href="/docs/">Docs</a>
+          <a href="/demo/">Demo</a>
+          <a href="https://github.com/seonglae/openportfolio">GitHub</a>
+        </nav>
+      </div>
+    </footer>
+    <script>
+      (function () {
+        var btn = document.getElementById("theme");
+        if (!btn) return;
+        var root = document.documentElement;
+        function dark() {
+          return (
+            root.dataset.theme === "dark" ||
+            (!root.dataset.theme && window.matchMedia("(prefers-color-scheme: dark)").matches)
+          );
+        }
+        function label() {
+          btn.textContent = dark() ? "Light" : "Dark";
+        }
+        label();
+        btn.addEventListener("click", function () {
+          root.dataset.theme = dark() ? "light" : "dark";
+          try {
+            localStorage.setItem("openportfolio-theme", root.dataset.theme);
+          } catch (e) {}
+          label();
+        });
+      })();
+    </script>
+  </body>
+</html>

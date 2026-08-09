@@ -1,0 +1,28 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "moduleDetection": "force",
+    "jsx": "react-jsx",
+    // Node types are here for the Convex modules, not for this bundle. Importing
+    // `api` pulls their declarations in, and they read process.env. Nothing
+    // under browser/src may use a node API.
+    "types": ["node"],
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true,
+    "allowImportingTsExtensions": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "incremental": true,
+    "tsBuildInfoFile": "./node_modules/.tmp/browser.tsbuildinfo"
+  },
+  // demo/ builds through vite, which does not typecheck. Without it here a type
+  // error in the fixtures or the shim would only surface as a blank demo page.
+  "include": ["src", "demo"]
+}

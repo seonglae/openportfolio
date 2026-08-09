@@ -1,0 +1,8 @@
+convex/_generated
+pnpm-lock.yaml
+LICENSE
+NOTICE
+
+# Vite build output, committed so Cloudflare Pages can serve site/ with no build step
+site/demo/
+browser/dist-demo/

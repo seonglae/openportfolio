@@ -1,0 +1,8 @@
+packages:
+  - "packages/*"
+  - "browser"
+
+# Convex and Vite both shell out to esbuild's platform binary, which only exists
+# after its postinstall runs.
+allowBuilds:
+  esbuild: true

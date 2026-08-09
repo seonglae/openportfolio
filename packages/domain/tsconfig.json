@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    // No "types", no DOM lib, and no workspace dependency either. The Convex
+    // runtime, the browser bundle, the tsx workers and the bare-node MCP server
+    // all import this package, so anything reachable from src must be plain
+    // ECMAScript with nothing underneath it.
+    "lib": ["ES2022"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "types": [],
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true,
+    "allowImportingTsExtensions": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "incremental": true,
+    "tsBuildInfoFile": "./node_modules/.tmp/domain.tsbuildinfo"
+  },
+  "include": ["src"]
+}

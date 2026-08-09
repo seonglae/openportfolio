@@ -1,0 +1,258 @@
+/* Design tokens. Light is the default and dark is a flip of the same names, so
+   every rule below is written once. Editorial rather than dashboard: a serif
+   for the one number that matters, a mono for anything the machine wrote. */
+
+:root {
+  --paper: #f3f4f8;
+  --paper-warm: #ffffff;
+  --ink: #181a20;
+  --ink-2: #3f434d;
+  --ink-3: #7a8090;
+  --ink-4: #aab0bd;
+  --rule: #d8dbe3;
+  --rule-light: #e8eaf0;
+  --accent: #5b6cf0;
+  --accent-2: #7c5cf0;
+  --gain: #3f9576;
+  --loss: #cf6257;
+  --late: #fdf3e0;
+  --shadow: 0 1px 2px rgba(24, 26, 32, 0.04), 0 8px 24px -12px rgba(24, 26, 32, 0.12);
+
+  --sans: "Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --serif: "Instrument Serif", Georgia, serif;
+  --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  color-scheme: light;
+}
+
+/* Dark follows the OS unless the toggle has pinned a choice. Both selectors
+   assign the same names, so nothing downstream branches on theme. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #0c0e13;
+    --paper-warm: #161a22;
+    --ink: #e8eaf0;
+    --ink-2: #c2c6d1;
+    --ink-3: #868c9c;
+    --ink-4: #565c6b;
+    --rule: #2a2f3b;
+    --rule-light: #20242e;
+    --accent: #7d8cff;
+    --accent-2: #9b7cff;
+    --gain: #5fb89a;
+    --loss: #e0857b;
+    --late: #2e2716;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px -12px rgba(0, 0, 0, 0.6);
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --paper: #0c0e13;
+  --paper-warm: #161a22;
+  --ink: #e8eaf0;
+  --ink-2: #c2c6d1;
+  --ink-3: #868c9c;
+  --ink-4: #565c6b;
+  --rule: #2a2f3b;
+  --rule-light: #20242e;
+  --accent: #7d8cff;
+  --accent-2: #9b7cff;
+  --gain: #5fb89a;
+  --loss: #e0857b;
+  --late: #2e2716;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px -12px rgba(0, 0, 0, 0.6);
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font: 400 15px/1.6 var(--sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.app {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 28px 24px 80px;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid var(--rule);
+  padding-bottom: 14px;
+}
+
+header .mark {
+  display: block;
+  height: 26px;
+  width: 26px;
+}
+
+h1 {
+  font: 400 25px/1 var(--serif);
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+.tenant {
+  color: var(--ink-3);
+  font-family: var(--mono);
+  font-size: 12px;
+  margin-left: auto;
+}
+
+h2 {
+  color: var(--ink-3);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  margin: 36px 0 10px;
+  text-transform: uppercase;
+}
+
+nav {
+  display: flex;
+  gap: 2px;
+  margin: 18px 0 4px;
+}
+
+nav button {
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  color: var(--ink-3);
+  cursor: pointer;
+  font: 500 14px/1 var(--sans);
+  padding: 8px 14px;
+  transition:
+    color 0.12s ease,
+    background 0.12s ease;
+}
+
+nav button:hover {
+  color: var(--ink);
+}
+
+nav button.on {
+  background: var(--paper-warm);
+  border-color: var(--rule);
+  box-shadow: var(--shadow);
+  color: var(--ink);
+}
+
+.headline {
+  align-items: baseline;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin: 26px 0 8px;
+}
+
+/* The one number the page exists to show. Serif, because it is a statement and
+   not a readout.
+   No tabular-nums here: Instrument Serif has no currency glyphs, so "£" falls
+   back to Georgia mid-run and the forced tabular advance collides the symbol
+   into the first digit. Tabular figures matter in a column, and this is not one. */
+.total {
+  font: 400 44px/1.15 var(--serif);
+  letter-spacing: 0;
+}
+
+.muted {
+  color: var(--ink-3);
+}
+
+.mono {
+  font-family: var(--mono);
+  font-size: 12px;
+}
+
+.negative {
+  color: var(--loss);
+}
+
+input {
+  background: var(--paper-warm);
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  color: inherit;
+  font: 500 14px/1 var(--sans);
+  padding: 8px 12px;
+}
+
+input:focus-visible {
+  border-color: var(--accent);
+  outline: 2px solid color-mix(in srgb, var(--accent) 28%, transparent);
+  outline-offset: 1px;
+}
+
+table {
+  background: var(--paper-warm);
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  border-collapse: separate;
+  border-spacing: 0;
+  overflow: hidden;
+  width: 100%;
+}
+
+th,
+td {
+  border-bottom: 1px solid var(--rule-light);
+  padding: 9px 13px;
+  text-align: left;
+  vertical-align: top;
+}
+
+tbody tr:last-child td {
+  border-bottom: none;
+}
+
+th {
+  background: color-mix(in srgb, var(--ink) 3%, transparent);
+  color: var(--ink-3);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+td.num,
+th.num {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+td.num {
+  font-family: var(--mono);
+  font-size: 13px;
+}
+
+tr.late td {
+  background: var(--late);
+}
+
+/* Two overlaid bars per bucket: what was said, and what happened. The gap
+   between them is the entire point of a reliability diagram. */
+.bar {
+  background: var(--accent);
+  border-radius: 3px;
+  display: block;
+  height: 7px;
+  min-width: 2px;
+}
+
+.bar.observed {
+  background: var(--gain);
+  margin-top: 3px;
+}

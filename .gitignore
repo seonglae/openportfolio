@@ -1,0 +1,23 @@
+node_modules/
+
+# Build output
+browser/dist/
+browser/.vite-temp/
+
+# Secrets and machine-local config. `.env.example` is the tracked template.
+.env.local
+.env*.local
+browser/.env.local
+browser/.env.production
+
+# Convex codegen for the browser bundle
+browser/convex/
+
+# Manual-adapter holdings files are personal position data, not fixtures.
+holdings*.json
+
+# Agent and tooling scratch
+tmp/
+.codex-home/
+browser/dist-demo/
+browser/.vite-temp-demo/

@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>Overview · openportfolio docs</title>
+    <meta
+      name="description"
+      content="What openportfolio is, what it deliberately does not do, and how the pieces fit: adapters, the sync worker, the Convex backend, the MCP server and the browser."
+    />
+    <link rel="canonical" href="https://openportfolio.app/docs/" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="openportfolio" />
+    <meta property="og:url" content="https://openportfolio.app/docs/" />
+    <meta property="og:title" content="Overview · openportfolio docs" />
+    <meta
+      property="og:description"
+      content="What openportfolio is, what it deliberately does not do, and how the pieces fit: adapters, the sync worker, the Convex backend, the MCP server and the browser."
+    />
+    <meta property="og:image" content="https://openportfolio.app/og.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="https://openportfolio.app/og.png" />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/assets/style.css" />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "TechArticle",
+        "headline": "Overview",
+        "description": "What openportfolio is, what it deliberately does not do, and how the pieces fit: adapters, the sync worker, the Convex backend, the MCP server and the browser.",
+        "url": "https://openportfolio.app/docs/",
+        "isPartOf": { "@type": "WebSite", "name": "openportfolio", "url": "https://openportfolio.app/" },
+        "author": { "@type": "Person", "name": "Seonglae Cho" },
+        "license": "https://www.apache.org/licenses/LICENSE-2.0",
+        "breadcrumb": {
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://openportfolio.app/" },
+            { "@type": "ListItem", "position": 2, "name": "Docs", "item": "https://openportfolio.app/docs/" },
+            { "@type": "ListItem", "position": 3, "name": "Overview" }
+          ]
+        }
+      }
+    </script>
+    <script>
+      (function () {
+        try {
+          var p = localStorage.getItem("openportfolio-theme");
+          if (p === "dark" || p === "light") document.documentElement.dataset.theme = p;
+          else document.documentElement.removeAttribute("data-theme");
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <header class="site-head">
+      <div class="wrap">
+        <a class="brand" href="/" aria-label="openportfolio home"
+          ><svg viewBox="0 0 64 64" aria-hidden="true">
+            <defs>
+              <linearGradient id="hm" gradientUnits="userSpaceOnUse" x1="6" y1="6" x2="46" y2="58">
+                <stop offset="0" stop-color="#8b9cff" />
+                <stop offset=".55" stop-color="#5b6cf0" />
+                <stop offset="1" stop-color="#7c5cf0" />
+              </linearGradient>
+            </defs>
+            <g fill="url(#hm)">
+              <rect x="4" y="38" width="14" height="20" rx="3" opacity=".55" />
+              <rect x="25" y="24" width="14" height="34" rx="3" opacity=".78" />
+              <rect x="46" y="8" width="14" height="50" rx="3" />
+            </g>
+          </svg>
+          openportfolio</a
+        >
+        <nav class="site-nav" aria-label="Primary">
+          <a href="/docs/">Docs</a>
+          <a href="/demo/">Demo</a>
+          <button class="theme-toggle" type="button" id="theme" aria-label="Toggle dark mode">Dark</button>
+          <a class="cta" href="https://github.com/seonglae/openportfolio">GitHub</a>
+        </nav>
+      </div>
+    </header>
+    <div class="wrap">
+      <div class="docs">
+        <nav class="docs-nav" aria-label="Documentation">
+          <strong>Start</strong><a href="/docs/" aria-current="page">Overview</a
+          ><a href="/docs/quickstart">Quick start</a><a href="/docs/configuration">Configuration</a
+          ><strong>Concepts</strong><a href="/docs/forecasts">Forecasts and Brier</a
+          ><a href="/docs/flows">Flows and catalysts</a><a href="/docs/multi-tenancy">Multi-tenancy</a
+          ><strong>Extend</strong><a href="/docs/adapters">Venue adapters</a><a href="/docs/mcp">MCP and agents</a>
+        </nav>
+        <article class="prose" id="main">
+          <h1>Overview</h1>
+          <p>
+            openportfolio is a self-hosted portfolio tracker with three jobs: hold every account as one book, keep the
+            flows behind the price, and score the calls you made before the fact.
+          </p>
+
+          <div class="callout">
+            <p>
+              <strong>It is not a trading bot.</strong> The backend has no function that places an order, both shipped
+              adapters declare <code>canPlaceOrders: false</code>, and <code>PlaceOrderRequest</code> requires an
+              <code>OrderConfirmation</code> field that has no default. Aggregate, watch, keep score.
+            </p>
+          </div>
+
+          <h2>The pieces</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Piece</th>
+                <th>What it is</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>convex/</code></td>
+                <td>
+                  The backend. Schema, tenancy gate, net worth, flows, forecasts, decisions, catalysts, audit, and the
+                  resolver cron.
+                </td>
+              </tr>
+              <tr>
+                <td><code>packages/core</code></td>
+                <td>Money, dates and order primitives. No I/O.</td>
+              </tr>
+              <tr>
+                <td><code>packages/domain</code></td>
+                <td>The vocabulary: enums, Brier scoring, resolution criteria, the adapter contract.</td>
+              </tr>
+              <tr>
+                <td><code>packages/node</code></td>
+                <td>Anything that touches the network: Convex transport, keyless FX, the venue adapters.</td>
+              </tr>
+              <tr>
+                <td><code>sync-worker.mts</code></td>
+                <td>Reads balances through the adapters, re-quotes, converts, writes one snapshot.</td>
+              </tr>
+              <tr>
+                <td><code>agent-worker.mts</code></td>
+                <td>Dispatches work to an agent CLI. No provider key.</td>
+              </tr>
+              <tr>
+                <td><code>mcp/</code></td>
+                <td>Stdio MCP server, 25 tools over one tenant's book.</td>
+              </tr>
+              <tr>
+                <td><code>browser/</code></td>
+                <td>Four views: net worth, flows, track record, decisions.</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h2>How a number gets on the page</h2>
+          <ol>
+            <li>An account is linked with <code>accounts:link</code>, naming the venue that serves it.</li>
+            <li>The sync worker asks that venue's adapter for balances.</li>
+            <li>Rows with no usable price are re-quoted through the configured quote venue.</li>
+            <li>
+              Every row is converted into the tenant's base currency, and
+              <strong>the rate is stored on the row it converted</strong>, so a snapshot records what the book was worth
+              then rather than what today's rates say.
+            </li>
+            <li>One <code>netWorthSnapshots</code> row is written, and the mutation appends to the audit log.</li>
+          </ol>
+
+          <h2>What is deliberately absent</h2>
+          <ul>
+            <li>
+              <strong>No provider API key.</strong> Model calls go to an agent CLI you are already signed in to. See
+              <a href="/docs/mcp">MCP and agents</a>.
+            </li>
+            <li>
+              <strong>No keyed broker adapter in the repo.</strong> Credentials belong in your worker process, not in a
+              public tree. See <a href="/docs/adapters">Venue adapters</a>.
+            </li>
+            <li><strong>No order path.</strong> Not disabled by a flag, absent from the backend.</li>
+          </ul>
+
+          <p>Next: <a href="/docs/quickstart">Quick start</a>.</p>
+        </article>
+      </div>
+    </div>
+    <footer class="site-foot">
+      <div class="wrap">
+        <span>openportfolio · Apache-2.0 · built by <a href="https://github.com/seonglae">Seonglae Cho</a></span>
+        <nav aria-label="Footer">
+          <a href="/docs/">Docs</a>
+          <a href="/demo/">Demo</a>
+          <a href="https://github.com/seonglae/openportfolio">GitHub</a>
+        </nav>
+      </div>
+    </footer>
+    <script>
+      (function () {
+        var btn = document.getElementById("theme");
+        if (!btn) return;
+        var root = document.documentElement;
+        function dark() {
+          return (
+            root.dataset.theme === "dark" ||
+            (!root.dataset.theme && window.matchMedia("(prefers-color-scheme: dark)").matches)
+          );
+        }
+        function label() {
+          btn.textContent = dark() ? "Light" : "Dark";
+        }
+        label();
+        btn.addEventListener("click", function () {
+          root.dataset.theme = dark() ? "light" : "dark";
+          try {
+            localStorage.setItem("openportfolio-theme", root.dataset.theme);
+          } catch (e) {}
+          label();
+        });
+      })();
+    </script>
+  </body>
+</html>

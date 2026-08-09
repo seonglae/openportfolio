@@ -1,0 +1,60 @@
+{
+  "name": "openportfolio",
+  "version": "0.1.0",
+  "description": "Open, self-hosted, multi-tenant portfolio intelligence: one net worth across every account, the flows behind the price, and a Brier-scored track record of every call.",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "sync-worker": "tsx sync-worker.mts",
+    "agent-worker": "tsx agent-worker.mts",
+    "mcp": "node mcp/portfolio-server.mjs",
+    "format": "prettier --write .",
+    "typecheck": "tsc -p tsconfig.json && tsc -p tsconfig.test.json && pnpm --filter @openportfolio/core typecheck && pnpm --filter @openportfolio/domain typecheck && pnpm --filter @openportfolio/node typecheck && tsc -p convex/tsconfig.json && tsc -p convex/tsconfig.test.json && pnpm --filter openportfolio-browser typecheck",
+    "site:demo": "pnpm --filter openportfolio-browser build:demo && rm -rf site/demo && cp -R browser/dist-demo site/demo",
+    "site:docs": "python3 site/build-docs.py && prettier --write 'site/docs/*.html' 'site/*.html' --log-level warn",
+    "site:build": "pnpm site:docs && pnpm site:demo",
+    "site:deploy": "pnpm site:build && wrangler pages deploy site --project-name=openportfolio --branch=main --commit-dirty=true"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/seonglae/openportfolio.git"
+  },
+  "keywords": [
+    "portfolio",
+    "net-worth",
+    "investing",
+    "flows",
+    "forecasting",
+    "calibration",
+    "brier-score",
+    "convex",
+    "self-hosted",
+    "multi-tenant"
+  ],
+  "author": "Seonglae Cho",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/seonglae/openportfolio/issues"
+  },
+  "homepage": "https://github.com/seonglae/openportfolio#readme",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "@openportfolio/core": "workspace:*",
+    "@openportfolio/domain": "workspace:*",
+    "@openportfolio/node": "workspace:*",
+    "convex": "^1.32.0",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@edge-runtime/vm": "^5.0.0",
+    "@types/node": "^25.7.0",
+    "convex-test": "^0.0.54",
+    "happy-dom": "^20.11.1",
+    "prettier": "^3.8.2",
+    "tsx": "^4.21.0",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.10"
+  }
+}

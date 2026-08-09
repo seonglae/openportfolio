@@ -1,0 +1,42 @@
+/* Demo chrome only. Not part of the shipped app. */
+
+.demo-banner {
+  align-items: center;
+  background: var(--paper-warm);
+  border-bottom: 1px solid var(--rule);
+  color: var(--ink-2);
+  display: flex;
+  flex-wrap: wrap;
+  font-size: 13px;
+  gap: 12px;
+  justify-content: space-between;
+  padding: 10px 24px;
+}
+
+.demo-banner strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.demo-banner-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.demo-banner button,
+.demo-banner a {
+  background: none;
+  border: 1px solid var(--rule);
+  border-radius: 7px;
+  color: var(--ink-2);
+  cursor: pointer;
+  font: 500 13px/1 var(--sans);
+  padding: 6px 11px;
+  text-decoration: none;
+}
+
+.demo-banner button:hover,
+.demo-banner a:hover {
+  border-color: var(--accent);
+  color: var(--ink);
+}

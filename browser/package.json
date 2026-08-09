@@ -1,0 +1,28 @@
+{
+  "name": "openportfolio-browser",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc -p tsconfig.json && tsc -p tsconfig.test.json",
+    "build:demo": "vite build --config vite.demo.config.ts && mv dist-demo/demo.html dist-demo/index.html && cp public/favicon.svg dist-demo/"
+  },
+  "dependencies": {
+    "@openportfolio/core": "workspace:*",
+    "@openportfolio/domain": "workspace:*",
+    "convex": "^1.42.3",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.7.0",
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.2.0",
+    "typescript": "~5.9.3",
+    "vite": "^8.0.16"
+  }
+}

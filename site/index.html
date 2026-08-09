@@ -1,0 +1,568 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+
+    <title>openportfolio · self-hosted portfolio tracker with a scored track record</title>
+    <meta
+      name="description"
+      content="Open-source, self-hosted portfolio tracker. Pulls every brokerage, pension, wallet and bank account into one net worth, stores the investor flows behind the price, and Brier-scores the forecasts you registered before the fact. Multi-tenant, MCP-native, and with no provider API key anywhere in it. Apache-2.0."
+    />
+    <link rel="canonical" href="https://openportfolio.app/" />
+    <meta name="author" content="Seonglae Cho" />
+    <meta
+      name="keywords"
+      content="open source portfolio tracker, self-hosted net worth tracker, portfolio aggregation, Brier score, forecast calibration, reliability diagram, investor flows, personal finance dashboard, multi-tenant, MCP server, Convex, TypeScript, privacy first finance"
+    />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="openportfolio" />
+    <meta property="og:url" content="https://openportfolio.app/" />
+    <meta property="og:title" content="openportfolio — every account as one book, every call on the record" />
+    <meta
+      property="og:description"
+      content="Self-hosted portfolio intelligence. One net worth across every account, the flows behind the price, and a Brier-scored record of the calls you actually made. No provider API key, anywhere."
+    />
+    <meta property="og:image" content="https://openportfolio.app/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="openportfolio: every account as one book, every call on the record" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="openportfolio — every account as one book, every call on the record" />
+    <meta
+      name="twitter:description"
+      content="Self-hosted portfolio intelligence. One net worth, the flows behind the price, and a Brier-scored track record. Apache-2.0."
+    />
+    <meta name="twitter:image" content="https://openportfolio.app/og.png" />
+
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/assets/style.css" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "SoftwareApplication",
+            "@id": "https://openportfolio.app/#app",
+            "name": "openportfolio",
+            "url": "https://openportfolio.app/",
+            "applicationCategory": "FinanceApplication",
+            "applicationSubCategory": "Portfolio tracker",
+            "operatingSystem": "macOS, Linux, Windows",
+            "description": "Open-source, self-hosted portfolio tracker that aggregates every account into one net worth, records investor flows, and Brier-scores registered forecasts.",
+            "license": "https://www.apache.org/licenses/LICENSE-2.0",
+            "isAccessibleForFree": true,
+            "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+            "author": { "@type": "Person", "name": "Seonglae Cho", "url": "https://github.com/seonglae" },
+            "featureList": [
+              "Aggregate brokerage, pension, wallet and bank accounts into one net worth",
+              "Keyless FX with the rate stored on the row it converted",
+              "Investor flow and turnover series per market and per symbol",
+              "Brier-scored forecasts with automatic resolution and a reliability diagram",
+              "Deferred-decision queue with trigger conditions",
+              "Dated catalyst calendar",
+              "Append-only audit log",
+              "MCP server with 25 tools",
+              "Multi-tenant with per-tenant service keys"
+            ]
+          },
+          {
+            "@type": "SoftwareSourceCode",
+            "codeRepository": "https://github.com/seonglae/openportfolio",
+            "programmingLanguage": "TypeScript",
+            "license": "https://www.apache.org/licenses/LICENSE-2.0",
+            "name": "openportfolio",
+            "about": { "@id": "https://openportfolio.app/#app" }
+          },
+          {
+            "@type": "FAQPage",
+            "mainEntity": [
+              {
+                "@type": "Question",
+                "name": "Is openportfolio a trading bot?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "No. The backend has no function that places an order, the adapters that ship declare canPlaceOrders false, and the order request type requires a human confirmation field that has no default. It aggregates, watches and keeps score."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Why is there no provider API key?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Every model call is dispatched to an agent CLI you are already signed in to, such as codex, antigravity or claude. Metered inference makes every autonomous check a purchase, so a portfolio that watches itself would have to ask permission to look. Agent work is bounded by quota and wall clock instead of spend."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Where is my financial data stored?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "In your own Convex deployment. openportfolio is self-hosted by design: your syncs run on your machine under your own logins, against your own accounts. Broker credentials stay in the worker process and are never sent to the backend."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "What is a Brier score and why does the tracker compute one?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "A Brier score is the mean squared error of probabilistic forecasts, where 0.25 is what a coin flip earns. Registering a call with a probability, a horizon and a resolution criterion before the fact makes being wrong cost something, which is the difference between a forecaster worth reading and one who is merely fluent."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Can more than one person use a single deployment?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Yes. Every table is scoped to a tenant and every index leads with the tenant id. A caller never states which tenant it is: the id is derived from membership rows or from the service key's own row, so there is no argument a client can set to reach another book."
+                }
+              }
+            ]
+          }
+        ]
+      }
+    </script>
+
+    <script>
+      // Set before first paint so a pinned dark preference never flashes light.
+      // Default is light: the screenshots are light and a dashboard that arrives
+      // dark reads as a different product than the one pictured.
+      (function () {
+        try {
+          var pinned = localStorage.getItem("openportfolio-theme");
+          if (pinned === "dark" || pinned === "light") document.documentElement.dataset.theme = pinned;
+          else document.documentElement.removeAttribute("data-theme");
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+
+    <header class="site-head">
+      <div class="wrap">
+        <a class="brand" href="/" aria-label="openportfolio home">
+          <svg viewBox="0 0 64 64" aria-hidden="true">
+            <defs>
+              <linearGradient id="hm" gradientUnits="userSpaceOnUse" x1="6" y1="6" x2="46" y2="58">
+                <stop offset="0" stop-color="#8b9cff" />
+                <stop offset=".55" stop-color="#5b6cf0" />
+                <stop offset="1" stop-color="#7c5cf0" />
+              </linearGradient>
+            </defs>
+            <g fill="url(#hm)">
+              <rect x="4" y="38" width="14" height="20" rx="3" opacity=".55" />
+              <rect x="25" y="24" width="14" height="34" rx="3" opacity=".78" />
+              <rect x="46" y="8" width="14" height="50" rx="3" />
+            </g>
+          </svg>
+          openportfolio
+        </a>
+        <nav class="site-nav" aria-label="Primary">
+          <a href="/docs/">Docs</a>
+          <a href="/demo/">Demo</a>
+          <button class="theme-toggle" type="button" id="theme" aria-label="Toggle dark mode">Dark</button>
+          <a class="cta" href="https://github.com/seonglae/openportfolio">GitHub</a>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main">
+      <div class="wrap">
+        <section class="hero">
+          <p class="eyebrow"><span class="dot"></span> Apache-2.0 · self-hosted · no provider API key</p>
+          <h1>Every account as one book.<br />Every call <em>on the record</em>.</h1>
+          <p class="lede">
+            openportfolio is an open-source, self-hosted portfolio tracker. It pulls every brokerage, pension, wallet
+            and bank account into a single net worth, stores the investor flows behind the price, and Brier-scores the
+            forecasts you registered before the fact.
+          </p>
+          <p class="btn-row">
+            <a class="btn btn-primary" href="/docs/quickstart">Get started</a>
+            <a class="btn btn-ghost" href="/demo/">See the live demo</a>
+          </p>
+          <p class="hero-note">git clone · pnpm install · npx convex dev</p>
+
+          <img
+            class="shot"
+            src="/assets/net-worth.png"
+            width="2720"
+            height="1800"
+            alt="The openportfolio net worth view: a single total in pounds, then breakdowns by venue and by asset class, then the full position table"
+            fetchpriority="high"
+          />
+          <p class="hero-note">Screenshots show the demo book. Every figure in them is invented.</p>
+        </section>
+
+        <section id="why">
+          <div class="section-head">
+            <h2>Two problems that look unrelated</h2>
+            <p>
+              A portfolio is scattered by construction, and market commentary is unaccountable. Both are bookkeeping
+              failures, so openportfolio treats them as bookkeeping.
+            </p>
+          </div>
+          <div class="grid-3">
+            <article class="card">
+              <span class="num">01</span>
+              <h3>One net worth</h3>
+              <p>
+                A broker here, a pension there, an ISA, an exchange account, a holding no API will ever return. Every
+                app shows you a number and none of them shows you yours, so the figures that decide things get
+                estimated, generously, in the direction that avoids a decision.
+              </p>
+            </article>
+            <article class="card">
+              <span class="num">02</span>
+              <h3>Flows, not just prices</h3>
+              <p>
+                Price is the output of who was buying and who was made to sell. Net buying by investor type, turnover
+                and a calendar of dated forward events are stored as first-class series, not derived when somebody
+                remembers to ask. A forced seller is on a schedule.
+              </p>
+            </article>
+            <article class="card">
+              <span class="num">03</span>
+              <h3>A scored track record</h3>
+              <p>
+                Being wrong costs nothing and leaves no trace, so a forecaster worth reading and one who is merely
+                fluent are indistinguishable. Register the call before the fact with a probability and a resolution
+                criterion, and the machine settles it and scores it.
+              </p>
+            </article>
+          </div>
+        </section>
+
+        <section id="features">
+          <div class="feature">
+            <div>
+              <p class="tag">Track record</p>
+              <h2>The reliability diagram is the product</h2>
+              <p>
+                A mean Brier score alone hides the direction you are wrong in. The diagram puts what you said next to
+                what happened, bucket by bucket, and the gap between the two bars is the entire point.
+              </p>
+              <p>
+                Calls with a parseable criterion resolve themselves when the horizon passes. Nothing waits on you
+                remembering that you made a prediction three weeks ago.
+              </p>
+              <ul class="ticks">
+                <li>Probability, horizon and resolution criterion required at registration</li>
+                <li>Automatic settlement on horizon expiry, scored on resolve</li>
+                <li>Calibration error and per-bucket observed rate</li>
+              </ul>
+            </div>
+            <figure>
+              <img
+                src="/assets/track-record.png"
+                width="2720"
+                height="1800"
+                loading="lazy"
+                alt="The track record view showing a mean Brier score of 0.187 over 74 scored calls, with a reliability table comparing forecast probability against observed rate in five buckets"
+              />
+            </figure>
+          </div>
+
+          <div class="feature flip">
+            <div>
+              <p class="tag">Flows</p>
+              <h2>Who was buying, and who was made to sell</h2>
+              <p>
+                Net buying by investor type and session turnover, per market or per symbol, kept next to the tape rather
+                than under it. Retail absorbing a foreign dump on collapsing volume is a fact about supply, and it is
+                visible before it is a story.
+              </p>
+              <ul class="ticks">
+                <li>Per-session net buying by investor type</li>
+                <li>Turnover alongside every flow row, never without it</li>
+                <li>Dated catalyst calendar for forced-seller events</li>
+              </ul>
+            </div>
+            <figure>
+              <img
+                src="/assets/flows.png"
+                width="2720"
+                height="1800"
+                loading="lazy"
+                alt="The flows view showing net buying by investor type over thirty sessions and a table of individual sessions with net and turnover columns"
+              />
+            </figure>
+          </div>
+
+          <div class="feature">
+            <div>
+              <p class="tag">Decisions</p>
+              <h2>A deferred decision is still a decision</h2>
+              <p>
+                "Wait for the print, then decide" evaporates the moment it is said out loud. The queue holds each one
+                with a trigger condition and an outcome, and marks the ones that quietly went past their date.
+              </p>
+              <ul class="ticks">
+                <li>Trigger condition and due date on every entry</li>
+                <li>Overdue rows sorted first and flagged</li>
+                <li>Closed only with a written outcome</li>
+              </ul>
+            </div>
+            <figure>
+              <img
+                src="/assets/decisions.png"
+                width="2720"
+                height="1800"
+                loading="lazy"
+                alt="The decisions view listing open deferred decisions with trigger conditions and due dates, one row highlighted as overdue, and a table of upcoming catalysts"
+              />
+            </figure>
+          </div>
+        </section>
+
+        <section id="no-key">
+          <div class="section-head">
+            <h2>No provider API key. Anywhere.</h2>
+            <p>
+              Watching a book is only useful if something is actually watching. Metered inference is the wrong shape for
+              that.
+            </p>
+          </div>
+          <div class="feature">
+            <div>
+              <p>
+                When each run bills per token, every autonomous check becomes a purchase, and a product that spends your
+                money unprompted has to ask first, or batch, or ration. All three turn a portfolio that watches itself
+                into a portfolio that asks permission to look.
+              </p>
+              <p>
+                So every model call is dispatched to an agent CLI you are already signed in to, with a per-task fallback
+                order. There is no key in this repo and no field to put one in. Agent work is bounded by quota and wall
+                clock rather than by spend, so it never has to be justified one invocation at a time.
+              </p>
+              <ul class="ticks">
+                <li><code>codex</code>, <code>antigravity</code> and <code>claude</code> supported out of the box</li>
+                <li>Per-task provider order with automatic fallback</li>
+                <li>MCP server with 25 tools, so the agent reads and writes the book directly</li>
+              </ul>
+            </div>
+            <figure>
+              <pre><code><span class="c">// actor.mts — the provider chain, not an API client</span>
+<span class="k">const</span> ORDERS = {
+  sync:    [<span class="k">"codex"</span>, <span class="k">"claude"</span>],
+  review:  [<span class="k">"claude"</span>, <span class="k">"codex"</span>],
+  resolve: [<span class="k">"codex"</span>, <span class="k">"antigravity"</span>, <span class="k">"claude"</span>],
+}
+
+<span class="c">// Each entry is a CLI you already signed in to.</span>
+<span class="c">// There is no apiKey field to fill in, in any of them.</span></code></pre>
+            </figure>
+          </div>
+        </section>
+
+        <section id="compare">
+          <div class="section-head">
+            <h2>Where it sits</h2>
+            <p>Between a spreadsheet that never updates and a hosted tracker that wants your broker password.</p>
+          </div>
+          <div class="table-scroll">
+            <table class="cmp">
+              <caption class="visually-hidden">
+                openportfolio compared with a spreadsheet and a hosted portfolio tracker
+              </caption>
+              <thead>
+                <tr>
+                  <th scope="col">&nbsp;</th>
+                  <th scope="col">openportfolio</th>
+                  <th scope="col">Spreadsheet</th>
+                  <th scope="col">Hosted tracker</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row">Data stays on your infrastructure</th>
+                  <td class="y">Yes</td>
+                  <td class="y">Yes</td>
+                  <td class="n">No</td>
+                </tr>
+                <tr>
+                  <th scope="row">Updates without you</th>
+                  <td class="y">Yes</td>
+                  <td class="n">No</td>
+                  <td class="y">Yes</td>
+                </tr>
+                <tr>
+                  <th scope="row">Holdings no API returns</th>
+                  <td class="y">Manual adapter</td>
+                  <td class="y">Yes</td>
+                  <td class="n">Rarely</td>
+                </tr>
+                <tr>
+                  <th scope="row">Investor flow series</th>
+                  <td class="y">First class</td>
+                  <td class="n">No</td>
+                  <td class="n">No</td>
+                </tr>
+                <tr>
+                  <th scope="row">Scored forecast record</th>
+                  <td class="y">Brier + reliability</td>
+                  <td class="n">No</td>
+                  <td class="n">No</td>
+                </tr>
+                <tr>
+                  <th scope="row">Readable by an agent</th>
+                  <td class="y">MCP, 25 tools</td>
+                  <td class="n">No</td>
+                  <td class="n">No</td>
+                </tr>
+                <tr>
+                  <th scope="row">Places orders</th>
+                  <td class="n">Never</td>
+                  <td class="n">No</td>
+                  <td class="n">Sometimes</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="start">
+          <div class="section-head">
+            <h2>Running in five commands</h2>
+            <p>Node 22, pnpm, and a free Convex deployment. Nothing else is required to see a real number.</p>
+          </div>
+          <div class="feature">
+            <figure>
+              <pre><code>git clone https://github.com/seonglae/openportfolio.git
+<span class="k">cd</span> openportfolio
+pnpm install
+
+cp .env.example .env.local
+npx convex dev --once
+
+<span class="c"># create the first book</span>
+npx convex env set OPENPORTFOLIO_DEV_TENANT home
+npx convex run tenants:create <span class="k">'{"slug":"home","name":"Home","baseCurrency":"GBP"}'</span>
+
+<span class="c"># the UI, then the sync loop</span>
+pnpm --filter openportfolio-browser dev
+npx tsx sync-worker.mts --once</code></pre>
+            </figure>
+            <div>
+              <p>
+                With nothing linked it registers the venues it can serve and records a net worth of zero, which is
+                correct. Point <code>OPENPORTFOLIO_MANUAL_HOLDINGS</code> at a JSON file and the same command gives you
+                a real total, with crypto re-quoted through the keyless CoinGecko adapter and every row converted into
+                one base currency.
+              </p>
+              <p>
+                <a href="/docs/quickstart">Full quick start</a> · <a href="/docs/adapters">Writing a venue adapter</a> ·
+                <a href="/docs/multi-tenancy">Multi-tenancy</a>
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section id="faq">
+          <div class="section-head"><h2>Questions</h2></div>
+          <details>
+            <summary>Is this a trading bot?</summary>
+            <p>
+              No. The backend has no function that places an order, the adapters that ship declare
+              <code>canPlaceOrders: false</code>, and <code>PlaceOrderRequest</code> requires an
+              <code>OrderConfirmation</code> naming who confirmed it and when. That field has no default on purpose. It
+              aggregates, watches and keeps score.
+            </p>
+          </details>
+          <details>
+            <summary>Where does my financial data live?</summary>
+            <p>
+              In your own Convex deployment. Broker credentials stay in the worker process on your machine; the backend
+              never receives them and this repository has nowhere to put them.
+            </p>
+          </details>
+          <details>
+            <summary>Which accounts can it read?</summary>
+            <p>
+              Two adapters ship: a keyless CoinGecko quote source, and a manual adapter that reads a JSON file you
+              maintain, which is how a pension or an unlisted holding gets into the total instead of being left out of
+              it. A keyed broker adapter is about forty lines against a documented contract.
+            </p>
+          </details>
+          <details>
+            <summary>Can several people share one deployment?</summary>
+            <p>
+              Yes. Every table carries a tenant id and every index leads with it. A caller never says which tenant it
+              is: the id comes from membership rows or from the service key's own row. A document belonging to another
+              tenant reads as missing rather than forbidden, because "forbidden" confirms the row exists.
+            </p>
+          </details>
+          <details>
+            <summary>What does it cost to run?</summary>
+            <p>
+              A Convex free tier, a machine you already own, and the agent CLI subscriptions you already pay for. There
+              is no inference bill because there is no inference key.
+            </p>
+          </details>
+        </section>
+
+        <section>
+          <div class="cta-band">
+            <h2>Start keeping score</h2>
+            <p class="lede">Apache-2.0. Clone it, point it at one account, and register one call with a date on it.</p>
+            <p class="btn-row">
+              <a class="btn btn-primary" href="https://github.com/seonglae/openportfolio">Star on GitHub</a>
+              <a class="btn btn-ghost" href="/docs/quickstart">Read the docs</a>
+            </p>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <footer class="site-foot">
+      <div class="wrap">
+        <span>openportfolio · Apache-2.0 · built by <a href="https://github.com/seonglae">Seonglae Cho</a></span>
+        <nav aria-label="Footer">
+          <a href="/docs/">Docs</a>
+          <a href="/demo/">Demo</a>
+          <a href="https://github.com/seonglae/openportfolio">GitHub</a>
+          <a href="https://www.npmjs.com/package/openportfolio">npm</a>
+        </nav>
+      </div>
+    </footer>
+
+    <script>
+      (function () {
+        var btn = document.getElementById("theme");
+        if (!btn) return;
+        var root = document.documentElement;
+        function label() {
+          var dark =
+            root.dataset.theme === "dark" ||
+            (!root.dataset.theme && window.matchMedia("(prefers-color-scheme: dark)").matches);
+          btn.textContent = dark ? "Light" : "Dark";
+        }
+        label();
+        btn.addEventListener("click", function () {
+          var dark =
+            root.dataset.theme === "dark" ||
+            (!root.dataset.theme && window.matchMedia("(prefers-color-scheme: dark)").matches);
+          root.dataset.theme = dark ? "light" : "dark";
+          try {
+            localStorage.setItem("openportfolio-theme", root.dataset.theme);
+          } catch (e) {}
+          label();
+        });
+      })();
+    </script>
+  </body>
+</html>

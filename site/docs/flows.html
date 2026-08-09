@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>Flows and catalysts · openportfolio docs</title>
+    <meta
+      name="description"
+      content="Why net buying by investor type and session turnover are stored as first-class series, and how the catalyst calendar turns a forced seller into a scheduled event."
+    />
+    <link rel="canonical" href="https://openportfolio.app/docs/flows" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="openportfolio" />
+    <meta property="og:url" content="https://openportfolio.app/docs/flows" />
+    <meta property="og:title" content="Flows and catalysts · openportfolio docs" />
+    <meta
+      property="og:description"
+      content="Why net buying by investor type and session turnover are stored as first-class series, and how the catalyst calendar turns a forced seller into a scheduled event."
+    />
+    <meta property="og:image" content="https://openportfolio.app/og.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="https://openportfolio.app/og.png" />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/assets/style.css" />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "TechArticle",
+        "headline": "Flows and catalysts",
+        "description": "Why net buying by investor type and session turnover are stored as first-class series, and how the catalyst calendar turns a forced seller into a scheduled event.",
+        "url": "https://openportfolio.app/docs/flows",
+        "isPartOf": { "@type": "WebSite", "name": "openportfolio", "url": "https://openportfolio.app/" },
+        "author": { "@type": "Person", "name": "Seonglae Cho" },
+        "license": "https://www.apache.org/licenses/LICENSE-2.0",
+        "breadcrumb": {
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://openportfolio.app/" },
+            { "@type": "ListItem", "position": 2, "name": "Docs", "item": "https://openportfolio.app/docs/" },
+            { "@type": "ListItem", "position": 3, "name": "Flows and catalysts" }
+          ]
+        }
+      }
+    </script>
+    <script>
+      (function () {
+        try {
+          var p = localStorage.getItem("openportfolio-theme");
+          if (p === "dark" || p === "light") document.documentElement.dataset.theme = p;
+          else document.documentElement.removeAttribute("data-theme");
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <header class="site-head">
+      <div class="wrap">
+        <a class="brand" href="/" aria-label="openportfolio home"
+          ><svg viewBox="0 0 64 64" aria-hidden="true">
+            <defs>
+              <linearGradient id="hm" gradientUnits="userSpaceOnUse" x1="6" y1="6" x2="46" y2="58">
+                <stop offset="0" stop-color="#8b9cff" />
+                <stop offset=".55" stop-color="#5b6cf0" />
+                <stop offset="1" stop-color="#7c5cf0" />
+              </linearGradient>
+            </defs>
+            <g fill="url(#hm)">
+              <rect x="4" y="38" width="14" height="20" rx="3" opacity=".55" />
+              <rect x="25" y="24" width="14" height="34" rx="3" opacity=".78" />
+              <rect x="46" y="8" width="14" height="50" rx="3" />
+            </g>
+          </svg>
+          openportfolio</a
+        >
+        <nav class="site-nav" aria-label="Primary">
+          <a href="/docs/">Docs</a>
+          <a href="/demo/">Demo</a>
+          <button class="theme-toggle" type="button" id="theme" aria-label="Toggle dark mode">Dark</button>
+          <a class="cta" href="https://github.com/seonglae/openportfolio">GitHub</a>
+        </nav>
+      </div>
+    </header>
+    <div class="wrap">
+      <div class="docs">
+        <nav class="docs-nav" aria-label="Documentation">
+          <strong>Start</strong><a href="/docs/">Overview</a><a href="/docs/quickstart">Quick start</a
+          ><a href="/docs/configuration">Configuration</a><strong>Concepts</strong
+          ><a href="/docs/forecasts">Forecasts and Brier</a
+          ><a href="/docs/flows" aria-current="page">Flows and catalysts</a
+          ><a href="/docs/multi-tenancy">Multi-tenancy</a><strong>Extend</strong
+          ><a href="/docs/adapters">Venue adapters</a><a href="/docs/mcp">MCP and agents</a>
+        </nav>
+        <article class="prose" id="main">
+          <h1>Flows and catalysts</h1>
+          <p>
+            Price is the output of who was buying and who was made to sell. Earnings are the story the flow tells
+            afterwards.
+          </p>
+
+          <h2>Flow rows</h2>
+          <p>A flow row is one investor type, one session, one market or symbol.</p>
+          <table>
+            <thead>
+              <tr>
+                <th>Field</th>
+                <th>Note</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>date</code></td>
+                <td>Session date in the venue's local calendar.</td>
+              </tr>
+              <tr>
+                <td><code>investorType</code></td>
+                <td>
+                  <code>individual</code>, <code>foreigner</code>, <code>institution</code>,
+                  <code>other_corporation</code>.
+                </td>
+              </tr>
+              <tr>
+                <td><code>netBuyValue</code></td>
+                <td>Buy minus sell, in the market's own currency.</td>
+              </tr>
+              <tr>
+                <td><code>turnoverValue</code></td>
+                <td>Session turnover. Stored on the same row on purpose.</td>
+              </tr>
+              <tr>
+                <td><code>source</code></td>
+                <td>Where the figure came from, because same-day numbers are provisional until the close.</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="callout">
+            <p>
+              <strong>Net buying without turnover is a half-fact.</strong> Foreigners selling on collapsing volume and
+              foreigners selling into a record tape are opposite events with the same net number, so the two fields live
+              on one row and are read together.
+            </p>
+          </div>
+
+          <h2>Catalysts</h2>
+          <p>
+            A forced seller is on a schedule, and the schedule is usually public: index deletions, lockup expiries,
+            filing deadlines, scheduled prints. The catalyst table holds dated forward events and the assets each one
+            touches, so position sizing accounts for the next known event rather than only the idea in front of you.
+          </p>
+          <p>
+            The decisions queue reads the same calendar. A decision whose trigger is "after the print" is not a decision
+            until the print has a date.
+          </p>
+        </article>
+      </div>
+    </div>
+    <footer class="site-foot">
+      <div class="wrap">
+        <span>openportfolio · Apache-2.0 · built by <a href="https://github.com/seonglae">Seonglae Cho</a></span>
+        <nav aria-label="Footer">
+          <a href="/docs/">Docs</a>
+          <a href="/demo/">Demo</a>
+          <a href="https://github.com/seonglae/openportfolio">GitHub</a>
+        </nav>
+      </div>
+    </footer>
+    <script>
+      (function () {
+        var btn = document.getElementById("theme");
+        if (!btn) return;
+        var root = document.documentElement;
+        function dark() {
+          return (
+            root.dataset.theme === "dark" ||
+            (!root.dataset.theme && window.matchMedia("(prefers-color-scheme: dark)").matches)
+          );
+        }
+        function label() {
+          btn.textContent = dark() ? "Light" : "Dark";
+        }
+        label();
+        btn.addEventListener("click", function () {
+          root.dataset.theme = dark() ? "light" : "dark";
+          try {
+            localStorage.setItem("openportfolio-theme", root.dataset.theme);
+          } catch (e) {}
+          label();
+        });
+      })();
+    </script>
+  </body>
+</html>

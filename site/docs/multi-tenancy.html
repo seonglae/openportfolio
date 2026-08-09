@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>Multi-tenancy · openportfolio docs</title>
+    <meta
+      name="description"
+      content="One deployment, many books. How tenant scoping is derived rather than declared, why a foreign document reads as missing, and how service keys are issued."
+    />
+    <link rel="canonical" href="https://openportfolio.app/docs/multi-tenancy" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="openportfolio" />
+    <meta property="og:url" content="https://openportfolio.app/docs/multi-tenancy" />
+    <meta property="og:title" content="Multi-tenancy · openportfolio docs" />
+    <meta
+      property="og:description"
+      content="One deployment, many books. How tenant scoping is derived rather than declared, why a foreign document reads as missing, and how service keys are issued."
+    />
+    <meta property="og:image" content="https://openportfolio.app/og.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="https://openportfolio.app/og.png" />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/assets/style.css" />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "TechArticle",
+        "headline": "Multi-tenancy",
+        "description": "One deployment, many books. How tenant scoping is derived rather than declared, why a foreign document reads as missing, and how service keys are issued.",
+        "url": "https://openportfolio.app/docs/multi-tenancy",
+        "isPartOf": { "@type": "WebSite", "name": "openportfolio", "url": "https://openportfolio.app/" },
+        "author": { "@type": "Person", "name": "Seonglae Cho" },
+        "license": "https://www.apache.org/licenses/LICENSE-2.0",
+        "breadcrumb": {
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://openportfolio.app/" },
+            { "@type": "ListItem", "position": 2, "name": "Docs", "item": "https://openportfolio.app/docs/" },
+            { "@type": "ListItem", "position": 3, "name": "Multi-tenancy" }
+          ]
+        }
+      }
+    </script>
+    <script>
+      (function () {
+        try {
+          var p = localStorage.getItem("openportfolio-theme");
+          if (p === "dark" || p === "light") document.documentElement.dataset.theme = p;
+          else document.documentElement.removeAttribute("data-theme");
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <header class="site-head">
+      <div class="wrap">
+        <a class="brand" href="/" aria-label="openportfolio home"
+          ><svg viewBox="0 0 64 64" aria-hidden="true">
+            <defs>
+              <linearGradient id="hm" gradientUnits="userSpaceOnUse" x1="6" y1="6" x2="46" y2="58">
+                <stop offset="0" stop-color="#8b9cff" />
+                <stop offset=".55" stop-color="#5b6cf0" />
+                <stop offset="1" stop-color="#7c5cf0" />
+              </linearGradient>
+            </defs>
+            <g fill="url(#hm)">
+              <rect x="4" y="38" width="14" height="20" rx="3" opacity=".55" />
+              <rect x="25" y="24" width="14" height="34" rx="3" opacity=".78" />
+              <rect x="46" y="8" width="14" height="50" rx="3" />
+            </g>
+          </svg>
+          openportfolio</a
+        >
+        <nav class="site-nav" aria-label="Primary">
+          <a href="/docs/">Docs</a>
+          <a href="/demo/">Demo</a>
+          <button class="theme-toggle" type="button" id="theme" aria-label="Toggle dark mode">Dark</button>
+          <a class="cta" href="https://github.com/seonglae/openportfolio">GitHub</a>
+        </nav>
+      </div>
+    </header>
+    <div class="wrap">
+      <div class="docs">
+        <nav class="docs-nav" aria-label="Documentation">
+          <strong>Start</strong><a href="/docs/">Overview</a><a href="/docs/quickstart">Quick start</a
+          ><a href="/docs/configuration">Configuration</a><strong>Concepts</strong
+          ><a href="/docs/forecasts">Forecasts and Brier</a><a href="/docs/flows">Flows and catalysts</a
+          ><a href="/docs/multi-tenancy" aria-current="page">Multi-tenancy</a><strong>Extend</strong
+          ><a href="/docs/adapters">Venue adapters</a><a href="/docs/mcp">MCP and agents</a>
+        </nav>
+        <article class="prose" id="main">
+          <h1>Multi-tenancy</h1>
+          <p>
+            One deployment holds many books. The invariant is that
+            <strong>a caller never says which tenant it is</strong>.
+          </p>
+
+          <h2>Where the tenant comes from</h2>
+          <p>
+            <code>tenantId</code> is derived from the caller's membership rows, or from the service key's own row. There
+            is no argument a client can set to reach another book. The public API accepts <code>tenantSlug</code>, and
+            only as a disambiguator for a caller who belongs to several tenants; membership is still what decides.
+          </p>
+
+          <h2>Missing, not forbidden</h2>
+          <div class="callout">
+            <p>
+              A document id belonging to another tenant reads as <strong>not found</strong>. Answering "forbidden" would
+              confirm the row exists, which is itself the cross-tenant read you were trying to prevent.
+            </p>
+          </div>
+
+          <h2>Indexes lead with the tenant</h2>
+          <p>
+            Every index leads with <code>tenantId</code>, so a query that forgets the scope cannot use an index at all
+            and fails loudly in review rather than quietly returning somebody else's rows.
+          </p>
+          <p>
+            One exception is deliberate and marked: the resolver cron sweeps every book's due forecasts through a
+            tenant-less index. It is an <code>internalMutation</code> for exactly that reason and is unreachable from
+            any client. A test asserts it scores each book against its own prices.
+          </p>
+
+          <h2>Service keys</h2>
+          <p>
+            Workers and the MCP server have no browser session, so they present a key. The operator generates it locally
+            and registers only its hash, which means the deployment never returns a secret and a leaked database does
+            not leak a credential.
+          </p>
+          <pre><code>KEY="$(openssl rand -hex 32)"
+npx convex run tenants:issueServiceKey "{\"key\":\"$KEY\",\"label\":\"sync-worker\",\"role\":\"viewer\"}"</code></pre>
+          <p>
+            One key maps to exactly one tenant and carries its own role. Rotate by issuing a new label and revoking the
+            old one.
+          </p>
+        </article>
+      </div>
+    </div>
+    <footer class="site-foot">
+      <div class="wrap">
+        <span>openportfolio · Apache-2.0 · built by <a href="https://github.com/seonglae">Seonglae Cho</a></span>
+        <nav aria-label="Footer">
+          <a href="/docs/">Docs</a>
+          <a href="/demo/">Demo</a>
+          <a href="https://github.com/seonglae/openportfolio">GitHub</a>
+        </nav>
+      </div>
+    </footer>
+    <script>
+      (function () {
+        var btn = document.getElementById("theme");
+        if (!btn) return;
+        var root = document.documentElement;
+        function dark() {
+          return (
+            root.dataset.theme === "dark" ||
+            (!root.dataset.theme && window.matchMedia("(prefers-color-scheme: dark)").matches)
+          );
+        }
+        function label() {
+          btn.textContent = dark() ? "Light" : "Dark";
+        }
+        label();
+        btn.addEventListener("click", function () {
+          root.dataset.theme = dark() ? "light" : "dark";
+          try {
+            localStorage.setItem("openportfolio-theme", root.dataset.theme);
+          } catch (e) {}
+          label();
+        });
+      })();
+    </script>
+  </body>
+</html>

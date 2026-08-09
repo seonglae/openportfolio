@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    // Deliberately no "types" and no DOM lib: this package is imported by the
+    // Convex runtime, the browser bundle and the tsx workers alike, and their
+    // globals do not overlap. Anything reachable from src must be plain
+    // ECMAScript, or one of the three tiers breaks at build time.
+    "lib": ["ES2022"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "types": [],
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true,
+    "allowImportingTsExtensions": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "incremental": true,
+    "tsBuildInfoFile": "./node_modules/.tmp/core.tsbuildinfo"
+  },
+  "include": ["src"]
+}
