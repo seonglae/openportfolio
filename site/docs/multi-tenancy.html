@@ -5,19 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="color-scheme" content="light dark" />
     <title>Multi-tenancy · openportfolio docs</title>
-    <meta
-      name="description"
-      content="One deployment, many books. How tenant scoping is derived rather than declared, why a foreign document reads as missing, and how service keys are issued."
-    />
+    <meta name="description" content="One deployment, many books. How tenant scoping is derived rather than declared, why a foreign document reads as missing, and how service keys are issued." />
     <link rel="canonical" href="https://openportfolio.app/docs/multi-tenancy" />
     <meta property="og:type" content="article" />
     <meta property="og:site_name" content="openportfolio" />
     <meta property="og:url" content="https://openportfolio.app/docs/multi-tenancy" />
     <meta property="og:title" content="Multi-tenancy · openportfolio docs" />
-    <meta
-      property="og:description"
-      content="One deployment, many books. How tenant scoping is derived rather than declared, why a foreign document reads as missing, and how service keys are issued."
-    />
+    <meta property="og:description" content="One deployment, many books. How tenant scoping is derived rather than declared, why a foreign document reads as missing, and how service keys are issued." />
     <meta property="og:image" content="https://openportfolio.app/og.png" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:image" content="https://openportfolio.app/og.png" />
@@ -27,10 +21,7 @@
     <link rel="manifest" href="/site.webmanifest" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@400;500&display=swap"
-      rel="stylesheet"
-    />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/assets/style.css" />
     <script type="application/ld+json">
       {
@@ -68,23 +59,7 @@
     <a class="skip" href="#main">Skip to content</a>
     <header class="site-head">
       <div class="wrap">
-        <a class="brand" href="/" aria-label="openportfolio home"
-          ><svg viewBox="0 0 64 64" aria-hidden="true">
-            <defs>
-              <linearGradient id="hm" gradientUnits="userSpaceOnUse" x1="6" y1="6" x2="46" y2="58">
-                <stop offset="0" stop-color="#8b9cff" />
-                <stop offset=".55" stop-color="#5b6cf0" />
-                <stop offset="1" stop-color="#7c5cf0" />
-              </linearGradient>
-            </defs>
-            <g fill="url(#hm)">
-              <rect x="4" y="38" width="14" height="20" rx="3" opacity=".55" />
-              <rect x="25" y="24" width="14" height="34" rx="3" opacity=".78" />
-              <rect x="46" y="8" width="14" height="50" rx="3" />
-            </g>
-          </svg>
-          openportfolio</a
-        >
+        <a class="brand" href="/" aria-label="openportfolio home"><svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="hm" gradientUnits="userSpaceOnUse" x1="6" y1="6" x2="46" y2="58"><stop offset="0" stop-color="#8b9cff"/><stop offset=".55" stop-color="#5b6cf0"/><stop offset="1" stop-color="#7c5cf0"/></linearGradient></defs><g fill="url(#hm)"><rect x="4" y="38" width="14" height="20" rx="3" opacity=".55"/><rect x="25" y="24" width="14" height="34" rx="3" opacity=".78"/><rect x="46" y="8" width="14" height="50" rx="3"/></g></svg> openportfolio</a>
         <nav class="site-nav" aria-label="Primary">
           <a href="/docs/">Docs</a>
           <a href="/demo/">Demo</a>
@@ -110,58 +85,26 @@
     </header>
     <div class="wrap">
       <div class="docs">
-        <nav class="docs-nav" aria-label="Documentation">
-          <strong>Start</strong><a href="/docs/">Overview</a><a href="/docs/quickstart">Quick start</a
-          ><a href="/docs/configuration">Configuration</a><strong>Concepts</strong
-          ><a href="/docs/forecasts">Forecasts and Brier</a><a href="/docs/flows">Flows and catalysts</a
-          ><a href="/docs/multi-tenancy" aria-current="page">Multi-tenancy</a><strong>Extend</strong
-          ><a href="/docs/adapters">Venue adapters</a><a href="/docs/mcp">MCP and agents</a>
-        </nav>
+        <nav class="docs-nav" aria-label="Documentation"><strong>Start</strong><a href="/docs/">Overview</a><a href="/docs/quickstart">Quick start</a><a href="/docs/configuration">Configuration</a><strong>Concepts</strong><a href="/docs/forecasts">Forecasts and Brier</a><a href="/docs/flows">Flows and catalysts</a><a href="/docs/multi-tenancy" aria-current="page">Multi-tenancy</a><strong>Extend</strong><a href="/docs/adapters">Venue adapters</a><a href="/docs/mcp">MCP and agents</a></nav>
         <article class="prose" id="main">
-          <h1>Multi-tenancy</h1>
-          <p>
-            One deployment holds many books. The invariant is that
-            <strong>a caller never says which tenant it is</strong>.
-          </p>
+<h1>Multi-tenancy</h1>
+<p>One deployment holds many books. The invariant is that <strong>a caller never says which tenant it is</strong>.</p>
 
-          <h2>Where the tenant comes from</h2>
-          <p>
-            <code>tenantId</code> is derived from the caller's membership rows, or from the service key's own row. There
-            is no argument a client can set to reach another book. The public API accepts <code>tenantSlug</code>, and
-            only as a disambiguator for a caller who belongs to several tenants; membership is still what decides.
-          </p>
+<h2>Where the tenant comes from</h2>
+<p><code>tenantId</code> is derived from the caller's membership rows, or from the service key's own row. There is no argument a client can set to reach another book. The public API accepts <code>tenantSlug</code>, and only as a disambiguator for a caller who belongs to several tenants; membership is still what decides.</p>
 
-          <h2>Missing, not forbidden</h2>
-          <div class="callout">
-            <p>
-              A document id belonging to another tenant reads as <strong>not found</strong>. Answering "forbidden" would
-              confirm the row exists, which is itself the cross-tenant read you were trying to prevent.
-            </p>
-          </div>
+<h2>Missing, not forbidden</h2>
+<div class="callout"><p>A document id belonging to another tenant reads as <strong>not found</strong>. Answering "forbidden" would confirm the row exists, which is itself the cross-tenant read you were trying to prevent.</p></div>
 
-          <h2>Indexes lead with the tenant</h2>
-          <p>
-            Every index leads with <code>tenantId</code>, so a query that forgets the scope cannot use an index at all
-            and fails loudly in review rather than quietly returning somebody else's rows.
-          </p>
-          <p>
-            One exception is deliberate and marked: the resolver cron sweeps every book's due forecasts through a
-            tenant-less index. It is an <code>internalMutation</code> for exactly that reason and is unreachable from
-            any client. A test asserts it scores each book against its own prices.
-          </p>
+<h2>Indexes lead with the tenant</h2>
+<p>Every index leads with <code>tenantId</code>, so a query that forgets the scope cannot use an index at all and fails loudly in review rather than quietly returning somebody else's rows.</p>
+<p>One exception is deliberate and marked: the resolver cron sweeps every book's due forecasts through a tenant-less index. It is an <code>internalMutation</code> for exactly that reason and is unreachable from any client. A test asserts it scores each book against its own prices.</p>
 
-          <h2>Service keys</h2>
-          <p>
-            Workers and the MCP server have no browser session, so they present a key. The operator generates it locally
-            and registers only its hash, which means the deployment never returns a secret and a leaked database does
-            not leak a credential.
-          </p>
-          <pre><code>KEY="$(openssl rand -hex 32)"
-npx convex run tenants:issueServiceKey "{\"key\":\"$KEY\",\"label\":\"sync-worker\",\"role\":\"viewer\"}"</code></pre>
-          <p>
-            One key maps to exactly one tenant and carries its own role. Rotate by issuing a new label and revoking the
-            old one.
-          </p>
+<h2>Service keys</h2>
+<p>Workers and the MCP server have no browser session, so they present a key. The operator generates it locally and registers only its hash, which means the deployment never returns a secret and a leaked database does not leak a credential.</p>
+<div class="code"><button class="copy" type="button" aria-label="Copy code to clipboard"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2" /><path d="M5 15V5a2 2 0 0 1 2-2h8" /></svg><svg class="i-ok" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 13 4 4L19 7" /></svg></button><pre><code class="lang-bash">KEY=<span class="s">&quot;$(openssl rand -hex 32)&quot;</span>
+<span class="k">npx</span> convex run tenants:issueServiceKey <span class="s">&quot;{\&quot;key\&quot;:\&quot;$KEY\&quot;,\&quot;label\&quot;:\&quot;sync-worker\&quot;,\&quot;role\&quot;:\&quot;viewer\&quot;}&quot;</span></code></pre></div>
+<p>One key maps to exactly one tenant and carries its own role. Rotate by issuing a new label and revoking the old one.</p>
         </article>
       </div>
     </div>
@@ -183,9 +126,51 @@ npx convex run tenants:issueServiceKey "{\"key\":\"$KEY\",\"label\":\"sync-worke
         // No label to keep in sync: CSS picks the glyph off the attribute.
         btn.addEventListener("click", function () {
           root.dataset.theme = root.dataset.theme === "dark" ? "light" : "dark";
-          try {
-            localStorage.setItem("openportfolio-theme", root.dataset.theme);
-          } catch (e) {}
+          try { localStorage.setItem("openportfolio-theme", root.dataset.theme); } catch (e) {}
+        });
+      })();
+    </script>
+    <script>
+      // Delegated, so a page can hold any number of blocks without per-block
+      // wiring. The clipboard gets pre.innerText, and the button is a sibling of
+      // the <pre> rather than a child, so its own label cannot land in there.
+      (function () {
+        var HELD = 1400;
+        function done(btn) {
+          btn.classList.add("ok");
+          btn.setAttribute("aria-label", "Copied");
+          setTimeout(function () {
+            btn.classList.remove("ok");
+            btn.setAttribute("aria-label", "Copy code to clipboard");
+          }, HELD);
+        }
+        function legacy(text, btn) {
+          // execCommand is deprecated, and it is still the only path when the
+          // page is opened over http:// or from a file.
+          var ta = document.createElement("textarea");
+          ta.value = text;
+          ta.setAttribute("readonly", "");
+          ta.style.position = "fixed";
+          ta.style.opacity = "0";
+          document.body.appendChild(ta);
+          ta.select();
+          try { document.execCommand("copy"); done(btn); } catch (e) {}
+          document.body.removeChild(ta);
+        }
+        document.addEventListener("click", function (e) {
+          var btn = e.target.closest && e.target.closest(".copy");
+          if (!btn) return;
+          var pre = btn.parentNode.querySelector("pre");
+          if (!pre) return;
+          var text = pre.innerText;
+          if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(text).then(
+              function () { done(btn); },
+              function () { legacy(text, btn); }
+            );
+          } else {
+            legacy(text, btn);
+          }
         });
       })();
     </script>

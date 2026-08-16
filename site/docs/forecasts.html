@@ -5,19 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="color-scheme" content="light dark" />
     <title>Forecasts and Brier · openportfolio docs</title>
-    <meta
-      name="description"
-      content="How a call is registered with a probability, a horizon and a resolution criterion, how it settles itself, and how to read the reliability diagram it produces."
-    />
+    <meta name="description" content="How a call is registered with a probability, a horizon and a resolution criterion, how it settles itself, and how to read the reliability diagram it produces." />
     <link rel="canonical" href="https://openportfolio.app/docs/forecasts" />
     <meta property="og:type" content="article" />
     <meta property="og:site_name" content="openportfolio" />
     <meta property="og:url" content="https://openportfolio.app/docs/forecasts" />
     <meta property="og:title" content="Forecasts and Brier · openportfolio docs" />
-    <meta
-      property="og:description"
-      content="How a call is registered with a probability, a horizon and a resolution criterion, how it settles itself, and how to read the reliability diagram it produces."
-    />
+    <meta property="og:description" content="How a call is registered with a probability, a horizon and a resolution criterion, how it settles itself, and how to read the reliability diagram it produces." />
     <meta property="og:image" content="https://openportfolio.app/og.png" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:image" content="https://openportfolio.app/og.png" />
@@ -27,10 +21,7 @@
     <link rel="manifest" href="/site.webmanifest" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@400;500&display=swap"
-      rel="stylesheet"
-    />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/assets/style.css" />
     <script type="application/ld+json">
       {
@@ -68,23 +59,7 @@
     <a class="skip" href="#main">Skip to content</a>
     <header class="site-head">
       <div class="wrap">
-        <a class="brand" href="/" aria-label="openportfolio home"
-          ><svg viewBox="0 0 64 64" aria-hidden="true">
-            <defs>
-              <linearGradient id="hm" gradientUnits="userSpaceOnUse" x1="6" y1="6" x2="46" y2="58">
-                <stop offset="0" stop-color="#8b9cff" />
-                <stop offset=".55" stop-color="#5b6cf0" />
-                <stop offset="1" stop-color="#7c5cf0" />
-              </linearGradient>
-            </defs>
-            <g fill="url(#hm)">
-              <rect x="4" y="38" width="14" height="20" rx="3" opacity=".55" />
-              <rect x="25" y="24" width="14" height="34" rx="3" opacity=".78" />
-              <rect x="46" y="8" width="14" height="50" rx="3" />
-            </g>
-          </svg>
-          openportfolio</a
-        >
+        <a class="brand" href="/" aria-label="openportfolio home"><svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="hm" gradientUnits="userSpaceOnUse" x1="6" y1="6" x2="46" y2="58"><stop offset="0" stop-color="#8b9cff"/><stop offset=".55" stop-color="#5b6cf0"/><stop offset="1" stop-color="#7c5cf0"/></linearGradient></defs><g fill="url(#hm)"><rect x="4" y="38" width="14" height="20" rx="3" opacity=".55"/><rect x="25" y="24" width="14" height="34" rx="3" opacity=".78"/><rect x="46" y="8" width="14" height="50" rx="3"/></g></svg> openportfolio</a>
         <nav class="site-nav" aria-label="Primary">
           <a href="/docs/">Docs</a>
           <a href="/demo/">Demo</a>
@@ -110,108 +85,46 @@
     </header>
     <div class="wrap">
       <div class="docs">
-        <nav class="docs-nav" aria-label="Documentation">
-          <strong>Start</strong><a href="/docs/">Overview</a><a href="/docs/quickstart">Quick start</a
-          ><a href="/docs/configuration">Configuration</a><strong>Concepts</strong
-          ><a href="/docs/forecasts" aria-current="page">Forecasts and Brier</a
-          ><a href="/docs/flows">Flows and catalysts</a><a href="/docs/multi-tenancy">Multi-tenancy</a
-          ><strong>Extend</strong><a href="/docs/adapters">Venue adapters</a><a href="/docs/mcp">MCP and agents</a>
-        </nav>
+        <nav class="docs-nav" aria-label="Documentation"><strong>Start</strong><a href="/docs/">Overview</a><a href="/docs/quickstart">Quick start</a><a href="/docs/configuration">Configuration</a><strong>Concepts</strong><a href="/docs/forecasts" aria-current="page">Forecasts and Brier</a><a href="/docs/flows">Flows and catalysts</a><a href="/docs/multi-tenancy">Multi-tenancy</a><strong>Extend</strong><a href="/docs/adapters">Venue adapters</a><a href="/docs/mcp">MCP and agents</a></nav>
         <article class="prose" id="main">
-          <h1>Forecasts and Brier</h1>
-          <p>
-            Market commentary is unaccountable, and became more so the moment a model would produce a confident
-            directional view on anything you asked it. The problem is not that views are wrong. It is that being wrong
-            costs nothing and leaves no trace, so a forecaster worth reading and one who is merely fluent are
-            indistinguishable from the outside, and from the inside too.
-          </p>
+<h1>Forecasts and Brier</h1>
+<p>Market commentary is unaccountable, and became more so the moment a model would produce a confident directional view on anything you asked it. The problem is not that views are wrong. It is that being wrong costs nothing and leaves no trace, so a forecaster worth reading and one who is merely fluent are indistinguishable from the outside, and from the inside too.</p>
 
-          <h2>Registering a call</h2>
-          <p>Three things are required before the fact, and none of them can be added afterwards.</p>
-          <table>
-            <thead>
-              <tr>
-                <th>Field</th>
-                <th>Why it is mandatory</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td><code>probability</code></td>
-                <td>A direction with no number cannot be scored. 0.5 is an admission, not an answer.</td>
-              </tr>
-              <tr>
-                <td><code>horizon</code></td>
-                <td>A call with no deadline is never wrong, only early.</td>
-              </tr>
-              <tr>
-                <td><code>resolutionCriterion</code></td>
-                <td>
-                  Settled by the string, not by argument afterwards. <code>CSPX close &gt; 742.00</code> leaves nothing
-                  to interpret.
-                </td>
-              </tr>
-            </tbody>
-          </table>
+<h2>Registering a call</h2>
+<p>Three things are required before the fact, and none of them can be added afterwards.</p>
+<table>
+<thead><tr><th>Field</th><th>Why it is mandatory</th></tr></thead>
+<tbody>
+<tr><td><code>probability</code></td><td>A direction with no number cannot be scored. 0.5 is an admission, not an answer.</td></tr>
+<tr><td><code>horizon</code></td><td>A call with no deadline is never wrong, only early.</td></tr>
+<tr><td><code>resolutionCriterion</code></td><td>Settled by the string, not by argument afterwards. <code>CSPX close &gt; 742.00</code> leaves nothing to interpret.</td></tr>
+</tbody>
+</table>
 
-          <h2>Settlement</h2>
-          <p>
-            Criteria that parse into a comparison resolve themselves: a cron sweeps every book's due calls, evaluates
-            the criterion against the stored price series and scores the result. Nothing waits on you remembering that
-            you made a prediction three weeks ago.
-          </p>
-          <p>
-            The sweep is the one deliberate exception to tenant scoping. It runs on a tenant-less index and is an
-            <code>internalMutation</code> for exactly that reason, unreachable from any client, with a test asserting
-            each book is scored against its own prices.
-          </p>
+<h2>Settlement</h2>
+<p>Criteria that parse into a comparison resolve themselves: a cron sweeps every book's due calls, evaluates the criterion against the stored price series and scores the result. Nothing waits on you remembering that you made a prediction three weeks ago.</p>
+<p>The sweep is the one deliberate exception to tenant scoping. It runs on a tenant-less index and is an <code>internalMutation</code> for exactly that reason, unreachable from any client, with a test asserting each book is scored against its own prices.</p>
 
-          <h2>The score</h2>
-          <p>Brier is the mean squared error of the probabilities you gave:</p>
-          <pre><code>brier = mean((probability - outcome)²)   <span class="c">// outcome is 1 or 0</span></code></pre>
-          <table>
-            <thead>
-              <tr>
-                <th>Value</th>
-                <th>Reading</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>0.00</td>
-                <td>Perfect, and if you see it, check the criteria.</td>
-              </tr>
-              <tr>
-                <td>0.25</td>
-                <td>What a coin flip earns. The bar, not the goal.</td>
-              </tr>
-              <tr>
-                <td>&gt; 0.25</td>
-                <td>Worse than saying 50% to everything.</td>
-              </tr>
-            </tbody>
-          </table>
+<h2>The score</h2>
+<p>Brier is the mean squared error of the probabilities you gave:</p>
+<div class="code"><button class="copy" type="button" aria-label="Copy code to clipboard"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2" /><path d="M5 15V5a2 2 0 0 1 2-2h8" /></svg><svg class="i-ok" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 13 4 4L19 7" /></svg></button><pre><code class="lang-ts">brier <span class="o">=</span> <span class="f">mean</span><span class="o">((</span>probability <span class="o">-</span> outcome<span class="o">)</span>²<span class="o">)</span>   <span class="c">// outcome is 1 or 0</span></code></pre></div>
+<table>
+<thead><tr><th>Value</th><th>Reading</th></tr></thead>
+<tbody>
+<tr><td>0.00</td><td>Perfect, and if you see it, check the criteria.</td></tr>
+<tr><td>0.25</td><td>What a coin flip earns. The bar, not the goal.</td></tr>
+<tr><td>&gt; 0.25</td><td>Worse than saying 50% to everything.</td></tr>
+</tbody>
+</table>
 
-          <h2>Reading the reliability diagram</h2>
-          <p>
-            A mean Brier alone hides the direction you are wrong in. The diagram buckets calls by what you said and
-            shows what actually happened in each bucket, as two overlaid bars. The gap between them is the entire point.
-          </p>
-          <ul>
-            <li>
-              <strong>Observed below said, at the top end.</strong> Overconfidence. The usual failure: your 90% calls
-              land 70% of the time.
-            </li>
-            <li>
-              <strong>Observed above said, at the bottom end.</strong> Underconfidence, which costs less but is still a
-              miscalibration.
-            </li>
-            <li><strong>Bars level across every bucket.</strong> Calibrated. Your 70% means 70%.</li>
-          </ul>
-          <p>
-            Calibration and discrimination are different things. A forecaster who says 50% to everything is perfectly
-            calibrated and completely useless, which is why the bucket counts are on the page next to the rates.
-          </p>
+<h2>Reading the reliability diagram</h2>
+<p>A mean Brier alone hides the direction you are wrong in. The diagram buckets calls by what you said and shows what actually happened in each bucket, as two overlaid bars. The gap between them is the entire point.</p>
+<ul>
+<li><strong>Observed below said, at the top end.</strong> Overconfidence. The usual failure: your 90% calls land 70% of the time.</li>
+<li><strong>Observed above said, at the bottom end.</strong> Underconfidence, which costs less but is still a miscalibration.</li>
+<li><strong>Bars level across every bucket.</strong> Calibrated. Your 70% means 70%.</li>
+</ul>
+<p>Calibration and discrimination are different things. A forecaster who says 50% to everything is perfectly calibrated and completely useless, which is why the bucket counts are on the page next to the rates.</p>
         </article>
       </div>
     </div>
@@ -233,9 +146,51 @@
         // No label to keep in sync: CSS picks the glyph off the attribute.
         btn.addEventListener("click", function () {
           root.dataset.theme = root.dataset.theme === "dark" ? "light" : "dark";
-          try {
-            localStorage.setItem("openportfolio-theme", root.dataset.theme);
-          } catch (e) {}
+          try { localStorage.setItem("openportfolio-theme", root.dataset.theme); } catch (e) {}
+        });
+      })();
+    </script>
+    <script>
+      // Delegated, so a page can hold any number of blocks without per-block
+      // wiring. The clipboard gets pre.innerText, and the button is a sibling of
+      // the <pre> rather than a child, so its own label cannot land in there.
+      (function () {
+        var HELD = 1400;
+        function done(btn) {
+          btn.classList.add("ok");
+          btn.setAttribute("aria-label", "Copied");
+          setTimeout(function () {
+            btn.classList.remove("ok");
+            btn.setAttribute("aria-label", "Copy code to clipboard");
+          }, HELD);
+        }
+        function legacy(text, btn) {
+          // execCommand is deprecated, and it is still the only path when the
+          // page is opened over http:// or from a file.
+          var ta = document.createElement("textarea");
+          ta.value = text;
+          ta.setAttribute("readonly", "");
+          ta.style.position = "fixed";
+          ta.style.opacity = "0";
+          document.body.appendChild(ta);
+          ta.select();
+          try { document.execCommand("copy"); done(btn); } catch (e) {}
+          document.body.removeChild(ta);
+        }
+        document.addEventListener("click", function (e) {
+          var btn = e.target.closest && e.target.closest(".copy");
+          if (!btn) return;
+          var pre = btn.parentNode.querySelector("pre");
+          if (!pre) return;
+          var text = pre.innerText;
+          if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(text).then(
+              function () { done(btn); },
+              function () { legacy(text, btn); }
+            );
+          } else {
+            legacy(text, btn);
+          }
         });
       })();
     </script>

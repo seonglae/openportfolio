@@ -5,19 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="color-scheme" content="light dark" />
     <title>Venue adapters · openportfolio docs</title>
-    <meta
-      name="description"
-      content="The adapter contract, the two adapters that ship, and how to add a keyed broker without putting a credential anywhere near the backend or the repository."
-    />
+    <meta name="description" content="The adapter contract, the two adapters that ship, and how to add a keyed broker without putting a credential anywhere near the backend or the repository." />
     <link rel="canonical" href="https://openportfolio.app/docs/adapters" />
     <meta property="og:type" content="article" />
     <meta property="og:site_name" content="openportfolio" />
     <meta property="og:url" content="https://openportfolio.app/docs/adapters" />
     <meta property="og:title" content="Venue adapters · openportfolio docs" />
-    <meta
-      property="og:description"
-      content="The adapter contract, the two adapters that ship, and how to add a keyed broker without putting a credential anywhere near the backend or the repository."
-    />
+    <meta property="og:description" content="The adapter contract, the two adapters that ship, and how to add a keyed broker without putting a credential anywhere near the backend or the repository." />
     <meta property="og:image" content="https://openportfolio.app/og.png" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:image" content="https://openportfolio.app/og.png" />
@@ -27,10 +21,7 @@
     <link rel="manifest" href="/site.webmanifest" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@400;500&display=swap"
-      rel="stylesheet"
-    />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/assets/style.css" />
     <script type="application/ld+json">
       {
@@ -68,23 +59,7 @@
     <a class="skip" href="#main">Skip to content</a>
     <header class="site-head">
       <div class="wrap">
-        <a class="brand" href="/" aria-label="openportfolio home"
-          ><svg viewBox="0 0 64 64" aria-hidden="true">
-            <defs>
-              <linearGradient id="hm" gradientUnits="userSpaceOnUse" x1="6" y1="6" x2="46" y2="58">
-                <stop offset="0" stop-color="#8b9cff" />
-                <stop offset=".55" stop-color="#5b6cf0" />
-                <stop offset="1" stop-color="#7c5cf0" />
-              </linearGradient>
-            </defs>
-            <g fill="url(#hm)">
-              <rect x="4" y="38" width="14" height="20" rx="3" opacity=".55" />
-              <rect x="25" y="24" width="14" height="34" rx="3" opacity=".78" />
-              <rect x="46" y="8" width="14" height="50" rx="3" />
-            </g>
-          </svg>
-          openportfolio</a
-        >
+        <a class="brand" href="/" aria-label="openportfolio home"><svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="hm" gradientUnits="userSpaceOnUse" x1="6" y1="6" x2="46" y2="58"><stop offset="0" stop-color="#8b9cff"/><stop offset=".55" stop-color="#5b6cf0"/><stop offset="1" stop-color="#7c5cf0"/></linearGradient></defs><g fill="url(#hm)"><rect x="4" y="38" width="14" height="20" rx="3" opacity=".55"/><rect x="25" y="24" width="14" height="34" rx="3" opacity=".78"/><rect x="46" y="8" width="14" height="50" rx="3"/></g></svg> openportfolio</a>
         <nav class="site-nav" aria-label="Primary">
           <a href="/docs/">Docs</a>
           <a href="/demo/">Demo</a>
@@ -110,78 +85,43 @@
     </header>
     <div class="wrap">
       <div class="docs">
-        <nav class="docs-nav" aria-label="Documentation">
-          <strong>Start</strong><a href="/docs/">Overview</a><a href="/docs/quickstart">Quick start</a
-          ><a href="/docs/configuration">Configuration</a><strong>Concepts</strong
-          ><a href="/docs/forecasts">Forecasts and Brier</a><a href="/docs/flows">Flows and catalysts</a
-          ><a href="/docs/multi-tenancy">Multi-tenancy</a><strong>Extend</strong
-          ><a href="/docs/adapters" aria-current="page">Venue adapters</a><a href="/docs/mcp">MCP and agents</a>
-        </nav>
+        <nav class="docs-nav" aria-label="Documentation"><strong>Start</strong><a href="/docs/">Overview</a><a href="/docs/quickstart">Quick start</a><a href="/docs/configuration">Configuration</a><strong>Concepts</strong><a href="/docs/forecasts">Forecasts and Brier</a><a href="/docs/flows">Flows and catalysts</a><a href="/docs/multi-tenancy">Multi-tenancy</a><strong>Extend</strong><a href="/docs/adapters" aria-current="page">Venue adapters</a><a href="/docs/mcp">MCP and agents</a></nav>
         <article class="prose" id="main">
-          <h1>Venue adapters</h1>
-          <p>An adapter declares what it can do and implements only that.</p>
-          <pre><code>type VenueAdapter = {
-  venue: string;
-  kind: AccountKind;
-  capabilities: { canReadBalances: boolean; canReadQuotes: boolean; canPlaceOrders: boolean };
-  readBalances(request: ReadBalancesRequest): Promise&lt;AdapterBalance[]&gt;;
-  readQuote(request: ReadQuoteRequest): Promise&lt;AdapterQuote&gt;;
-  placeOrder?(request: PlaceOrderRequest): Promise&lt;OrderReceipt&gt;;
-};</code></pre>
+<h1>Venue adapters</h1>
+<p>An adapter declares what it can do and implements only that.</p>
+<div class="code"><button class="copy" type="button" aria-label="Copy code to clipboard"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2" /><path d="M5 15V5a2 2 0 0 1 2-2h8" /></svg><svg class="i-ok" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 13 4 4L19 7" /></svg></button><pre><code class="lang-ts"><span class="k">type</span> <span class="t">VenueAdapter</span> <span class="o">=</span> <span class="o">{</span>
+  <span class="p">venue</span><span class="o">:</span> <span class="k">string</span><span class="o">;</span>
+  <span class="p">kind</span><span class="o">:</span> <span class="t">AccountKind</span><span class="o">;</span>
+  <span class="p">capabilities</span><span class="o">:</span> <span class="o">{</span> <span class="p">canReadBalances</span><span class="o">:</span> <span class="k">boolean</span><span class="o">;</span> <span class="p">canReadQuotes</span><span class="o">:</span> <span class="k">boolean</span><span class="o">;</span> <span class="p">canPlaceOrders</span><span class="o">:</span> <span class="k">boolean</span> <span class="o">};</span>
+  <span class="f">readBalances</span><span class="o">(</span><span class="p">request</span><span class="o">:</span> <span class="t">ReadBalancesRequest</span><span class="o">):</span> <span class="t">Promise</span><span class="o">&lt;</span><span class="t">AdapterBalance</span><span class="o">[]&gt;;</span>
+  <span class="f">readQuote</span><span class="o">(</span><span class="p">request</span><span class="o">:</span> <span class="t">ReadQuoteRequest</span><span class="o">):</span> <span class="t">Promise</span><span class="o">&lt;</span><span class="t">AdapterQuote</span><span class="o">&gt;;</span>
+  <span class="f">placeOrder</span><span class="o">?(</span><span class="p">request</span><span class="o">:</span> <span class="t">PlaceOrderRequest</span><span class="o">):</span> <span class="t">Promise</span><span class="o">&lt;</span><span class="t">OrderReceipt</span><span class="o">&gt;;</span>
+<span class="o">};</span></code></pre></div>
 
-          <h2>What ships</h2>
-          <table>
-            <thead>
-              <tr>
-                <th>Adapter</th>
-                <th>Reads balances</th>
-                <th>Reads quotes</th>
-                <th>Key</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td><code>coingecko</code></td>
-                <td>No, on purpose</td>
-                <td>Yes</td>
-                <td>None</td>
-              </tr>
-              <tr>
-                <td><code>manual</code></td>
-                <td>Yes, from a JSON file</td>
-                <td>No</td>
-                <td>None</td>
-              </tr>
-            </tbody>
-          </table>
-          <p>
-            <code>coingecko</code> refuses balances rather than returning an empty list, because a price source does not
-            know what you hold and an empty list reads as "you hold nothing".
-          </p>
+<h2>What ships</h2>
+<table>
+<thead><tr><th>Adapter</th><th>Reads balances</th><th>Reads quotes</th><th>Key</th></tr></thead>
+<tbody>
+<tr><td><code>coingecko</code></td><td>No, on purpose</td><td>Yes</td><td>None</td></tr>
+<tr><td><code>manual</code></td><td>Yes, from a JSON file</td><td>No</td><td>None</td></tr>
+</tbody>
+</table>
+<p><code>coingecko</code> refuses balances rather than returning an empty list, because a price source does not know what you hold and an empty list reads as "you hold nothing".</p>
 
-          <h2>Adding a keyed broker</h2>
-          <ol>
-            <li>Write a module in <code>packages/node/src/adapters/</code>.</li>
-            <li>Take the credential from the <strong>worker's</strong> environment.</li>
-            <li>Register it in <code>defaultRegistry()</code>.</li>
-          </ol>
-          <div class="callout">
-            <p>
-              <strong>Keep the credential in the worker process.</strong> The backend never sees it and neither does
-              this repository. That is why no keyed adapter ships: the useful ones all need a secret, and a public tree
-              is the wrong place to normalise putting one.
-            </p>
-          </div>
+<h2>Adding a keyed broker</h2>
+<ol>
+<li>Write a module in <code>packages/node/src/adapters/</code>.</li>
+<li>Take the credential from the <strong>worker's</strong> environment.</li>
+<li>Register it in <code>defaultRegistry()</code>.</li>
+</ol>
+<div class="callout"><p><strong>Keep the credential in the worker process.</strong> The backend never sees it and neither does this repository. That is why no keyed adapter ships: the useful ones all need a secret, and a public tree is the wrong place to normalise putting one.</p></div>
 
-          <h2>If you implement placeOrder</h2>
-          <pre><code>type PlaceOrderRequest = {
+<h2>If you implement placeOrder</h2>
+<div class="code"><button class="copy" type="button" aria-label="Copy code to clipboard"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2" /><path d="M5 15V5a2 2 0 0 1 2-2h8" /></svg><svg class="i-ok" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 13 4 4L19 7" /></svg></button><pre><code class="lang-ts"><span class="k">type</span> <span class="t">PlaceOrderRequest</span> <span class="o">=</span> <span class="o">{</span>
   <span class="c">// ...</span>
-  confirmation: OrderConfirmation;   <span class="c">// { confirmedBy, confirmedAt }</span>
-};</code></pre>
-          <p>
-            <code>OrderConfirmation</code> has no default. An order that no human confirmed cannot be constructed, which
-            is a type error rather than a policy someone can forget.
-          </p>
+  <span class="p">confirmation</span><span class="o">:</span> <span class="t">OrderConfirmation</span><span class="o">;</span>   <span class="c">// { confirmedBy, confirmedAt }</span>
+<span class="o">};</span></code></pre></div>
+<p><code>OrderConfirmation</code> has no default. An order that no human confirmed cannot be constructed, which is a type error rather than a policy someone can forget.</p>
         </article>
       </div>
     </div>
@@ -203,9 +143,51 @@
         // No label to keep in sync: CSS picks the glyph off the attribute.
         btn.addEventListener("click", function () {
           root.dataset.theme = root.dataset.theme === "dark" ? "light" : "dark";
-          try {
-            localStorage.setItem("openportfolio-theme", root.dataset.theme);
-          } catch (e) {}
+          try { localStorage.setItem("openportfolio-theme", root.dataset.theme); } catch (e) {}
+        });
+      })();
+    </script>
+    <script>
+      // Delegated, so a page can hold any number of blocks without per-block
+      // wiring. The clipboard gets pre.innerText, and the button is a sibling of
+      // the <pre> rather than a child, so its own label cannot land in there.
+      (function () {
+        var HELD = 1400;
+        function done(btn) {
+          btn.classList.add("ok");
+          btn.setAttribute("aria-label", "Copied");
+          setTimeout(function () {
+            btn.classList.remove("ok");
+            btn.setAttribute("aria-label", "Copy code to clipboard");
+          }, HELD);
+        }
+        function legacy(text, btn) {
+          // execCommand is deprecated, and it is still the only path when the
+          // page is opened over http:// or from a file.
+          var ta = document.createElement("textarea");
+          ta.value = text;
+          ta.setAttribute("readonly", "");
+          ta.style.position = "fixed";
+          ta.style.opacity = "0";
+          document.body.appendChild(ta);
+          ta.select();
+          try { document.execCommand("copy"); done(btn); } catch (e) {}
+          document.body.removeChild(ta);
+        }
+        document.addEventListener("click", function (e) {
+          var btn = e.target.closest && e.target.closest(".copy");
+          if (!btn) return;
+          var pre = btn.parentNode.querySelector("pre");
+          if (!pre) return;
+          var text = pre.innerText;
+          if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(text).then(
+              function () { done(btn); },
+              function () { legacy(text, btn); }
+            );
+          } else {
+            legacy(text, btn);
+          }
         });
       })();
     </script>

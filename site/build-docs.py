@@ -7,6 +7,7 @@ the generated files alongside the source. Keeping the output in git is what lets
 Cloudflare Pages serve the directory with no build configured at all.
 """
 
+import html
 import pathlib
 import re
 
@@ -31,6 +32,152 @@ NAV = [
 ]
 
 MARK = """<svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="hm" gradientUnits="userSpaceOnUse" x1="6" y1="6" x2="46" y2="58"><stop offset="0" stop-color="#8b9cff"/><stop offset=".55" stop-color="#5b6cf0"/><stop offset="1" stop-color="#7c5cf0"/></linearGradient></defs><g fill="url(#hm)"><rect x="4" y="38" width="14" height="20" rx="3" opacity=".55"/><rect x="25" y="24" width="14" height="34" rx="3" opacity=".78"/><rect x="46" y="8" width="14" height="50" rx="3"/></g></svg>"""
+
+# --------------------------------------------------------------- code blocks
+#
+# Highlighting happens here, at build time, for the same reason the pages are
+# generated here: the output is committed and Cloudflare Pages serves it with no
+# build configured, so a runtime highlighter would mean either a CDN script on
+# every docs page or a bundler this site does not have. A few hundred lines of
+# code across eight pages does not justify either.
+#
+# Blocks are authored as <pre><code class="lang-X">, plain and HTML-escaped. The
+# builder unescapes, tokenises, and re-escapes, so the source stays readable and
+# comment colouring is not hand-maintained per line.
+#
+# Classes, one or two letters because they are emitted once per token into a
+# file that ships verbatim: c comment, k keyword, s string, t type, f call,
+# p property, n number, v variable, a flag, o operator.
+
+TOKENS: dict[str, list[tuple[str, re.Pattern[str]]]] = {}
+
+
+def _lang(name: str, rules: list[tuple[str, str]], flags: int = 0) -> None:
+    TOKENS[name] = [(cls, re.compile(rx, flags)) for cls, rx in rules]
+
+
+_STR_D = r'"(?:\\.|[^"\\])*"'
+_STR_S = r"'(?:\\.|[^'\\])*'"
+
+_lang(
+    "bash",
+    [
+        ("c", r"#[^\n]*"),
+        ("s", _STR_D + "|" + _STR_S),
+        ("s", r"https?://[^\s\"'<>]+"),
+        ("v", r"\$\{[^}]*\}|\$[A-Za-z_]\w*|\$\("),
+        # Anchored to a line start so an argument that happens to share a name
+        # with a command is not painted as one.
+        ("k", r"^[ \t]*(?P<t>npx|npm|pnpm|node|python3|tsx|git|cd|cp|mv|mkdir|export|echo|curl|openssl|chmod|source|sudo|cat)\b"),
+        ("a", r"(?<=\s)--?[A-Za-z][\w-]*"),
+        ("n", r"\b\d+(?:\.\d+)*\b"),
+        ("o", r"[|&;<>()]"),
+    ],
+    re.M,
+)
+
+_lang(
+    "json",
+    [
+        ("c", r"//[^\n]*"),
+        ("p", _STR_D + r"(?=\s*:)"),
+        ("s", _STR_D),
+        ("k", r"\b(?:true|false|null)\b"),
+        ("n", r"-?\b\d+(?:\.\d+)?\b"),
+        ("o", r"[{}\[\],:]"),
+    ],
+)
+
+_lang(
+    "ts",
+    [
+        ("c", r"//[^\n]*|/\*.*?\*/"),
+        ("s", _STR_D + "|" + _STR_S + r"|`(?:\\.|[^`\\])*`"),
+        ("k", r"\b(?:type|interface|const|let|var|function|return|import|export|from|extends|implements|async|await|new|class|if|else|for|of|in|readonly|boolean|string|number|void|null|undefined|true|false)\b"),
+        ("t", r"\b[A-Z][A-Za-z0-9_]*\b"),
+        # `?` before the paren so an optional method still reads as a call.
+        ("f", r"\b[a-z_$][\w$]*(?=\??\s*\()"),
+        ("p", r"\b[A-Za-z_$][\w$]*(?=\??\s*:)"),
+        ("n", r"\b\d+(?:\.\d+)?\b"),
+        ("o", r"[{}()\[\];,.<>?:=|&+\-*/!]"),
+    ],
+    re.S,
+)
+
+
+def highlight(code: str, lang: str) -> str:
+    """Wrap tokens of `code` in spans. Unknown language: escape and return."""
+    rules = TOKENS.get(lang)
+    if rules is None:
+        return html.escape(code)
+
+    # (class or None, text). Runs are accumulated first and merged after, so a
+    # line of punctuation is one span instead of one per character -- this file
+    # ships as-is, so the markup it emits is the markup that is served.
+    runs: list[tuple[str | None, str]] = []
+
+    def add(cls: str | None, text: str) -> None:
+        if not text:
+            return
+        if runs and runs[-1][0] == cls:
+            runs[-1] = (cls, runs[-1][1] + text)
+        else:
+            runs.append((cls, text))
+
+    pos = 0
+    while pos < len(code):
+        for cls, rx in rules:
+            m = rx.match(code, pos)
+            if m is None:
+                continue
+            # A rule may name the part it wants painted; anything before it is
+            # matched only to establish position and stays plain.
+            key = "t" if "t" in rx.groupindex else 0
+            text = m.group(key)
+            if not text:
+                continue
+            add(None, code[pos : m.start(key)])
+            add(cls, text)
+            pos = m.end(key)
+            break
+        else:
+            add(None, code[pos])
+            pos += 1
+
+    return "".join(
+        html.escape(text) if cls is None else f'<span class="{cls}">{html.escape(text)}</span>'
+        for cls, text in runs
+    )
+
+
+COPY = (
+    '<button class="copy" type="button" aria-label="Copy code to clipboard">'
+    '<svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true">'
+    '<rect x="9" y="9" width="11" height="11" rx="2" />'
+    '<path d="M5 15V5a2 2 0 0 1 2-2h8" /></svg>'
+    '<svg class="i-ok" viewBox="0 0 24 24" aria-hidden="true">'
+    '<path d="m5 13 4 4L19 7" /></svg>'
+    "</button>"
+)
+
+CODE_BLOCK = re.compile(
+    r'<pre><code class="lang-(?P<lang>[a-z]+)">(?P<code>.*?)</code></pre>', re.S
+)
+
+
+def render_code(body: str) -> str:
+    def one(m: re.Match[str]) -> str:
+        lang = m.group("lang")
+        # Strip any hand-written spans first, then unescape: the stored fragment
+        # is HTML, and the tokeniser wants the source the reader would copy.
+        source = html.unescape(re.sub(r"</?span[^>]*>", "", m.group("code")))
+        return (
+            f'<div class="code">{COPY}'
+            f'<pre><code class="lang-{lang}">{highlight(source, lang)}</code></pre></div>'
+        )
+
+    return CODE_BLOCK.sub(one, body)
+
 
 TEMPLATE = """<!doctype html>
 <html lang="en" data-theme="light">
@@ -147,6 +294,50 @@ TEMPLATE = """<!doctype html>
         }});
       }})();
     </script>
+    <script>
+      // Delegated, so a page can hold any number of blocks without per-block
+      // wiring. The clipboard gets pre.innerText, and the button is a sibling of
+      // the <pre> rather than a child, so its own label cannot land in there.
+      (function () {{
+        var HELD = 1400;
+        function done(btn) {{
+          btn.classList.add("ok");
+          btn.setAttribute("aria-label", "Copied");
+          setTimeout(function () {{
+            btn.classList.remove("ok");
+            btn.setAttribute("aria-label", "Copy code to clipboard");
+          }}, HELD);
+        }}
+        function legacy(text, btn) {{
+          // execCommand is deprecated, and it is still the only path when the
+          // page is opened over http:// or from a file.
+          var ta = document.createElement("textarea");
+          ta.value = text;
+          ta.setAttribute("readonly", "");
+          ta.style.position = "fixed";
+          ta.style.opacity = "0";
+          document.body.appendChild(ta);
+          ta.select();
+          try {{ document.execCommand("copy"); done(btn); }} catch (e) {{}}
+          document.body.removeChild(ta);
+        }}
+        document.addEventListener("click", function (e) {{
+          var btn = e.target.closest && e.target.closest(".copy");
+          if (!btn) return;
+          var pre = btn.parentNode.querySelector("pre");
+          if (!pre) return;
+          var text = pre.innerText;
+          if (navigator.clipboard && window.isSecureContext) {{
+            navigator.clipboard.writeText(text).then(
+              function () {{ done(btn); }},
+              function () {{ legacy(text, btn); }}
+            );
+          }} else {{
+            legacy(text, btn);
+          }}
+        }});
+      }})();
+    </script>
   </body>
 </html>
 """
@@ -229,7 +420,7 @@ page(
 <p>Node 22+, pnpm, and a <a href="https://convex.dev">Convex</a> account. The free tier is enough.</p>
 
 <h2>1. Install</h2>
-<pre><code>git clone https://github.com/seonglae/openportfolio.git
+<pre><code class="lang-bash">git clone https://github.com/seonglae/openportfolio.git
 cd openportfolio
 pnpm install
 
@@ -238,25 +429,25 @@ npx convex dev --once          <span class="c"># creates the deployment</span></
 
 <h2>2. Create the first book</h2>
 <p>On localhost with no identity provider configured, the deployment will only create the tenant named by <code>OPENPORTFOLIO_DEV_TENANT</code>.</p>
-<pre><code>npx convex env set OPENPORTFOLIO_DEV_TENANT home
+<pre><code class="lang-bash">npx convex env set OPENPORTFOLIO_DEV_TENANT home
 npx convex run tenants:create '{"slug":"home","name":"Home","baseCurrency":"GBP"}'</code></pre>
 
 <h2>3. Start the UI</h2>
-<pre><code>cp browser/.env.local.example browser/.env.local   <span class="c"># set VITE_CONVEX_URL</span>
+<pre><code class="lang-bash">cp browser/.env.local.example browser/.env.local   <span class="c"># set VITE_CONVEX_URL</span>
 pnpm --filter openportfolio-browser dev            <span class="c"># http://localhost:6101</span></code></pre>
 
 <h2>4. Sync</h2>
-<pre><code>npx tsx sync-worker.mts --once</code></pre>
+<pre><code class="lang-bash">npx tsx sync-worker.mts --once</code></pre>
 <p>With nothing linked it registers the venues it can serve and records a net worth of zero, which is correct.</p>
 
 <h2>5. Put something in it</h2>
 <p>A manual holdings file is how a pension, a property or an unlisted holding gets into the total instead of being left out of it.</p>
-<pre><code><span class="c">// holdings.json</span>
+<pre><code class="lang-json"><span class="c">// holdings.json</span>
 [
   { "accountKey": "isa",    "symbol": "VWRL", "assetClass": "etf",    "qty": 40,   "price": 118.2, "currency": "GBP" },
   { "accountKey": "wallet", "symbol": "BTC",  "assetClass": "crypto", "qty": 0.15, "price": 0,     "currency": "USD" }
 ]</code></pre>
-<pre><code>export OPENPORTFOLIO_MANUAL_HOLDINGS=$PWD/holdings.json
+<pre><code class="lang-bash">export OPENPORTFOLIO_MANUAL_HOLDINGS=$PWD/holdings.json
 npx convex run accounts:link '{"accountKey":"isa","venue":"manual","kind":"brokerage","label":"ISA","currency":"GBP"}'
 npx convex run accounts:link '{"accountKey":"wallet","venue":"manual","kind":"wallet","label":"Wallet","currency":"USD"}'
 npx tsx sync-worker.mts --once</code></pre>
@@ -264,7 +455,7 @@ npx tsx sync-worker.mts --once</code></pre>
 
 <h2>6. Before exposing it</h2>
 <div class="callout"><p><strong>Two things are open on localhost.</strong> While <code>OPENPORTFOLIO_DEV_TENANT</code> is set, any unauthenticated caller is scoped to that tenant. Unset it and configure Clerk before the deployment is reachable from the internet.</p></div>
-<pre><code>npx convex env set CLERK_ISSUER_URL https://your-app.clerk.accounts.dev
+<pre><code class="lang-bash">npx convex env set CLERK_ISSUER_URL https://your-app.clerk.accounts.dev
 npx convex env unset OPENPORTFOLIO_DEV_TENANT
 
 KEY="$(openssl rand -hex 32)"
@@ -340,7 +531,7 @@ page(
 
 <h2>The score</h2>
 <p>Brier is the mean squared error of the probabilities you gave:</p>
-<pre><code>brier = mean((probability - outcome)²)   <span class="c">// outcome is 1 or 0</span></code></pre>
+<pre><code class="lang-ts">brier = mean((probability - outcome)²)   <span class="c">// outcome is 1 or 0</span></code></pre>
 <table>
 <thead><tr><th>Value</th><th>Reading</th></tr></thead>
 <tbody>
@@ -410,7 +601,7 @@ page(
 
 <h2>Service keys</h2>
 <p>Workers and the MCP server have no browser session, so they present a key. The operator generates it locally and registers only its hash, which means the deployment never returns a secret and a leaked database does not leak a credential.</p>
-<pre><code>KEY="$(openssl rand -hex 32)"
+<pre><code class="lang-bash">KEY="$(openssl rand -hex 32)"
 npx convex run tenants:issueServiceKey "{\\"key\\":\\"$KEY\\",\\"label\\":\\"sync-worker\\",\\"role\\":\\"viewer\\"}"</code></pre>
 <p>One key maps to exactly one tenant and carries its own role. Rotate by issuing a new label and revoking the old one.</p>
 """,
@@ -423,7 +614,7 @@ page(
     """
 <h1>Venue adapters</h1>
 <p>An adapter declares what it can do and implements only that.</p>
-<pre><code>type VenueAdapter = {
+<pre><code class="lang-ts">type VenueAdapter = {
   venue: string;
   kind: AccountKind;
   capabilities: { canReadBalances: boolean; canReadQuotes: boolean; canPlaceOrders: boolean };
@@ -451,7 +642,7 @@ page(
 <div class="callout"><p><strong>Keep the credential in the worker process.</strong> The backend never sees it and neither does this repository. That is why no keyed adapter ships: the useful ones all need a secret, and a public tree is the wrong place to normalise putting one.</p></div>
 
 <h2>If you implement placeOrder</h2>
-<pre><code>type PlaceOrderRequest = {
+<pre><code class="lang-ts">type PlaceOrderRequest = {
   <span class="c">// ...</span>
   confirmation: OrderConfirmation;   <span class="c">// { confirmedBy, confirmedAt }</span>
 };</code></pre>
@@ -473,7 +664,7 @@ page(
 <div class="callout"><p><strong>This does not make a run free.</strong> Subscription plans have rate limits, and the fallback chain exists partly because one provider runs out before the others do. What changes is the kind of limit: quota and wall clock rather than spend, so a run never has to be justified one invocation at a time.</p></div>
 
 <h2>The provider chain</h2>
-<pre><code><span class="c">// actor.mts</span>
+<pre><code class="lang-ts"><span class="c">// actor.mts</span>
 const ORDERS = {
   sync:    ["codex", "claude"],
   review:  ["claude", "codex"],
@@ -509,7 +700,7 @@ def main() -> None:
             site=SITE,
             mark=MARK,
             sidebar=sidebar(slug),
-            body=body.strip(),
+            body=render_code(body.strip()),
         )
         (OUT / slug).write_text(html, encoding="utf-8")
         print("wrote docs/" + slug)

@@ -5,19 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="color-scheme" content="light dark" />
     <title>MCP and agents · openportfolio docs</title>
-    <meta
-      name="description"
-      content="Why there is no provider API key, how work is dispatched to an agent CLI you already signed in to, and what the 25 MCP tools expose."
-    />
+    <meta name="description" content="Why there is no provider API key, how work is dispatched to an agent CLI you already signed in to, and what the 25 MCP tools expose." />
     <link rel="canonical" href="https://openportfolio.app/docs/mcp" />
     <meta property="og:type" content="article" />
     <meta property="og:site_name" content="openportfolio" />
     <meta property="og:url" content="https://openportfolio.app/docs/mcp" />
     <meta property="og:title" content="MCP and agents · openportfolio docs" />
-    <meta
-      property="og:description"
-      content="Why there is no provider API key, how work is dispatched to an agent CLI you already signed in to, and what the 25 MCP tools expose."
-    />
+    <meta property="og:description" content="Why there is no provider API key, how work is dispatched to an agent CLI you already signed in to, and what the 25 MCP tools expose." />
     <meta property="og:image" content="https://openportfolio.app/og.png" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:image" content="https://openportfolio.app/og.png" />
@@ -27,10 +21,7 @@
     <link rel="manifest" href="/site.webmanifest" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@400;500&display=swap"
-      rel="stylesheet"
-    />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/assets/style.css" />
     <script type="application/ld+json">
       {
@@ -68,23 +59,7 @@
     <a class="skip" href="#main">Skip to content</a>
     <header class="site-head">
       <div class="wrap">
-        <a class="brand" href="/" aria-label="openportfolio home"
-          ><svg viewBox="0 0 64 64" aria-hidden="true">
-            <defs>
-              <linearGradient id="hm" gradientUnits="userSpaceOnUse" x1="6" y1="6" x2="46" y2="58">
-                <stop offset="0" stop-color="#8b9cff" />
-                <stop offset=".55" stop-color="#5b6cf0" />
-                <stop offset="1" stop-color="#7c5cf0" />
-              </linearGradient>
-            </defs>
-            <g fill="url(#hm)">
-              <rect x="4" y="38" width="14" height="20" rx="3" opacity=".55" />
-              <rect x="25" y="24" width="14" height="34" rx="3" opacity=".78" />
-              <rect x="46" y="8" width="14" height="50" rx="3" />
-            </g>
-          </svg>
-          openportfolio</a
-        >
+        <a class="brand" href="/" aria-label="openportfolio home"><svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="hm" gradientUnits="userSpaceOnUse" x1="6" y1="6" x2="46" y2="58"><stop offset="0" stop-color="#8b9cff"/><stop offset=".55" stop-color="#5b6cf0"/><stop offset="1" stop-color="#7c5cf0"/></linearGradient></defs><g fill="url(#hm)"><rect x="4" y="38" width="14" height="20" rx="3" opacity=".55"/><rect x="25" y="24" width="14" height="34" rx="3" opacity=".78"/><rect x="46" y="8" width="14" height="50" rx="3"/></g></svg> openportfolio</a>
         <nav class="site-nav" aria-label="Primary">
           <a href="/docs/">Docs</a>
           <a href="/demo/">Demo</a>
@@ -110,91 +85,39 @@
     </header>
     <div class="wrap">
       <div class="docs">
-        <nav class="docs-nav" aria-label="Documentation">
-          <strong>Start</strong><a href="/docs/">Overview</a><a href="/docs/quickstart">Quick start</a
-          ><a href="/docs/configuration">Configuration</a><strong>Concepts</strong
-          ><a href="/docs/forecasts">Forecasts and Brier</a><a href="/docs/flows">Flows and catalysts</a
-          ><a href="/docs/multi-tenancy">Multi-tenancy</a><strong>Extend</strong
-          ><a href="/docs/adapters">Venue adapters</a><a href="/docs/mcp" aria-current="page">MCP and agents</a>
-        </nav>
+        <nav class="docs-nav" aria-label="Documentation"><strong>Start</strong><a href="/docs/">Overview</a><a href="/docs/quickstart">Quick start</a><a href="/docs/configuration">Configuration</a><strong>Concepts</strong><a href="/docs/forecasts">Forecasts and Brier</a><a href="/docs/flows">Flows and catalysts</a><a href="/docs/multi-tenancy">Multi-tenancy</a><strong>Extend</strong><a href="/docs/adapters">Venue adapters</a><a href="/docs/mcp" aria-current="page">MCP and agents</a></nav>
         <article class="prose" id="main">
-          <h1>MCP and agents</h1>
-          <p>
-            Watching a book is only useful if something is actually watching: reconciling after the close, settling a
-            call the day its horizon passes, noticing that a deferred decision came due three weeks ago.
-          </p>
+<h1>MCP and agents</h1>
+<p>Watching a book is only useful if something is actually watching: reconciling after the close, settling a call the day its horizon passes, noticing that a deferred decision came due three weeks ago.</p>
 
-          <h2>Why there is no API key</h2>
-          <p>
-            Metered inference is the wrong shape for that work. When each run bills per token, every autonomous check
-            becomes a purchase, and a product that spends the operator's money unprompted has to ask first, or batch, or
-            ration. All three turn a portfolio that watches itself into a portfolio that asks permission to look.
-          </p>
-          <p>
-            So every model call is dispatched to an agent CLI you are already signed in to, with a per-task fallback
-            order. There is no provider key in this repo and no field to put one in.
-          </p>
-          <div class="callout">
-            <p>
-              <strong>This does not make a run free.</strong> Subscription plans have rate limits, and the fallback
-              chain exists partly because one provider runs out before the others do. What changes is the kind of limit:
-              quota and wall clock rather than spend, so a run never has to be justified one invocation at a time.
-            </p>
-          </div>
+<h2>Why there is no API key</h2>
+<p>Metered inference is the wrong shape for that work. When each run bills per token, every autonomous check becomes a purchase, and a product that spends the operator's money unprompted has to ask first, or batch, or ration. All three turn a portfolio that watches itself into a portfolio that asks permission to look.</p>
+<p>So every model call is dispatched to an agent CLI you are already signed in to, with a per-task fallback order. There is no provider key in this repo and no field to put one in.</p>
+<div class="callout"><p><strong>This does not make a run free.</strong> Subscription plans have rate limits, and the fallback chain exists partly because one provider runs out before the others do. What changes is the kind of limit: quota and wall clock rather than spend, so a run never has to be justified one invocation at a time.</p></div>
 
-          <h2>The provider chain</h2>
-          <pre><code><span class="c">// actor.mts</span>
-const ORDERS = {
-  sync:    ["codex", "claude"],
-  review:  ["claude", "codex"],
-  resolve: ["codex", "antigravity", "claude"],
-};</code></pre>
-          <p>
-            Supported today: <code>codex</code>, <code>antigravity</code> (<code>agy</code>), <code>claude</code>.
-            Adding one is an entry in the registry and a spawn shape.
-          </p>
+<h2>The provider chain</h2>
+<div class="code"><button class="copy" type="button" aria-label="Copy code to clipboard"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2" /><path d="M5 15V5a2 2 0 0 1 2-2h8" /></svg><svg class="i-ok" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 13 4 4L19 7" /></svg></button><pre><code class="lang-ts"><span class="c">// actor.mts</span>
+<span class="k">const</span> <span class="t">ORDERS</span> <span class="o">=</span> <span class="o">{</span>
+  <span class="p">sync</span><span class="o">:</span>    <span class="o">[</span><span class="s">&quot;codex&quot;</span><span class="o">,</span> <span class="s">&quot;claude&quot;</span><span class="o">],</span>
+  <span class="p">review</span><span class="o">:</span>  <span class="o">[</span><span class="s">&quot;claude&quot;</span><span class="o">,</span> <span class="s">&quot;codex&quot;</span><span class="o">],</span>
+  <span class="p">resolve</span><span class="o">:</span> <span class="o">[</span><span class="s">&quot;codex&quot;</span><span class="o">,</span> <span class="s">&quot;antigravity&quot;</span><span class="o">,</span> <span class="s">&quot;claude&quot;</span><span class="o">],</span>
+<span class="o">};</span></code></pre></div>
+<p>Supported today: <code>codex</code>, <code>antigravity</code> (<code>agy</code>), <code>claude</code>. Adding one is an entry in the registry and a spawn shape.</p>
 
-          <h2>The MCP server</h2>
-          <p>
-            A stdio MCP server exposes 25 tools over exactly one tenant's book, so an agent CLI can read and write it
-            directly rather than through a scraped UI. The service key is injected inline rather than passed on the
-            command line, so no secret reaches <code>argv</code>.
-          </p>
-          <table>
-            <thead>
-              <tr>
-                <th>Group</th>
-                <th>Examples</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>Read the book</td>
-                <td>net worth, accounts, balances, snapshots</td>
-              </tr>
-              <tr>
-                <td>Flows</td>
-                <td>record a session, read net buying, read turnover</td>
-              </tr>
-              <tr>
-                <td>Forecasts</td>
-                <td>register a call, list due, resolve, read calibration</td>
-              </tr>
-              <tr>
-                <td>Decisions</td>
-                <td>defer, list open, list overdue, close with an outcome</td>
-              </tr>
-              <tr>
-                <td>Catalysts</td>
-                <td>add a dated event, list what is inside a window</td>
-              </tr>
-              <tr>
-                <td>Audit</td>
-                <td>read the append-only log, including what the cron did unattended</td>
-              </tr>
-            </tbody>
-          </table>
-          <p>There is no order tool, because there is no order function to expose.</p>
+<h2>The MCP server</h2>
+<p>A stdio MCP server exposes 25 tools over exactly one tenant's book, so an agent CLI can read and write it directly rather than through a scraped UI. The service key is injected inline rather than passed on the command line, so no secret reaches <code>argv</code>.</p>
+<table>
+<thead><tr><th>Group</th><th>Examples</th></tr></thead>
+<tbody>
+<tr><td>Read the book</td><td>net worth, accounts, balances, snapshots</td></tr>
+<tr><td>Flows</td><td>record a session, read net buying, read turnover</td></tr>
+<tr><td>Forecasts</td><td>register a call, list due, resolve, read calibration</td></tr>
+<tr><td>Decisions</td><td>defer, list open, list overdue, close with an outcome</td></tr>
+<tr><td>Catalysts</td><td>add a dated event, list what is inside a window</td></tr>
+<tr><td>Audit</td><td>read the append-only log, including what the cron did unattended</td></tr>
+</tbody>
+</table>
+<p>There is no order tool, because there is no order function to expose.</p>
         </article>
       </div>
     </div>
@@ -216,9 +139,51 @@ const ORDERS = {
         // No label to keep in sync: CSS picks the glyph off the attribute.
         btn.addEventListener("click", function () {
           root.dataset.theme = root.dataset.theme === "dark" ? "light" : "dark";
-          try {
-            localStorage.setItem("openportfolio-theme", root.dataset.theme);
-          } catch (e) {}
+          try { localStorage.setItem("openportfolio-theme", root.dataset.theme); } catch (e) {}
+        });
+      })();
+    </script>
+    <script>
+      // Delegated, so a page can hold any number of blocks without per-block
+      // wiring. The clipboard gets pre.innerText, and the button is a sibling of
+      // the <pre> rather than a child, so its own label cannot land in there.
+      (function () {
+        var HELD = 1400;
+        function done(btn) {
+          btn.classList.add("ok");
+          btn.setAttribute("aria-label", "Copied");
+          setTimeout(function () {
+            btn.classList.remove("ok");
+            btn.setAttribute("aria-label", "Copy code to clipboard");
+          }, HELD);
+        }
+        function legacy(text, btn) {
+          // execCommand is deprecated, and it is still the only path when the
+          // page is opened over http:// or from a file.
+          var ta = document.createElement("textarea");
+          ta.value = text;
+          ta.setAttribute("readonly", "");
+          ta.style.position = "fixed";
+          ta.style.opacity = "0";
+          document.body.appendChild(ta);
+          ta.select();
+          try { document.execCommand("copy"); done(btn); } catch (e) {}
+          document.body.removeChild(ta);
+        }
+        document.addEventListener("click", function (e) {
+          var btn = e.target.closest && e.target.closest(".copy");
+          if (!btn) return;
+          var pre = btn.parentNode.querySelector("pre");
+          if (!pre) return;
+          var text = pre.innerText;
+          if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(text).then(
+              function () { done(btn); },
+              function () { legacy(text, btn); }
+            );
+          } else {
+            legacy(text, btn);
+          }
         });
       })();
     </script>

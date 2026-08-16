@@ -423,12 +423,120 @@ pre {
   padding: 22px 24px;
 }
 
+/* Token palette. One set serves both themes: the code block keeps a dark
+   background on the light page, and --code-bg only gets darker in dark mode, so
+   a colour that clears contrast on #14161c clears it on #05070b too. Hues stay
+   in the brand family (accent blue, accent-2 violet), with green and amber
+   carrying the two kinds that must never read as a bare identifier. */
 pre .c {
   color: #7f8798;
 }
 
 pre .k {
   color: #9db2ff;
+}
+
+pre .s {
+  color: #8fcfa8;
+}
+
+pre .t {
+  color: #c4a7ff;
+}
+
+pre .f {
+  color: #7fd0e0;
+}
+
+pre .p {
+  color: #c2c6d1;
+}
+
+pre .n,
+pre .v {
+  color: #e0b088;
+}
+
+pre .a {
+  color: #9db2ff;
+}
+
+pre .o {
+  color: #868c9c;
+}
+
+/* The copy button is a sibling of <pre>, never a child: the clipboard gets
+   pre.innerText, and a button inside the block would put its own label in it. */
+.code {
+  position: relative;
+}
+
+.code pre {
+  margin: 0;
+}
+
+.copy {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 8px;
+  color: #aab0bd;
+  display: grid;
+  height: 30px;
+  opacity: 0;
+  place-items: center;
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  transition:
+    opacity 0.12s,
+    color 0.12s,
+    border-color 0.12s;
+  width: 30px;
+}
+
+.code:hover .copy,
+.copy:focus-visible {
+  opacity: 1;
+}
+
+.copy:hover {
+  border-color: rgba(255, 255, 255, 0.3);
+  color: #fff;
+}
+
+.copy.ok {
+  color: var(--color-gain);
+  opacity: 1;
+}
+
+.copy svg {
+  display: block;
+  fill: none;
+  height: 15px;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+  width: 15px;
+}
+
+.copy .i-ok {
+  display: none;
+}
+
+.copy.ok .i-copy {
+  display: none;
+}
+
+.copy.ok .i-ok {
+  display: block;
+}
+
+/* A touch device has no hover to reveal it with. */
+@media (hover: none) {
+  .copy {
+    opacity: 1;
+  }
 }
 
 code {
@@ -645,7 +753,8 @@ details p {
   margin: 6px 0;
 }
 
-.prose pre {
+.prose pre,
+.prose .code {
   margin: 18px 0;
 }
 
