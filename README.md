@@ -79,8 +79,8 @@ check becomes a purchase, and a product that spends the operator's money unpromp
 first, or batch, or ration. All three turn a portfolio that watches itself into a portfolio that
 asks permission to look.
 
-So every model call is dispatched instead to an agent CLI you are already signed in to (`codex`,
-`antigravity`, `claude`), with a per-task fallback order. There is no provider key in this repo and
+So every model call is dispatched instead to an agent CLI you are already signed in to: `codex`,
+`antigravity`, or `claude`, with a per-task fallback order. There is no provider key in this repo and
 no field to put one in. That does not make a run free: subscription plans have rate limits, and the
 fallback chain exists partly because one provider runs out before the others do. What changes is
 the kind of limit. Agent work is bounded by quota and wall clock rather than by spend, so it never
