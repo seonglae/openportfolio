@@ -687,15 +687,15 @@
               </ul>
             </div>
             <figure>
-              <pre><code><span class="c">// actor.mts — the provider chain, not an API client</span>
-<span class="k">const</span> ORDERS = {
-  sync:    [<span class="k">"codex"</span>, <span class="k">"claude"</span>],
-  review:  [<span class="k">"claude"</span>, <span class="k">"codex"</span>],
-  resolve: [<span class="k">"codex"</span>, <span class="k">"antigravity"</span>, <span class="k">"claude"</span>],
-}
+              <div class="code"><button class="copy" type="button" aria-label="Copy code to clipboard"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2" /><path d="M5 15V5a2 2 0 0 1 2-2h8" /></svg><svg class="i-ok" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 13 4 4L19 7" /></svg></button><pre><code class="lang-ts"><span class="c">// actor.mts — the provider chain, not an API client</span>
+<span class="k">const</span> <span class="t">ORDERS</span> <span class="o">=</span> <span class="o">{</span>
+  <span class="p">sync</span><span class="o">:</span>    <span class="o">[</span><span class="s">&quot;codex&quot;</span><span class="o">,</span> <span class="s">&quot;claude&quot;</span><span class="o">],</span>
+  <span class="p">review</span><span class="o">:</span>  <span class="o">[</span><span class="s">&quot;claude&quot;</span><span class="o">,</span> <span class="s">&quot;codex&quot;</span><span class="o">],</span>
+  <span class="p">resolve</span><span class="o">:</span> <span class="o">[</span><span class="s">&quot;codex&quot;</span><span class="o">,</span> <span class="s">&quot;antigravity&quot;</span><span class="o">,</span> <span class="s">&quot;claude&quot;</span><span class="o">],</span>
+<span class="o">}</span>
 
 <span class="c">// Each entry is a CLI you already signed in to.</span>
-<span class="c">// There is no apiKey field to fill in, in any of them.</span></code></pre>
+<span class="c">// There is no apiKey field to fill in, in any of them.</span></code></pre></div>
             </figure>
           </div>
         </section>
@@ -773,20 +773,20 @@
           </div>
           <div class="feature">
             <figure>
-              <pre><code>git clone https://github.com/seonglae/openportfolio.git
+              <div class="code"><button class="copy" type="button" aria-label="Copy code to clipboard"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2" /><path d="M5 15V5a2 2 0 0 1 2-2h8" /></svg><svg class="i-ok" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 13 4 4L19 7" /></svg></button><pre><code class="lang-bash"><span class="k">git</span> clone <span class="s">https://github.com/seonglae/openportfolio.git</span>
 <span class="k">cd</span> openportfolio
-pnpm install
+<span class="k">pnpm</span> install
 
-cp .env.example .env.local
-npx convex dev --once
+<span class="k">cp</span> .env.example .env.local
+<span class="k">npx</span> convex dev <span class="a">--once</span>
 
 <span class="c"># create the first book</span>
-npx convex env set OPENPORTFOLIO_DEV_TENANT home
-npx convex run tenants:create <span class="k">'{"slug":"home","name":"Home","baseCurrency":"GBP"}'</span>
+<span class="k">npx</span> convex env set OPENPORTFOLIO_DEV_TENANT home
+<span class="k">npx</span> convex run tenants:create <span class="s">&#x27;{&quot;slug&quot;:&quot;home&quot;,&quot;name&quot;:&quot;Home&quot;,&quot;baseCurrency&quot;:&quot;GBP&quot;}&#x27;</span>
 
 <span class="c"># the UI, then the sync loop</span>
-pnpm --filter openportfolio-browser dev
-npx tsx sync-worker.mts --once</code></pre>
+<span class="k">pnpm</span> <span class="a">--filter</span> openportfolio-browser dev
+<span class="k">npx</span> tsx sync-worker.mts <span class="a">--once</span></code></pre></div>
             </figure>
             <div>
               <p>
@@ -906,5 +906,6 @@ npx tsx sync-worker.mts --once</code></pre>
         }
       })();
     </script>
+    <script src="/assets/copy.js" defer></script>
   </body>
 </html>
