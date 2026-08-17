@@ -17,7 +17,7 @@ forecasts you registered before the fact. No provider API key, anywhere in it.
 
 **[Website](https://openportfolio.app) · [Docs](https://openportfolio.app/docs/) · [Live demo](https://openportfolio.app/demo/)**
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fseonglae%2Fopenportfolio&project-name=openportfolio&repository-name=openportfolio&env=CONVEX_DEPLOY_KEY,VITE_CLERK_PUBLISHABLE_KEY&envDescription=A%20Convex%20production%20deploy%20key%20and%20your%20Clerk%20publishable%20key&envLink=https%3A%2F%2Fopenportfolio.app%2Fdocs%2Fdeploy)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fseonglae%2Fopenportfolio&project-name=openportfolio&repository-name=openportfolio&demo-title=openportfolio&demo-description=Every%20account%20as%20one%20book%2C%20every%20call%20on%20the%20record.%20One%20net%20worth%2C%20the%20investor%20flows%20behind%20the%20price%2C%20and%20a%20Brier-scored%20record%20of%20the%20calls%20you%20registered%20before%20the%20fact.&demo-url=https%3A%2F%2Fopenportfolio.app%2Fdemo%2F&products=%5B%7B%22type%22%3A%22integration%22%2C%22integrationSlug%22%3A%22convex%22%2C%22productSlug%22%3A%22convex%22%2C%22protocol%22%3A%22storage%22%7D%5D&env=VITE_CLERK_PUBLISHABLE_KEY&envDescription=Clerk%20publishable%20key.%20A%20deployed%20book%20is%20private%2C%20so%20it%20needs%20an%20identity%20provider%20to%20know%20who%20you%20are.&envLink=https%3A%2F%2Fopenportfolio.app%2Fdocs%2Fdeploy)
 
 <sub>Dashboard and backend in one click. The sync worker runs on your machine, by design: see [Deploying](https://openportfolio.app/docs/deploy).</sub>
 
@@ -152,17 +152,26 @@ Full walkthrough: **[openportfolio.app/docs/quickstart](https://openportfolio.ap
 
 ### Or deploy it
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fseonglae%2Fopenportfolio&project-name=openportfolio&repository-name=openportfolio&env=CONVEX_DEPLOY_KEY,VITE_CLERK_PUBLISHABLE_KEY&envDescription=A%20Convex%20production%20deploy%20key%20and%20your%20Clerk%20publishable%20key&envLink=https%3A%2F%2Fopenportfolio.app%2Fdocs%2Fdeploy)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fseonglae%2Fopenportfolio&project-name=openportfolio&repository-name=openportfolio&demo-title=openportfolio&demo-description=Every%20account%20as%20one%20book%2C%20every%20call%20on%20the%20record.%20One%20net%20worth%2C%20the%20investor%20flows%20behind%20the%20price%2C%20and%20a%20Brier-scored%20record%20of%20the%20calls%20you%20registered%20before%20the%20fact.&demo-url=https%3A%2F%2Fopenportfolio.app%2Fdemo%2F&products=%5B%7B%22type%22%3A%22integration%22%2C%22integrationSlug%22%3A%22convex%22%2C%22productSlug%22%3A%22convex%22%2C%22protocol%22%3A%22storage%22%7D%5D&env=VITE_CLERK_PUBLISHABLE_KEY&envDescription=Clerk%20publishable%20key.%20A%20deployed%20book%20is%20private%2C%20so%20it%20needs%20an%20identity%20provider%20to%20know%20who%20you%20are.&envLink=https%3A%2F%2Fopenportfolio.app%2Fdocs%2Fdeploy)
 
-One build command does both halves, from `vercel.json`:
+That flow clones this repository into your own Git account, installs the Convex integration from the
+Vercel Marketplace and provisions a Convex project under your own Convex team, asks you for one
+value, and builds both halves in a single command:
 
 ```bash
 npx convex deploy --cmd-url-env-var-name VITE_CONVEX_URL --cmd 'pnpm --filter openportfolio-browser build'
 ```
 
-It pushes the schema, functions and indexes to your Convex deployment, then builds the browser
-against it. Two prompts: a Convex production deploy key, and your Clerk publishable key. Afterwards,
-one command on the Convex side, because the issuer is a Convex variable and not a Vercel one:
+The Marketplace step is the only reason this is one click rather than two: Vercel can create the
+backend during the import instead of sending you off to make one first, and it hands the build a
+deploy key. `vercel.json` guards the command on `CONVEX_DEPLOY_KEY` and falls back to a plain
+browser build, so the same file also covers a deployment you provisioned yourself and now want a
+hosted page for. Without the guard that case would fail its build.
+
+The one value it asks for is `VITE_CLERK_PUBLISHABLE_KEY`. A deployed book is private, so it needs an
+identity provider to know who you are, and it is better to be asked at import than to find out
+afterwards. Then two commands on the Convex side, because the issuer is a Convex deployment variable
+rather than a Vercel one:
 
 ```bash
 npx convex env set CLERK_ISSUER_URL https://your-app.clerk.accounts.dev
