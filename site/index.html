@@ -209,10 +209,18 @@
             forecasts you registered before the fact.
           </p>
           <p class="btn-row">
-            <a class="btn btn-primary" href="/docs/quickstart">Get started</a>
+            <a
+              class="btn btn-primary"
+              href="https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fseonglae%2Fopenportfolio&amp;project-name=openportfolio&amp;repository-name=openportfolio&amp;env=CONVEX_DEPLOY_KEY,VITE_CLERK_PUBLISHABLE_KEY&amp;envDescription=A%20Convex%20production%20deploy%20key%20and%20your%20Clerk%20publishable%20key&amp;envLink=https%3A%2F%2Fopenportfolio.app%2Fdocs%2Fdeploy"
+              >Deploy to Vercel</a
+            >
             <a class="btn btn-ghost" href="/demo/">See the live demo</a>
+            <a class="btn btn-ghost" href="/docs/quickstart">Or run it locally</a>
           </p>
-          <p class="hero-note">git clone · pnpm install · npx convex dev</p>
+          <p class="hero-note">
+            Dashboard and backend in one click. The sync worker runs on your machine, by design &mdash;
+            <a href="/docs/deploy">why</a>.
+          </p>
 
           <div class="panel">
             <div class="panel-bar">
@@ -687,7 +695,14 @@
               </ul>
             </div>
             <figure>
-              <div class="code"><button class="copy" type="button" aria-label="Copy code to clipboard"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2" /><path d="M5 15V5a2 2 0 0 1 2-2h8" /></svg><svg class="i-ok" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 13 4 4L19 7" /></svg></button><pre><code class="lang-ts"><span class="c">// actor.mts — the provider chain, not an API client</span>
+              <div class="code">
+                <button class="copy" type="button" aria-label="Copy code to clipboard">
+                  <svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true">
+                    <rect x="9" y="9" width="11" height="11" rx="2" />
+                    <path d="M5 15V5a2 2 0 0 1 2-2h8" /></svg
+                  ><svg class="i-ok" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 13 4 4L19 7" /></svg>
+                </button>
+                <pre><code class="lang-ts"><span class="c">// actor.mts — the provider chain, not an API client</span>
 <span class="k">const</span> <span class="t">ORDERS</span> <span class="o">=</span> <span class="o">{</span>
   <span class="p">sync</span><span class="o">:</span>    <span class="o">[</span><span class="s">&quot;codex&quot;</span><span class="o">,</span> <span class="s">&quot;claude&quot;</span><span class="o">],</span>
   <span class="p">review</span><span class="o">:</span>  <span class="o">[</span><span class="s">&quot;claude&quot;</span><span class="o">,</span> <span class="s">&quot;codex&quot;</span><span class="o">],</span>
@@ -695,7 +710,8 @@
 <span class="o">}</span>
 
 <span class="c">// Each entry is a CLI you already signed in to.</span>
-<span class="c">// There is no apiKey field to fill in, in any of them.</span></code></pre></div>
+<span class="c">// There is no apiKey field to fill in, in any of them.</span></code></pre>
+              </div>
             </figure>
           </div>
         </section>
@@ -773,7 +789,14 @@
           </div>
           <div class="feature">
             <figure>
-              <div class="code"><button class="copy" type="button" aria-label="Copy code to clipboard"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2" /><path d="M5 15V5a2 2 0 0 1 2-2h8" /></svg><svg class="i-ok" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 13 4 4L19 7" /></svg></button><pre><code class="lang-bash"><span class="k">git</span> clone <span class="s">https://github.com/seonglae/openportfolio.git</span>
+              <div class="code">
+                <button class="copy" type="button" aria-label="Copy code to clipboard">
+                  <svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true">
+                    <rect x="9" y="9" width="11" height="11" rx="2" />
+                    <path d="M5 15V5a2 2 0 0 1 2-2h8" /></svg
+                  ><svg class="i-ok" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 13 4 4L19 7" /></svg>
+                </button>
+                <pre><code class="lang-bash"><span class="k">git</span> clone <span class="s">https://github.com/seonglae/openportfolio.git</span>
 <span class="k">cd</span> openportfolio
 <span class="k">pnpm</span> install
 
@@ -786,7 +809,8 @@
 
 <span class="c"># the UI, then the sync loop</span>
 <span class="k">pnpm</span> <span class="a">--filter</span> openportfolio-browser dev
-<span class="k">npx</span> tsx sync-worker.mts <span class="a">--once</span></code></pre></div>
+<span class="k">npx</span> tsx sync-worker.mts <span class="a">--once</span></code></pre>
+              </div>
             </figure>
             <div>
               <p>

@@ -5,13 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="color-scheme" content="light dark" />
     <title>Quick start · openportfolio docs</title>
-    <meta name="description" content="Clone, install, create a Convex deployment, create the first book, and get a real net worth on screen from a manual holdings file." />
+    <meta
+      name="description"
+      content="Clone, install, create a Convex deployment, create the first book, and get a real net worth on screen from a manual holdings file."
+    />
     <link rel="canonical" href="https://openportfolio.app/docs/quickstart" />
     <meta property="og:type" content="article" />
     <meta property="og:site_name" content="openportfolio" />
     <meta property="og:url" content="https://openportfolio.app/docs/quickstart" />
     <meta property="og:title" content="Quick start · openportfolio docs" />
-    <meta property="og:description" content="Clone, install, create a Convex deployment, create the first book, and get a real net worth on screen from a manual holdings file." />
+    <meta
+      property="og:description"
+      content="Clone, install, create a Convex deployment, create the first book, and get a real net worth on screen from a manual holdings file."
+    />
     <meta property="og:image" content="https://openportfolio.app/og.png" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:image" content="https://openportfolio.app/og.png" />
@@ -21,7 +27,10 @@
     <link rel="manifest" href="/site.webmanifest" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="/assets/style.css" />
     <script type="application/ld+json">
       {
@@ -59,7 +68,23 @@
     <a class="skip" href="#main">Skip to content</a>
     <header class="site-head">
       <div class="wrap">
-        <a class="brand" href="/" aria-label="openportfolio home"><svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="hm" gradientUnits="userSpaceOnUse" x1="6" y1="6" x2="46" y2="58"><stop offset="0" stop-color="#8b9cff"/><stop offset=".55" stop-color="#5b6cf0"/><stop offset="1" stop-color="#7c5cf0"/></linearGradient></defs><g fill="url(#hm)"><rect x="4" y="38" width="14" height="20" rx="3" opacity=".55"/><rect x="25" y="24" width="14" height="34" rx="3" opacity=".78"/><rect x="46" y="8" width="14" height="50" rx="3"/></g></svg> openportfolio</a>
+        <a class="brand" href="/" aria-label="openportfolio home"
+          ><svg viewBox="0 0 64 64" aria-hidden="true">
+            <defs>
+              <linearGradient id="hm" gradientUnits="userSpaceOnUse" x1="6" y1="6" x2="46" y2="58">
+                <stop offset="0" stop-color="#8b9cff" />
+                <stop offset=".55" stop-color="#5b6cf0" />
+                <stop offset="1" stop-color="#7c5cf0" />
+              </linearGradient>
+            </defs>
+            <g fill="url(#hm)">
+              <rect x="4" y="38" width="14" height="20" rx="3" opacity=".55" />
+              <rect x="25" y="24" width="14" height="34" rx="3" opacity=".78" />
+              <rect x="46" y="8" width="14" height="50" rx="3" />
+            </g>
+          </svg>
+          openportfolio</a
+        >
         <nav class="site-nav" aria-label="Primary">
           <a href="/docs/">Docs</a>
           <a href="/demo/">Demo</a>
@@ -85,54 +110,138 @@
     </header>
     <div class="wrap">
       <div class="docs">
-        <nav class="docs-nav" aria-label="Documentation"><strong>Start</strong><a href="/docs/">Overview</a><a href="/docs/quickstart" aria-current="page">Quick start</a><a href="/docs/configuration">Configuration</a><strong>Concepts</strong><a href="/docs/forecasts">Forecasts and Brier</a><a href="/docs/flows">Flows and catalysts</a><a href="/docs/multi-tenancy">Multi-tenancy</a><strong>Extend</strong><a href="/docs/adapters">Venue adapters</a><a href="/docs/mcp">MCP and agents</a></nav>
+        <nav class="docs-nav" aria-label="Documentation">
+          <strong>Start</strong><a href="/docs/">Overview</a
+          ><a href="/docs/quickstart" aria-current="page">Quick start</a><a href="/docs/deploy">Deploying</a
+          ><a href="/docs/configuration">Configuration</a><strong>Concepts</strong
+          ><a href="/docs/forecasts">Forecasts and Brier</a><a href="/docs/flows">Flows and catalysts</a
+          ><a href="/docs/multi-tenancy">Multi-tenancy</a><strong>Extend</strong
+          ><a href="/docs/adapters">Venue adapters</a><a href="/docs/mcp">MCP and agents</a>
+        </nav>
         <article class="prose" id="main">
-<h1>Quick start</h1>
-<p>Node 22+, pnpm, and a <a href="https://convex.dev">Convex</a> account. The free tier is enough.</p>
+          <h1>Quick start</h1>
+          <p>Node 22+, pnpm, and a <a href="https://convex.dev">Convex</a> account. The free tier is enough.</p>
 
-<h2>1. Install</h2>
-<div class="code"><button class="copy" type="button" aria-label="Copy code to clipboard"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2" /><path d="M5 15V5a2 2 0 0 1 2-2h8" /></svg><svg class="i-ok" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 13 4 4L19 7" /></svg></button><pre><code class="lang-bash"><span class="k">git</span> clone <span class="s">https://github.com/seonglae/openportfolio.git</span>
+          <h2>1. Install</h2>
+          <div class="code">
+            <button class="copy" type="button" aria-label="Copy code to clipboard">
+              <svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true">
+                <rect x="9" y="9" width="11" height="11" rx="2" />
+                <path d="M5 15V5a2 2 0 0 1 2-2h8" /></svg
+              ><svg class="i-ok" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 13 4 4L19 7" /></svg>
+            </button>
+            <pre><code class="lang-bash"><span class="k">git</span> clone <span class="s">https://github.com/seonglae/openportfolio.git</span>
 <span class="k">cd</span> openportfolio
 <span class="k">pnpm</span> install
 
 <span class="k">cp</span> .env.example .env.local
-<span class="k">npx</span> convex dev <span class="a">--once</span>          <span class="c"># creates the deployment</span></code></pre></div>
+<span class="k">npx</span> convex dev <span class="a">--once</span>          <span class="c"># creates the deployment</span></code></pre>
+          </div>
 
-<h2>2. Create the first book</h2>
-<p>On localhost with no identity provider configured, the deployment will only create the tenant named by <code>OPENPORTFOLIO_DEV_TENANT</code>.</p>
-<div class="code"><button class="copy" type="button" aria-label="Copy code to clipboard"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2" /><path d="M5 15V5a2 2 0 0 1 2-2h8" /></svg><svg class="i-ok" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 13 4 4L19 7" /></svg></button><pre><code class="lang-bash"><span class="k">npx</span> convex env set OPENPORTFOLIO_DEV_TENANT home
-<span class="k">npx</span> convex run tenants:create <span class="s">&#x27;{&quot;slug&quot;:&quot;home&quot;,&quot;name&quot;:&quot;Home&quot;,&quot;baseCurrency&quot;:&quot;GBP&quot;}&#x27;</span></code></pre></div>
+          <h2>2. Create the first book</h2>
+          <p>
+            On localhost with no identity provider configured, the deployment will only create the tenant named by
+            <code>OPENPORTFOLIO_DEV_TENANT</code>.
+          </p>
+          <div class="code">
+            <button class="copy" type="button" aria-label="Copy code to clipboard">
+              <svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true">
+                <rect x="9" y="9" width="11" height="11" rx="2" />
+                <path d="M5 15V5a2 2 0 0 1 2-2h8" /></svg
+              ><svg class="i-ok" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 13 4 4L19 7" /></svg>
+            </button>
+            <pre><code class="lang-bash"><span class="k">npx</span> convex env set OPENPORTFOLIO_DEV_TENANT home
+<span class="k">npx</span> convex run tenants:create <span class="s">&#x27;{&quot;slug&quot;:&quot;home&quot;,&quot;name&quot;:&quot;Home&quot;,&quot;baseCurrency&quot;:&quot;GBP&quot;}&#x27;</span></code></pre>
+          </div>
 
-<h2>3. Start the UI</h2>
-<div class="code"><button class="copy" type="button" aria-label="Copy code to clipboard"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2" /><path d="M5 15V5a2 2 0 0 1 2-2h8" /></svg><svg class="i-ok" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 13 4 4L19 7" /></svg></button><pre><code class="lang-bash"><span class="k">cp</span> browser/.env.local.example browser/.env.local   <span class="c"># set VITE_CONVEX_URL</span>
-<span class="k">pnpm</span> <span class="a">--filter</span> openportfolio-browser dev            <span class="c"># http://localhost:6101</span></code></pre></div>
+          <h2>3. Start the UI</h2>
+          <div class="code">
+            <button class="copy" type="button" aria-label="Copy code to clipboard">
+              <svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true">
+                <rect x="9" y="9" width="11" height="11" rx="2" />
+                <path d="M5 15V5a2 2 0 0 1 2-2h8" /></svg
+              ><svg class="i-ok" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 13 4 4L19 7" /></svg>
+            </button>
+            <pre><code class="lang-bash"><span class="k">cp</span> browser/.env.local.example browser/.env.local   <span class="c"># set VITE_CONVEX_URL</span>
+<span class="k">pnpm</span> <span class="a">--filter</span> openportfolio-browser dev            <span class="c"># http://localhost:6101</span></code></pre>
+          </div>
 
-<h2>4. Sync</h2>
-<div class="code"><button class="copy" type="button" aria-label="Copy code to clipboard"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2" /><path d="M5 15V5a2 2 0 0 1 2-2h8" /></svg><svg class="i-ok" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 13 4 4L19 7" /></svg></button><pre><code class="lang-bash"><span class="k">npx</span> tsx sync-worker.mts <span class="a">--once</span></code></pre></div>
-<p>With nothing linked it registers the venues it can serve and records a net worth of zero, which is correct.</p>
+          <h2>4. Sync</h2>
+          <div class="code">
+            <button class="copy" type="button" aria-label="Copy code to clipboard">
+              <svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true">
+                <rect x="9" y="9" width="11" height="11" rx="2" />
+                <path d="M5 15V5a2 2 0 0 1 2-2h8" /></svg
+              ><svg class="i-ok" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 13 4 4L19 7" /></svg>
+            </button>
+            <pre><code class="lang-bash"><span class="k">npx</span> tsx sync-worker.mts <span class="a">--once</span></code></pre>
+          </div>
+          <p>
+            With nothing linked it registers the venues it can serve and records a net worth of zero, which is correct.
+          </p>
 
-<h2>5. Put something in it</h2>
-<p>A manual holdings file is how a pension, a property or an unlisted holding gets into the total instead of being left out of it.</p>
-<div class="code"><button class="copy" type="button" aria-label="Copy code to clipboard"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2" /><path d="M5 15V5a2 2 0 0 1 2-2h8" /></svg><svg class="i-ok" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 13 4 4L19 7" /></svg></button><pre><code class="lang-json"><span class="c">// holdings.json</span>
+          <h2>5. Put something in it</h2>
+          <p>
+            A manual holdings file is how a pension, a property or an unlisted holding gets into the total instead of
+            being left out of it.
+          </p>
+          <div class="code">
+            <button class="copy" type="button" aria-label="Copy code to clipboard">
+              <svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true">
+                <rect x="9" y="9" width="11" height="11" rx="2" />
+                <path d="M5 15V5a2 2 0 0 1 2-2h8" /></svg
+              ><svg class="i-ok" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 13 4 4L19 7" /></svg>
+            </button>
+            <pre><code class="lang-json"><span class="c">// holdings.json</span>
 <span class="o">[</span>
   <span class="o">{</span> <span class="p">&quot;accountKey&quot;</span><span class="o">:</span> <span class="s">&quot;isa&quot;</span><span class="o">,</span>    <span class="p">&quot;symbol&quot;</span><span class="o">:</span> <span class="s">&quot;VWRL&quot;</span><span class="o">,</span> <span class="p">&quot;assetClass&quot;</span><span class="o">:</span> <span class="s">&quot;etf&quot;</span><span class="o">,</span>    <span class="p">&quot;qty&quot;</span><span class="o">:</span> <span class="n">40</span><span class="o">,</span>   <span class="p">&quot;price&quot;</span><span class="o">:</span> <span class="n">118.2</span><span class="o">,</span> <span class="p">&quot;currency&quot;</span><span class="o">:</span> <span class="s">&quot;GBP&quot;</span> <span class="o">},</span>
   <span class="o">{</span> <span class="p">&quot;accountKey&quot;</span><span class="o">:</span> <span class="s">&quot;wallet&quot;</span><span class="o">,</span> <span class="p">&quot;symbol&quot;</span><span class="o">:</span> <span class="s">&quot;BTC&quot;</span><span class="o">,</span>  <span class="p">&quot;assetClass&quot;</span><span class="o">:</span> <span class="s">&quot;crypto&quot;</span><span class="o">,</span> <span class="p">&quot;qty&quot;</span><span class="o">:</span> <span class="n">0.15</span><span class="o">,</span> <span class="p">&quot;price&quot;</span><span class="o">:</span> <span class="n">0</span><span class="o">,</span>     <span class="p">&quot;currency&quot;</span><span class="o">:</span> <span class="s">&quot;USD&quot;</span> <span class="o">}</span>
-<span class="o">]</span></code></pre></div>
-<div class="code"><button class="copy" type="button" aria-label="Copy code to clipboard"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2" /><path d="M5 15V5a2 2 0 0 1 2-2h8" /></svg><svg class="i-ok" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 13 4 4L19 7" /></svg></button><pre><code class="lang-bash"><span class="k">export</span> OPENPORTFOLIO_MANUAL_HOLDINGS=<span class="v">$PWD</span>/holdings.json
+<span class="o">]</span></code></pre>
+          </div>
+          <div class="code">
+            <button class="copy" type="button" aria-label="Copy code to clipboard">
+              <svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true">
+                <rect x="9" y="9" width="11" height="11" rx="2" />
+                <path d="M5 15V5a2 2 0 0 1 2-2h8" /></svg
+              ><svg class="i-ok" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 13 4 4L19 7" /></svg>
+            </button>
+            <pre><code class="lang-bash"><span class="k">export</span> OPENPORTFOLIO_MANUAL_HOLDINGS=<span class="v">$PWD</span>/holdings.json
 <span class="k">npx</span> convex run accounts:link <span class="s">&#x27;{&quot;accountKey&quot;:&quot;isa&quot;,&quot;venue&quot;:&quot;manual&quot;,&quot;kind&quot;:&quot;brokerage&quot;,&quot;label&quot;:&quot;ISA&quot;,&quot;currency&quot;:&quot;GBP&quot;}&#x27;</span>
 <span class="k">npx</span> convex run accounts:link <span class="s">&#x27;{&quot;accountKey&quot;:&quot;wallet&quot;,&quot;venue&quot;:&quot;manual&quot;,&quot;kind&quot;:&quot;wallet&quot;,&quot;label&quot;:&quot;Wallet&quot;,&quot;currency&quot;:&quot;USD&quot;}&#x27;</span>
-<span class="k">npx</span> tsx sync-worker.mts <span class="a">--once</span></code></pre></div>
-<p>The BTC row is priced at 0 on purpose: the worker re-quotes crypto through the keyless CoinGecko adapter, converts both rows into GBP, and writes one total.</p>
+<span class="k">npx</span> tsx sync-worker.mts <span class="a">--once</span></code></pre>
+          </div>
+          <p>
+            The BTC row is priced at 0 on purpose: the worker re-quotes crypto through the keyless CoinGecko adapter,
+            converts both rows into GBP, and writes one total.
+          </p>
 
-<h2>6. Before exposing it</h2>
-<div class="callout"><p><strong>Two things are open on localhost.</strong> While <code>OPENPORTFOLIO_DEV_TENANT</code> is set, any unauthenticated caller is scoped to that tenant. Unset it and configure Clerk before the deployment is reachable from the internet.</p></div>
-<div class="code"><button class="copy" type="button" aria-label="Copy code to clipboard"><svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2" /><path d="M5 15V5a2 2 0 0 1 2-2h8" /></svg><svg class="i-ok" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 13 4 4L19 7" /></svg></button><pre><code class="lang-bash"><span class="k">npx</span> convex env set CLERK_ISSUER_URL <span class="s">https://your-app.clerk.accounts.dev</span>
+          <h2>6. Before exposing it</h2>
+          <div class="callout">
+            <p>
+              <strong>Two things are open on localhost.</strong> While <code>OPENPORTFOLIO_DEV_TENANT</code> is set, any
+              unauthenticated caller is scoped to that tenant. Unset it and configure Clerk before the deployment is
+              reachable from the internet.
+            </p>
+          </div>
+          <div class="code">
+            <button class="copy" type="button" aria-label="Copy code to clipboard">
+              <svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true">
+                <rect x="9" y="9" width="11" height="11" rx="2" />
+                <path d="M5 15V5a2 2 0 0 1 2-2h8" /></svg
+              ><svg class="i-ok" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 13 4 4L19 7" /></svg>
+            </button>
+            <pre><code class="lang-bash"><span class="k">npx</span> convex env set CLERK_ISSUER_URL <span class="s">https://your-app.clerk.accounts.dev</span>
 <span class="k">npx</span> convex env unset OPENPORTFOLIO_DEV_TENANT
 
 KEY=<span class="s">&quot;$(openssl rand -hex 32)&quot;</span>
 <span class="k">npx</span> convex run tenants:issueServiceKey <span class="s">&quot;{\&quot;key\&quot;:\&quot;$KEY\&quot;,\&quot;label\&quot;:\&quot;sync-worker\&quot;,\&quot;role\&quot;:\&quot;member\&quot;}&quot;</span>
-<span class="k">echo</span> <span class="s">&quot;OPENPORTFOLIO_SERVICE_KEY=$KEY&quot;</span> <span class="o">&gt;&gt;</span> .env.local</code></pre></div>
-<p>Keys are stored as hashes. One key maps to exactly one tenant and carries its own role, so a worker that only reads can be issued a <code>viewer</code> key and will be refused every write.</p>
+<span class="k">echo</span> <span class="s">&quot;OPENPORTFOLIO_SERVICE_KEY=$KEY&quot;</span> <span class="o">&gt;&gt;</span> .env.local</code></pre>
+          </div>
+          <p>
+            Keys are stored as hashes. One key maps to exactly one tenant and carries its own role, so a worker that
+            only reads can be issued a <code>viewer</code> key and will be refused every write.
+          </p>
+          <p>Next: <a href="/docs/deploy">Deploying</a>.</p>
         </article>
       </div>
     </div>
@@ -154,7 +263,9 @@ KEY=<span class="s">&quot;$(openssl rand -hex 32)&quot;</span>
         // No label to keep in sync: CSS picks the glyph off the attribute.
         btn.addEventListener("click", function () {
           root.dataset.theme = root.dataset.theme === "dark" ? "light" : "dark";
-          try { localStorage.setItem("openportfolio-theme", root.dataset.theme); } catch (e) {}
+          try {
+            localStorage.setItem("openportfolio-theme", root.dataset.theme);
+          } catch (e) {}
         });
       })();
     </script>

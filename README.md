@@ -17,6 +17,10 @@ forecasts you registered before the fact. No provider API key, anywhere in it.
 
 **[Website](https://openportfolio.app) · [Docs](https://openportfolio.app/docs/) · [Live demo](https://openportfolio.app/demo/)**
 
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fseonglae%2Fopenportfolio&project-name=openportfolio&repository-name=openportfolio&env=CONVEX_DEPLOY_KEY,VITE_CLERK_PUBLISHABLE_KEY&envDescription=A%20Convex%20production%20deploy%20key%20and%20your%20Clerk%20publishable%20key&envLink=https%3A%2F%2Fopenportfolio.app%2Fdocs%2Fdeploy)
+
+<sub>Dashboard and backend in one click. The sync worker runs on your machine, by design: see [Deploying](https://openportfolio.app/docs/deploy).</sub>
+
 </div>
 
 <img src="assets/screenshots/net-worth.png" alt="The openportfolio net worth view: one total, then breakdowns by venue and by asset class, then the full position table" />
@@ -145,6 +149,33 @@ The BTC row is priced at 0 in the file on purpose: the worker re-quotes crypto t
 CoinGecko adapter, converts both rows into GBP, and writes one total.
 
 Full walkthrough: **[openportfolio.app/docs/quickstart](https://openportfolio.app/docs/quickstart)**
+
+### Or deploy it
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fseonglae%2Fopenportfolio&project-name=openportfolio&repository-name=openportfolio&env=CONVEX_DEPLOY_KEY,VITE_CLERK_PUBLISHABLE_KEY&envDescription=A%20Convex%20production%20deploy%20key%20and%20your%20Clerk%20publishable%20key&envLink=https%3A%2F%2Fopenportfolio.app%2Fdocs%2Fdeploy)
+
+One build command does both halves, from `vercel.json`:
+
+```bash
+npx convex deploy --cmd-url-env-var-name VITE_CONVEX_URL --cmd 'pnpm --filter openportfolio-browser build'
+```
+
+It pushes the schema, functions and indexes to your Convex deployment, then builds the browser
+against it. Two prompts: a Convex production deploy key, and your Clerk publishable key. Afterwards,
+one command on the Convex side, because the issuer is a Convex variable and not a Vercel one:
+
+```bash
+npx convex env set CLERK_ISSUER_URL https://your-app.clerk.accounts.dev
+npx convex run tenants:create '{"slug":"home","name":"Home","baseCurrency":"GBP"}'
+```
+
+The sync worker is not part of this and cannot be. It reads your accounts through the adapters and
+dispatches model work to an agent CLI you are signed in to, and there is no signed-in CLI inside a
+serverless function. The deployed half still resolves forecasts and scores them on Convex's own
+crons; run the worker when you want balances to refresh. Details: **[Deploying](https://openportfolio.app/docs/deploy)**.
+
+There is no Cloudflare button: that button supports Workers only, and its monorepo mode wants the app
+fully isolated in its subdirectory, which `browser/` is not.
 
 ### Before exposing it
 

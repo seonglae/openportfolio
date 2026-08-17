@@ -5,4 +5,9 @@ packages:
 # Convex and Vite both shell out to esbuild's platform binary, which only exists
 # after its postinstall runs.
 allowBuilds:
+  # Its postinstall only prints a telemetry notice and writes a "already told
+  # you" marker into the user's config dir. Nothing the package needs to work, so
+  # it does not get to run. Clerk's telemetry itself is disabled at the provider
+  # in browser/src/Auth.tsx.
+  '@clerk/shared': false
   esbuild: true

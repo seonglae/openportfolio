@@ -18,6 +18,7 @@ NAV = [
     ("Start", [
         ("index.html", "Overview"),
         ("quickstart.html", "Quick start"),
+        ("deploy.html", "Deploying"),
         ("configuration.html", "Configuration"),
     ]),
     ("Concepts", [
@@ -419,6 +420,47 @@ KEY="$(openssl rand -hex 32)"
 npx convex run tenants:issueServiceKey "{\\"key\\":\\"$KEY\\",\\"label\\":\\"sync-worker\\",\\"role\\":\\"member\\"}"
 echo "OPENPORTFOLIO_SERVICE_KEY=$KEY" >> .env.local</code></pre>
 <p>Keys are stored as hashes. One key maps to exactly one tenant and carries its own role, so a worker that only reads can be issued a <code>viewer</code> key and will be refused every write.</p>
+<p>Next: <a href="/docs/deploy">Deploying</a>.</p>
+""",
+)
+
+page(
+    "deploy.html",
+    "Deploying",
+    "One click puts the dashboard and the backend on Vercel. What that covers, the two things it cannot cover, and why there is no Cloudflare button.",
+    """
+<h1>Deploying</h1>
+<p>The dashboard and the backend deploy together in one click. The sync loop does not, and that is a property of the design rather than a gap.</p>
+
+<p><a class="btn btn-primary" href="https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fseonglae%2Fopenportfolio&amp;project-name=openportfolio&amp;repository-name=openportfolio&amp;env=CONVEX_DEPLOY_KEY,VITE_CLERK_PUBLISHABLE_KEY&amp;envDescription=A%20Convex%20production%20deploy%20key%20and%20your%20Clerk%20publishable%20key&amp;envLink=https%3A%2F%2Fopenportfolio.app%2Fdocs%2Fdeploy">Deploy to Vercel</a></p>
+
+<h2>What the button does</h2>
+<p>It clones the repository into your Git account and creates a Vercel project whose build command is in <code>vercel.json</code>:</p>
+<pre><code class="lang-bash">npx convex deploy --cmd-url-env-var-name VITE_CONVEX_URL --cmd 'pnpm --filter openportfolio-browser build'</code></pre>
+<p>One command does both halves: it pushes the schema, functions and indexes to your Convex deployment, then builds the browser with <code>VITE_CONVEX_URL</code> already pointing at it. The <code>--cmd-url-env-var-name</code> flag matters, because the default variable is <code>CONVEX_URL</code> and Vite only exposes names prefixed <code>VITE_</code>.</p>
+
+<h2>The two variables it asks for</h2>
+<table>
+<thead><tr><th>Variable</th><th>Where it comes from</th></tr></thead>
+<tbody>
+<tr><td><code>CONVEX_DEPLOY_KEY</code></td><td>A production deploy key from the Convex dashboard. Or install the Convex integration from the Vercel Marketplace and let it create the project for you.</td></tr>
+<tr><td><code>VITE_CLERK_PUBLISHABLE_KEY</code></td><td>Your Clerk application. Publishable keys are public by design; the secret never appears here.</td></tr>
+</tbody>
+</table>
+
+<h2>Then one command, on the Convex side</h2>
+<p>Convex has to be told which issuer to trust, and this is a Convex deployment variable rather than a Vercel one, so the button cannot set it:</p>
+<pre><code class="lang-bash">npx convex env set CLERK_ISSUER_URL https://your-app.clerk.accounts.dev
+npx convex run tenants:create '{"slug":"home","name":"Home","baseCurrency":"GBP"}'</code></pre>
+
+<div class="callout"><p><strong>Never set <code>OPENPORTFOLIO_DEV_TENANT</code> on a deployment with a public URL.</strong> It is the localhost escape hatch: while it is set, every unauthenticated visitor is scoped to that book. A deployment with Clerk configured and the hatch unset is private; the header says which of the two you are looking at, so you do not have to guess.</p></div>
+
+<h2>What one click cannot cover</h2>
+<p><code>sync-worker.mts</code> reads your accounts through the venue adapters, and <code>agent-worker.mts</code> dispatches model work to an agent CLI you are already signed in to. There is no provider key to hand a serverless function, and no signed-in CLI inside one. Those run on your machine, against your own logins, which is the same reason there is no hosted version of this to sign up for.</p>
+<p>The deployed half is not a shell without them. Convex runs its own crons, so forecasts still resolve and Brier scores still update on schedule; a manual holdings file still produces a net worth. Point the worker at the same deployment when you want the accounts to refresh themselves.</p>
+
+<h2>Why there is no Cloudflare button</h2>
+<p>Cloudflare's deploy button supports Workers applications only, and its monorepo mode requires the application to be fully isolated inside its subdirectory, dependencies included. <code>browser/</code> imports <code>convex/_generated</code> from the repository root and two workspace packages, so it fails that test. Cloudflare Pages remains a fine manual target, and this marketing site is deployed to it with <code>pnpm site:deploy</code>.</p>
 """,
 )
 

@@ -4,19 +4,19 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="color-scheme" content="light dark" />
-    <title>Venue adapters · openportfolio docs</title>
+    <title>Deploying · openportfolio docs</title>
     <meta
       name="description"
-      content="The adapter contract, the two adapters that ship, and how to add a keyed broker without putting a credential anywhere near the backend or the repository."
+      content="One click puts the dashboard and the backend on Vercel. What that covers, the two things it cannot cover, and why there is no Cloudflare button."
     />
-    <link rel="canonical" href="https://openportfolio.app/docs/adapters" />
+    <link rel="canonical" href="https://openportfolio.app/docs/deploy" />
     <meta property="og:type" content="article" />
     <meta property="og:site_name" content="openportfolio" />
-    <meta property="og:url" content="https://openportfolio.app/docs/adapters" />
-    <meta property="og:title" content="Venue adapters · openportfolio docs" />
+    <meta property="og:url" content="https://openportfolio.app/docs/deploy" />
+    <meta property="og:title" content="Deploying · openportfolio docs" />
     <meta
       property="og:description"
-      content="The adapter contract, the two adapters that ship, and how to add a keyed broker without putting a credential anywhere near the backend or the repository."
+      content="One click puts the dashboard and the backend on Vercel. What that covers, the two things it cannot cover, and why there is no Cloudflare button."
     />
     <meta property="og:image" content="https://openportfolio.app/og.png" />
     <meta name="twitter:card" content="summary_large_image" />
@@ -36,9 +36,9 @@
       {
         "@context": "https://schema.org",
         "@type": "TechArticle",
-        "headline": "Venue adapters",
-        "description": "The adapter contract, the two adapters that ship, and how to add a keyed broker without putting a credential anywhere near the backend or the repository.",
-        "url": "https://openportfolio.app/docs/adapters",
+        "headline": "Deploying",
+        "description": "One click puts the dashboard and the backend on Vercel. What that covers, the two things it cannot cover, and why there is no Cloudflare button.",
+        "url": "https://openportfolio.app/docs/deploy",
         "isPartOf": { "@type": "WebSite", "name": "openportfolio", "url": "https://openportfolio.app/" },
         "author": { "@type": "Person", "name": "Seonglae Cho" },
         "license": "https://www.apache.org/licenses/LICENSE-2.0",
@@ -47,7 +47,7 @@
           "itemListElement": [
             { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://openportfolio.app/" },
             { "@type": "ListItem", "position": 2, "name": "Docs", "item": "https://openportfolio.app/docs/" },
-            { "@type": "ListItem", "position": 3, "name": "Venue adapters" }
+            { "@type": "ListItem", "position": 3, "name": "Deploying" }
           ]
         }
       }
@@ -112,14 +112,31 @@
       <div class="docs">
         <nav class="docs-nav" aria-label="Documentation">
           <strong>Start</strong><a href="/docs/">Overview</a><a href="/docs/quickstart">Quick start</a
-          ><a href="/docs/deploy">Deploying</a><a href="/docs/configuration">Configuration</a><strong>Concepts</strong
-          ><a href="/docs/forecasts">Forecasts and Brier</a><a href="/docs/flows">Flows and catalysts</a
-          ><a href="/docs/multi-tenancy">Multi-tenancy</a><strong>Extend</strong
-          ><a href="/docs/adapters" aria-current="page">Venue adapters</a><a href="/docs/mcp">MCP and agents</a>
+          ><a href="/docs/deploy" aria-current="page">Deploying</a><a href="/docs/configuration">Configuration</a
+          ><strong>Concepts</strong><a href="/docs/forecasts">Forecasts and Brier</a
+          ><a href="/docs/flows">Flows and catalysts</a><a href="/docs/multi-tenancy">Multi-tenancy</a
+          ><strong>Extend</strong><a href="/docs/adapters">Venue adapters</a><a href="/docs/mcp">MCP and agents</a>
         </nav>
         <article class="prose" id="main">
-          <h1>Venue adapters</h1>
-          <p>An adapter declares what it can do and implements only that.</p>
+          <h1>Deploying</h1>
+          <p>
+            The dashboard and the backend deploy together in one click. The sync loop does not, and that is a property
+            of the design rather than a gap.
+          </p>
+
+          <p>
+            <a
+              class="btn btn-primary"
+              href="https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fseonglae%2Fopenportfolio&amp;project-name=openportfolio&amp;repository-name=openportfolio&amp;env=CONVEX_DEPLOY_KEY,VITE_CLERK_PUBLISHABLE_KEY&amp;envDescription=A%20Convex%20production%20deploy%20key%20and%20your%20Clerk%20publishable%20key&amp;envLink=https%3A%2F%2Fopenportfolio.app%2Fdocs%2Fdeploy"
+              >Deploy to Vercel</a
+            >
+          </p>
+
+          <h2>What the button does</h2>
+          <p>
+            It clones the repository into your Git account and creates a Vercel project whose build command is in
+            <code>vercel.json</code>:
+          </p>
           <div class="code">
             <button class="copy" type="button" aria-label="Copy code to clipboard">
               <svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true">
@@ -127,61 +144,43 @@
                 <path d="M5 15V5a2 2 0 0 1 2-2h8" /></svg
               ><svg class="i-ok" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 13 4 4L19 7" /></svg>
             </button>
-            <pre><code class="lang-ts"><span class="k">type</span> <span class="t">VenueAdapter</span> <span class="o">=</span> <span class="o">{</span>
-  <span class="p">venue</span><span class="o">:</span> <span class="k">string</span><span class="o">;</span>
-  <span class="p">kind</span><span class="o">:</span> <span class="t">AccountKind</span><span class="o">;</span>
-  <span class="p">capabilities</span><span class="o">:</span> <span class="o">{</span> <span class="p">canReadBalances</span><span class="o">:</span> <span class="k">boolean</span><span class="o">;</span> <span class="p">canReadQuotes</span><span class="o">:</span> <span class="k">boolean</span><span class="o">;</span> <span class="p">canPlaceOrders</span><span class="o">:</span> <span class="k">boolean</span> <span class="o">};</span>
-  <span class="f">readBalances</span><span class="o">(</span><span class="p">request</span><span class="o">:</span> <span class="t">ReadBalancesRequest</span><span class="o">):</span> <span class="t">Promise</span><span class="o">&lt;</span><span class="t">AdapterBalance</span><span class="o">[]&gt;;</span>
-  <span class="f">readQuote</span><span class="o">(</span><span class="p">request</span><span class="o">:</span> <span class="t">ReadQuoteRequest</span><span class="o">):</span> <span class="t">Promise</span><span class="o">&lt;</span><span class="t">AdapterQuote</span><span class="o">&gt;;</span>
-  <span class="f">placeOrder</span><span class="o">?(</span><span class="p">request</span><span class="o">:</span> <span class="t">PlaceOrderRequest</span><span class="o">):</span> <span class="t">Promise</span><span class="o">&lt;</span><span class="t">OrderReceipt</span><span class="o">&gt;;</span>
-<span class="o">};</span></code></pre>
+            <pre><code class="lang-bash"><span class="k">npx</span> convex deploy <span class="a">--cmd-url-env-var-name</span> VITE_CONVEX_URL <span class="a">--cmd</span> <span class="s">&#x27;pnpm --filter openportfolio-browser build&#x27;</span></code></pre>
           </div>
+          <p>
+            One command does both halves: it pushes the schema, functions and indexes to your Convex deployment, then
+            builds the browser with <code>VITE_CONVEX_URL</code> already pointing at it. The
+            <code>--cmd-url-env-var-name</code> flag matters, because the default variable is
+            <code>CONVEX_URL</code> and Vite only exposes names prefixed <code>VITE_</code>.
+          </p>
 
-          <h2>What ships</h2>
+          <h2>The two variables it asks for</h2>
           <table>
             <thead>
               <tr>
-                <th>Adapter</th>
-                <th>Reads balances</th>
-                <th>Reads quotes</th>
-                <th>Key</th>
+                <th>Variable</th>
+                <th>Where it comes from</th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td><code>coingecko</code></td>
-                <td>No, on purpose</td>
-                <td>Yes</td>
-                <td>None</td>
+                <td><code>CONVEX_DEPLOY_KEY</code></td>
+                <td>
+                  A production deploy key from the Convex dashboard. Or install the Convex integration from the Vercel
+                  Marketplace and let it create the project for you.
+                </td>
               </tr>
               <tr>
-                <td><code>manual</code></td>
-                <td>Yes, from a JSON file</td>
-                <td>No</td>
-                <td>None</td>
+                <td><code>VITE_CLERK_PUBLISHABLE_KEY</code></td>
+                <td>Your Clerk application. Publishable keys are public by design; the secret never appears here.</td>
               </tr>
             </tbody>
           </table>
+
+          <h2>Then one command, on the Convex side</h2>
           <p>
-            <code>coingecko</code> refuses balances rather than returning an empty list, because a price source does not
-            know what you hold and an empty list reads as "you hold nothing".
+            Convex has to be told which issuer to trust, and this is a Convex deployment variable rather than a Vercel
+            one, so the button cannot set it:
           </p>
-
-          <h2>Adding a keyed broker</h2>
-          <ol>
-            <li>Write a module in <code>packages/node/src/adapters/</code>.</li>
-            <li>Take the credential from the <strong>worker's</strong> environment.</li>
-            <li>Register it in <code>defaultRegistry()</code>.</li>
-          </ol>
-          <div class="callout">
-            <p>
-              <strong>Keep the credential in the worker process.</strong> The backend never sees it and neither does
-              this repository. That is why no keyed adapter ships: the useful ones all need a secret, and a public tree
-              is the wrong place to normalise putting one.
-            </p>
-          </div>
-
-          <h2>If you implement placeOrder</h2>
           <div class="code">
             <button class="copy" type="button" aria-label="Copy code to clipboard">
               <svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true">
@@ -189,14 +188,39 @@
                 <path d="M5 15V5a2 2 0 0 1 2-2h8" /></svg
               ><svg class="i-ok" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 13 4 4L19 7" /></svg>
             </button>
-            <pre><code class="lang-ts"><span class="k">type</span> <span class="t">PlaceOrderRequest</span> <span class="o">=</span> <span class="o">{</span>
-  <span class="c">// ...</span>
-  <span class="p">confirmation</span><span class="o">:</span> <span class="t">OrderConfirmation</span><span class="o">;</span>   <span class="c">// { confirmedBy, confirmedAt }</span>
-<span class="o">};</span></code></pre>
+            <pre><code class="lang-bash"><span class="k">npx</span> convex env set CLERK_ISSUER_URL <span class="s">https://your-app.clerk.accounts.dev</span>
+<span class="k">npx</span> convex run tenants:create <span class="s">&#x27;{&quot;slug&quot;:&quot;home&quot;,&quot;name&quot;:&quot;Home&quot;,&quot;baseCurrency&quot;:&quot;GBP&quot;}&#x27;</span></code></pre>
           </div>
+
+          <div class="callout">
+            <p>
+              <strong>Never set <code>OPENPORTFOLIO_DEV_TENANT</code> on a deployment with a public URL.</strong> It is
+              the localhost escape hatch: while it is set, every unauthenticated visitor is scoped to that book. A
+              deployment with Clerk configured and the hatch unset is private; the header says which of the two you are
+              looking at, so you do not have to guess.
+            </p>
+          </div>
+
+          <h2>What one click cannot cover</h2>
           <p>
-            <code>OrderConfirmation</code> has no default. An order that no human confirmed cannot be constructed, which
-            is a type error rather than a policy someone can forget.
+            <code>sync-worker.mts</code> reads your accounts through the venue adapters, and
+            <code>agent-worker.mts</code> dispatches model work to an agent CLI you are already signed in to. There is
+            no provider key to hand a serverless function, and no signed-in CLI inside one. Those run on your machine,
+            against your own logins, which is the same reason there is no hosted version of this to sign up for.
+          </p>
+          <p>
+            The deployed half is not a shell without them. Convex runs its own crons, so forecasts still resolve and
+            Brier scores still update on schedule; a manual holdings file still produces a net worth. Point the worker
+            at the same deployment when you want the accounts to refresh themselves.
+          </p>
+
+          <h2>Why there is no Cloudflare button</h2>
+          <p>
+            Cloudflare's deploy button supports Workers applications only, and its monorepo mode requires the
+            application to be fully isolated inside its subdirectory, dependencies included.
+            <code>browser/</code> imports <code>convex/_generated</code> from the repository root and two workspace
+            packages, so it fails that test. Cloudflare Pages remains a fine manual target, and this marketing site is
+            deployed to it with <code>pnpm site:deploy</code>.
           </p>
         </article>
       </div>

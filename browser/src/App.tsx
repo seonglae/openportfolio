@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
+import { AuthButton } from "./Auth.tsx";
 import { Mark } from "./Mark.tsx";
 import { ThemeToggle } from "./ThemeToggle.tsx";
 import { NetWorthView } from "./views/NetWorthView.tsx";
@@ -35,6 +36,24 @@ const TAB_STATE: Record<"on" | "off", string> = {
   off: "border border-transparent text-ink-3 hover:text-ink",
 };
 
+type Whoami = { tenantSlug: string | null; tenantName: string | null; role: string; via: string };
+
+/**
+ * Which book, and on whose authority.
+ *
+ * `via` is shown because the two auth paths are not interchangeable and look
+ * identical otherwise. "dev" means OPENPORTFOLIO_DEV_TENANT is set on the
+ * deployment, so ANY unauthenticated caller reaches this book -- correct on
+ * localhost, a data leak on a public URL. Saying so in the header is cheaper
+ * than finding out later.
+ */
+function tenantLabel(me: Whoami | undefined): string {
+  if (me === undefined) return "resolving tenant";
+  const book = me.tenantName ?? me.tenantSlug ?? "unknown book";
+  if (me.via === "dev") return `${book} · ${me.role} · dev tenant, no sign-in required`;
+  return `${book} · ${me.role}`;
+}
+
 export function App() {
   const [tab, setTab] = useState<TabKey>("worth");
   const me = useQuery(api.tenants.whoami, {});
@@ -45,10 +64,9 @@ export function App() {
       <header className="flex items-center gap-3 border-b border-rule pb-3.5">
         <Mark />
         <h1 className="serif text-[25px] leading-none font-normal tracking-[-0.01em]">openportfolio</h1>
-        <span className="ml-auto font-mono text-xs text-ink-3">
-          {me ? `${me.tenantName ?? me.tenantSlug} · ${me.role}` : "resolving tenant"}
-        </span>
+        <span className="ml-auto font-mono text-xs text-ink-3">{tenantLabel(me)}</span>
         <ThemeToggle />
+        <AuthButton />
       </header>
       <nav className="mt-[18px] mb-1 flex gap-0.5">
         {TABS.map((entry) => {

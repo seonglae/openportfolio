@@ -5,13 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="color-scheme" content="light dark" />
     <title>Configuration · openportfolio docs</title>
-    <meta name="description" content="Every environment variable openportfolio reads, which of them also have to be set on the Convex deployment, and what happens when each is missing." />
+    <meta
+      name="description"
+      content="Every environment variable openportfolio reads, which of them also have to be set on the Convex deployment, and what happens when each is missing."
+    />
     <link rel="canonical" href="https://openportfolio.app/docs/configuration" />
     <meta property="og:type" content="article" />
     <meta property="og:site_name" content="openportfolio" />
     <meta property="og:url" content="https://openportfolio.app/docs/configuration" />
     <meta property="og:title" content="Configuration · openportfolio docs" />
-    <meta property="og:description" content="Every environment variable openportfolio reads, which of them also have to be set on the Convex deployment, and what happens when each is missing." />
+    <meta
+      property="og:description"
+      content="Every environment variable openportfolio reads, which of them also have to be set on the Convex deployment, and what happens when each is missing."
+    />
     <meta property="og:image" content="https://openportfolio.app/og.png" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:image" content="https://openportfolio.app/og.png" />
@@ -21,7 +27,10 @@
     <link rel="manifest" href="/site.webmanifest" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="/assets/style.css" />
     <script type="application/ld+json">
       {
@@ -59,7 +68,23 @@
     <a class="skip" href="#main">Skip to content</a>
     <header class="site-head">
       <div class="wrap">
-        <a class="brand" href="/" aria-label="openportfolio home"><svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="hm" gradientUnits="userSpaceOnUse" x1="6" y1="6" x2="46" y2="58"><stop offset="0" stop-color="#8b9cff"/><stop offset=".55" stop-color="#5b6cf0"/><stop offset="1" stop-color="#7c5cf0"/></linearGradient></defs><g fill="url(#hm)"><rect x="4" y="38" width="14" height="20" rx="3" opacity=".55"/><rect x="25" y="24" width="14" height="34" rx="3" opacity=".78"/><rect x="46" y="8" width="14" height="50" rx="3"/></g></svg> openportfolio</a>
+        <a class="brand" href="/" aria-label="openportfolio home"
+          ><svg viewBox="0 0 64 64" aria-hidden="true">
+            <defs>
+              <linearGradient id="hm" gradientUnits="userSpaceOnUse" x1="6" y1="6" x2="46" y2="58">
+                <stop offset="0" stop-color="#8b9cff" />
+                <stop offset=".55" stop-color="#5b6cf0" />
+                <stop offset="1" stop-color="#7c5cf0" />
+              </linearGradient>
+            </defs>
+            <g fill="url(#hm)">
+              <rect x="4" y="38" width="14" height="20" rx="3" opacity=".55" />
+              <rect x="25" y="24" width="14" height="34" rx="3" opacity=".78" />
+              <rect x="46" y="8" width="14" height="50" rx="3" />
+            </g>
+          </svg>
+          openportfolio</a
+        >
         <nav class="site-nav" aria-label="Primary">
           <a href="/docs/">Docs</a>
           <a href="/demo/">Demo</a>
@@ -85,41 +110,106 @@
     </header>
     <div class="wrap">
       <div class="docs">
-        <nav class="docs-nav" aria-label="Documentation"><strong>Start</strong><a href="/docs/">Overview</a><a href="/docs/quickstart">Quick start</a><a href="/docs/configuration" aria-current="page">Configuration</a><strong>Concepts</strong><a href="/docs/forecasts">Forecasts and Brier</a><a href="/docs/flows">Flows and catalysts</a><a href="/docs/multi-tenancy">Multi-tenancy</a><strong>Extend</strong><a href="/docs/adapters">Venue adapters</a><a href="/docs/mcp">MCP and agents</a></nav>
+        <nav class="docs-nav" aria-label="Documentation">
+          <strong>Start</strong><a href="/docs/">Overview</a><a href="/docs/quickstart">Quick start</a
+          ><a href="/docs/deploy">Deploying</a><a href="/docs/configuration" aria-current="page">Configuration</a
+          ><strong>Concepts</strong><a href="/docs/forecasts">Forecasts and Brier</a
+          ><a href="/docs/flows">Flows and catalysts</a><a href="/docs/multi-tenancy">Multi-tenancy</a
+          ><strong>Extend</strong><a href="/docs/adapters">Venue adapters</a><a href="/docs/mcp">MCP and agents</a>
+        </nav>
         <article class="prose" id="main">
-<h1>Configuration</h1>
-<p>Values marked <em>deployment</em> also have to be set on Convex itself with <code>npx convex env set</code>; the deployment does not read <code>.env.local</code>.</p>
+          <h1>Configuration</h1>
+          <p>
+            Values marked <em>deployment</em> also have to be set on Convex itself with <code>npx convex env set</code>;
+            the deployment does not read <code>.env.local</code>.
+          </p>
 
-<h2>Required</h2>
-<table>
-<thead><tr><th>Variable</th><th>Meaning</th></tr></thead>
-<tbody>
-<tr><td><code>CONVEX_DEPLOYMENT</code></td><td>Written by <code>npx convex dev</code> on first run.</td></tr>
-<tr><td><code>OPENPORTFOLIO_SERVICE_KEY</code></td><td>Shared secret the workers and MCP server present instead of a browser session. Generate with <code>openssl rand -hex 32</code> and register only its hash.</td></tr>
-<tr><td><code>VITE_CONVEX_URL</code></td><td>In <code>browser/.env.local</code>. The deployment URL the UI talks to.</td></tr>
-</tbody>
-</table>
+          <h2>Required</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Variable</th>
+                <th>Meaning</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>CONVEX_DEPLOYMENT</code></td>
+                <td>Written by <code>npx convex dev</code> on first run.</td>
+              </tr>
+              <tr>
+                <td><code>OPENPORTFOLIO_SERVICE_KEY</code></td>
+                <td>
+                  Shared secret the workers and MCP server present instead of a browser session. Generate with
+                  <code>openssl rand -hex 32</code> and register only its hash.
+                </td>
+              </tr>
+              <tr>
+                <td><code>VITE_CONVEX_URL</code></td>
+                <td>In <code>browser/.env.local</code>. The deployment URL the UI talks to.</td>
+              </tr>
+            </tbody>
+          </table>
 
-<h2>Tenancy</h2>
-<table>
-<thead><tr><th>Variable</th><th>Meaning</th></tr></thead>
-<tbody>
-<tr><td><code>OPENPORTFOLIO_TENANT</code></td><td>Which book a worker acts on. Only needed when one identity belongs to several tenants; a service key is never ambiguous.</td></tr>
-<tr><td><code>OPENPORTFOLIO_DEV_TENANT</code> <em>(deployment)</em></td><td>Localhost escape hatch. While set, any unauthenticated caller is scoped to that tenant. Unset before the deployment is reachable.</td></tr>
-<tr><td><code>CLERK_ISSUER_URL</code> <em>(deployment)</em></td><td>Clerk JWT issuer. Required once more than one person uses the deployment.</td></tr>
-</tbody>
-</table>
+          <h2>Tenancy</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Variable</th>
+                <th>Meaning</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>OPENPORTFOLIO_TENANT</code></td>
+                <td>
+                  Which book a worker acts on. Only needed when one identity belongs to several tenants; a service key
+                  is never ambiguous.
+                </td>
+              </tr>
+              <tr>
+                <td><code>OPENPORTFOLIO_DEV_TENANT</code> <em>(deployment)</em></td>
+                <td>
+                  Localhost escape hatch. While set, any unauthenticated caller is scoped to that tenant. Unset before
+                  the deployment is reachable.
+                </td>
+              </tr>
+              <tr>
+                <td><code>CLERK_ISSUER_URL</code> <em>(deployment)</em></td>
+                <td>Clerk JWT issuer. Required once more than one person uses the deployment.</td>
+              </tr>
+            </tbody>
+          </table>
 
-<h2>Venues</h2>
-<table>
-<thead><tr><th>Variable</th><th>Meaning</th></tr></thead>
-<tbody>
-<tr><td><code>OPENPORTFOLIO_MANUAL_HOLDINGS</code></td><td>Path to a JSON array of manually maintained holdings.</td></tr>
-<tr><td><code>OPENPORTFOLIO_QUOTE_VENUE</code></td><td>Which registered venue prices symbols the holding venue cannot. Defaults to <code>coingecko</code>, which needs no key.</td></tr>
-</tbody>
-</table>
+          <h2>Venues</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Variable</th>
+                <th>Meaning</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>OPENPORTFOLIO_MANUAL_HOLDINGS</code></td>
+                <td>Path to a JSON array of manually maintained holdings.</td>
+              </tr>
+              <tr>
+                <td><code>OPENPORTFOLIO_QUOTE_VENUE</code></td>
+                <td>
+                  Which registered venue prices symbols the holding venue cannot. Defaults to <code>coingecko</code>,
+                  which needs no key.
+                </td>
+              </tr>
+            </tbody>
+          </table>
 
-<div class="callout"><p><strong>There is no model provider key.</strong> Not omitted from this table: there is no variable to set. See <a href="/docs/mcp">MCP and agents</a>.</p></div>
+          <div class="callout">
+            <p>
+              <strong>There is no model provider key.</strong> Not omitted from this table: there is no variable to set.
+              See <a href="/docs/mcp">MCP and agents</a>.
+            </p>
+          </div>
         </article>
       </div>
     </div>
@@ -141,7 +231,9 @@
         // No label to keep in sync: CSS picks the glyph off the attribute.
         btn.addEventListener("click", function () {
           root.dataset.theme = root.dataset.theme === "dark" ? "light" : "dark";
-          try { localStorage.setItem("openportfolio-theme", root.dataset.theme); } catch (e) {}
+          try {
+            localStorage.setItem("openportfolio-theme", root.dataset.theme);
+          } catch (e) {}
         });
       })();
     </script>
