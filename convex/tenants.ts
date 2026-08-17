@@ -12,7 +12,16 @@ const MIN_SERVICE_KEY_LENGTH = 32;
 // The signup path. An authenticated caller creates a tenant and becomes its
 // owner. With no identity provider configured, the only slug that can be
 // created is the one OPENPORTFOLIO_DEV_TENANT names, which is what lets a fresh
-// localhost checkout get its first book without standing up Clerk first.
+// localhost checkout get its first book without configuring anything.
+//
+// After the first book exists, this closes. A self-hosted deployment reachable
+// from the internet has an open sign-up form on it -- Convex Auth will happily
+// create an account for anyone who finds the URL -- and while the tenant gate
+// means a stranger could never read your book, they could create their own
+// inside your deployment and spend your quota. So a caller who already belongs
+// to a tenant may make another, and a caller who belongs to none may only make
+// the very first one. `OPENPORTFOLIO_OPEN_SIGNUP=1` reopens it for a deployment
+// meant to serve several households.
 export const create = mutation({
   args: { slug: v.string(), name: v.string(), baseCurrency: v.string() },
   handler: async (ctx, args) => {
@@ -25,6 +34,17 @@ export const create = mutation({
     const userId = await getUserId(ctx);
     const devSlug = process.env.OPENPORTFOLIO_DEV_TENANT;
     if (!userId && devSlug !== args.slug) throw new Error("auth required");
+
+    if (process.env.OPENPORTFOLIO_OPEN_SIGNUP !== "1") {
+      const anyTenant = await ctx.db.query("tenants").first();
+      if (anyTenant !== null && userId !== null) {
+        const mine = await ctx.db
+          .query("memberships")
+          .withIndex("by_user", (q) => q.eq("userId", userId))
+          .first();
+        if (mine === null) throw new Error("sign-ups are closed on this deployment");
+      }
+    }
 
     const now = Date.now();
     const tenantId = await ctx.db.insert("tenants", {

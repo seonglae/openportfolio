@@ -1,3 +1,4 @@
+import { authTables } from "@convex-dev/auth/server";
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 import {
@@ -25,12 +26,22 @@ import { literals } from "./validators";
 // The one deliberate exception is `forecasts.by_status_due`, which omits the
 // tenant so the resolver cron can sweep every tenant's due calls in one pass.
 // It is reachable only from an internalMutation. See forecasts.ts.
+//
+// Convex Auth's tables are the second, and are structural rather than an
+// oversight: an identity exists BEFORE it belongs to any book -- that is what
+// signing up is -- and one identity can belong to several. Tenancy is expressed
+// by `memberships`, which does carry tenantId and does lead its indexes with it.
 
 const ACCOUNT_KIND = literals(ACCOUNT_KINDS);
 const ASSET_CLASS = literals(ASSET_CLASSES);
 const MEMBER_ROLE = literals(MEMBER_ROLES);
 
 export default defineSchema({
+  // users, authSessions, authAccounts, authRefreshTokens, authVerificationCodes,
+  // authVerifiers, authRateLimits. Owned by Convex Auth and reachable from a
+  // client only through its own functions.
+  ...authTables,
+
   // A tenant is one book: one household, one desk, one fund. It owns every
   // other row in the deployment.
   tenants: defineTable({

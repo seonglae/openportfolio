@@ -2,7 +2,7 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "vite",
   "installCommand": "pnpm install --frozen-lockfile",
-  "buildCommand": "if [ -n \"$CONVEX_DEPLOY_KEY\" ]; then npx convex deploy --cmd-url-env-var-name VITE_CONVEX_URL --cmd 'pnpm --filter openportfolio-browser build'; else pnpm --filter openportfolio-browser build; fi",
+  "buildCommand": "if [ -n \"$CONVEX_DEPLOY_KEY\" ]; then npx convex deploy --cmd-url-env-var-name VITE_CONVEX_URL --cmd 'pnpm --filter openportfolio-browser build'; elif [ -n \"$VITE_CONVEX_URL\" ]; then pnpm --filter openportfolio-browser build; else echo 'Set CONVEX_DEPLOY_KEY (or install the Convex integration) so the build can provision and reach a backend, or set VITE_CONVEX_URL to a deployment you already own. Building with neither ships a page that can only say the variable is missing.' >&2; exit 1; fi",
   "outputDirectory": "browser/dist",
   "headers": [
     {

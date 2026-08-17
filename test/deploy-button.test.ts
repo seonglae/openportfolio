@@ -22,10 +22,9 @@ const PARAMS: Record<string, string> = {
   products: JSON.stringify([
     { type: "integration", integrationSlug: "convex", productSlug: "convex", protocol: "storage" },
   ]),
-  env: "VITE_CLERK_PUBLISHABLE_KEY",
-  envDescription:
-    "Clerk publishable key. A deployed book is private, so it needs an identity provider to know who you are.",
-  envLink: "https://openportfolio.app/docs/deploy",
+  // No `env` at all. There was one, VITE_CLERK_PUBLISHABLE_KEY, until sign-in
+  // moved to Convex Auth running inside the deployment itself. The import now
+  // asks for nothing, which is the strongest form of the claim this file guards.
 };
 
 // URLSearchParams writes a space as `+`, which is right for a form body and only
@@ -66,15 +65,20 @@ describe("what the URL has to carry", () => {
     );
   });
 
-  it("does not ask the user for a Convex deploy key", () => {
-    // Listing it in `env` makes Vercel require it, which is what forced a
-    // dashboard trip and a hand-generated key before the button was worth
-    // calling one click. The integration supplies it now.
-    expect(params.get("env")?.split(",")).not.toContain("CONVEX_DEPLOY_KEY");
+  it("asks the user for nothing", () => {
+    // Every value this once prompted for has been removed by making the thing
+    // that needed it self-hosted: CONVEX_DEPLOY_KEY because the Marketplace
+    // integration supplies it, and VITE_CLERK_PUBLISHABLE_KEY because sign-in
+    // stopped being someone else's service. An `env` reappearing here means one
+    // click quietly became one click plus an errand.
+    expect(params.get("env")).toBeNull();
   });
 
-  it("points its help link at a docs page that exists", () => {
-    const slug = new URL(params.get("envLink") ?? "").pathname.replace(/^\/docs\//, "");
-    expect(readFileSync(new URL(`../site/docs/${slug}.html`, import.meta.url), "utf8").length).toBeGreaterThan(0);
+  it("has a deploy docs page to send people to", () => {
+    // The URL no longer carries envLink, since Vercel only shows it beside the
+    // prompts there are none of. The page it pointed at still has to exist,
+    // because the README and the marketing hero both link it.
+    const page = readFileSync(new URL("../site/docs/deploy.html", import.meta.url), "utf8");
+    expect(page).toContain("convex deploy");
   });
 });

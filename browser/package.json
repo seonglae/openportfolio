@@ -11,7 +11,6 @@
     "build:demo": "vite build --config vite.demo.config.ts && mv dist-demo/demo.html dist-demo/index.html && cp public/favicon.svg dist-demo/"
   },
   "dependencies": {
-    "@clerk/react": "^6.14.3",
     "@openportfolio/core": "workspace:*",
     "@openportfolio/domain": "workspace:*",
     "@tailwindcss/vite": "^4.3.3",

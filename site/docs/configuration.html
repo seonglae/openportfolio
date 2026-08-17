@@ -175,8 +175,18 @@
                 </td>
               </tr>
               <tr>
-                <td><code>CLERK_ISSUER_URL</code> <em>(deployment)</em></td>
-                <td>Clerk JWT issuer. Required once more than one person uses the deployment.</td>
+                <td><code>OPENPORTFOLIO_OPEN_SIGNUP</code> <em>(deployment)</em></td>
+                <td>
+                  Set to <code>1</code> to let a caller who belongs to no tenant create a book after the first one
+                  exists. Off by default, so a public URL does not become someone else's backend.
+                </td>
+              </tr>
+              <tr>
+                <td><code>VITE_DISABLE_AUTH</code></td>
+                <td>
+                  Set to <code>1</code> to skip sign-in for local work. Requires <code>OPENPORTFOLIO_DEV_TENANT</code>,
+                  and makes the deployment open to anyone who reaches it.
+                </td>
               </tr>
             </tbody>
           </table>

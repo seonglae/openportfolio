@@ -219,8 +219,8 @@
           <div class="callout">
             <p>
               <strong>Two things are open on localhost.</strong> While <code>OPENPORTFOLIO_DEV_TENANT</code> is set, any
-              unauthenticated caller is scoped to that tenant. Unset it and configure Clerk before the deployment is
-              reachable from the internet.
+              unauthenticated caller is scoped to that tenant. Unset it before the deployment is reachable from the
+              internet; sign-in is already there and needs no configuration.
             </p>
           </div>
           <div class="code">
@@ -230,7 +230,7 @@
                 <path d="M5 15V5a2 2 0 0 1 2-2h8" /></svg
               ><svg class="i-ok" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 13 4 4L19 7" /></svg>
             </button>
-            <pre><code class="lang-bash"><span class="k">npx</span> convex env set CLERK_ISSUER_URL <span class="s">https://your-app.clerk.accounts.dev</span>
+            <pre><code class="lang-bash"><span class="k">npx</span> @convex-dev/auth          <span class="c"># once, generates this deployment&#x27;s signing keys</span>
 <span class="k">npx</span> convex env unset OPENPORTFOLIO_DEV_TENANT
 
 KEY=<span class="s">&quot;$(openssl rand -hex 32)&quot;</span>

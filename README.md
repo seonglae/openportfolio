@@ -17,7 +17,7 @@ forecasts you registered before the fact. No provider API key, anywhere in it.
 
 **[Website](https://openportfolio.app) · [Docs](https://openportfolio.app/docs/) · [Live demo](https://openportfolio.app/demo/)**
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fseonglae%2Fopenportfolio&project-name=openportfolio&repository-name=openportfolio&demo-title=openportfolio&demo-description=Every%20account%20as%20one%20book%2C%20every%20call%20on%20the%20record.%20One%20net%20worth%2C%20the%20investor%20flows%20behind%20the%20price%2C%20and%20a%20Brier-scored%20record%20of%20the%20calls%20you%20registered%20before%20the%20fact.&demo-url=https%3A%2F%2Fopenportfolio.app%2Fdemo%2F&products=%5B%7B%22type%22%3A%22integration%22%2C%22integrationSlug%22%3A%22convex%22%2C%22productSlug%22%3A%22convex%22%2C%22protocol%22%3A%22storage%22%7D%5D&env=VITE_CLERK_PUBLISHABLE_KEY&envDescription=Clerk%20publishable%20key.%20A%20deployed%20book%20is%20private%2C%20so%20it%20needs%20an%20identity%20provider%20to%20know%20who%20you%20are.&envLink=https%3A%2F%2Fopenportfolio.app%2Fdocs%2Fdeploy)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fseonglae%2Fopenportfolio&project-name=openportfolio&repository-name=openportfolio&demo-title=openportfolio&demo-description=Every%20account%20as%20one%20book%2C%20every%20call%20on%20the%20record.%20One%20net%20worth%2C%20the%20investor%20flows%20behind%20the%20price%2C%20and%20a%20Brier-scored%20record%20of%20the%20calls%20you%20registered%20before%20the%20fact.&demo-url=https%3A%2F%2Fopenportfolio.app%2Fdemo%2F&products=%5B%7B%22type%22%3A%22integration%22%2C%22integrationSlug%22%3A%22convex%22%2C%22productSlug%22%3A%22convex%22%2C%22protocol%22%3A%22storage%22%7D%5D)
 
 <sub>Dashboard and backend in one click. The sync worker runs on your machine, by design: see [Deploying](https://openportfolio.app/docs/deploy).</sub>
 
@@ -152,7 +152,7 @@ Full walkthrough: **[openportfolio.app/docs/quickstart](https://openportfolio.ap
 
 ### Or deploy it
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fseonglae%2Fopenportfolio&project-name=openportfolio&repository-name=openportfolio&demo-title=openportfolio&demo-description=Every%20account%20as%20one%20book%2C%20every%20call%20on%20the%20record.%20One%20net%20worth%2C%20the%20investor%20flows%20behind%20the%20price%2C%20and%20a%20Brier-scored%20record%20of%20the%20calls%20you%20registered%20before%20the%20fact.&demo-url=https%3A%2F%2Fopenportfolio.app%2Fdemo%2F&products=%5B%7B%22type%22%3A%22integration%22%2C%22integrationSlug%22%3A%22convex%22%2C%22productSlug%22%3A%22convex%22%2C%22protocol%22%3A%22storage%22%7D%5D&env=VITE_CLERK_PUBLISHABLE_KEY&envDescription=Clerk%20publishable%20key.%20A%20deployed%20book%20is%20private%2C%20so%20it%20needs%20an%20identity%20provider%20to%20know%20who%20you%20are.&envLink=https%3A%2F%2Fopenportfolio.app%2Fdocs%2Fdeploy)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fseonglae%2Fopenportfolio&project-name=openportfolio&repository-name=openportfolio&demo-title=openportfolio&demo-description=Every%20account%20as%20one%20book%2C%20every%20call%20on%20the%20record.%20One%20net%20worth%2C%20the%20investor%20flows%20behind%20the%20price%2C%20and%20a%20Brier-scored%20record%20of%20the%20calls%20you%20registered%20before%20the%20fact.&demo-url=https%3A%2F%2Fopenportfolio.app%2Fdemo%2F&products=%5B%7B%22type%22%3A%22integration%22%2C%22integrationSlug%22%3A%22convex%22%2C%22productSlug%22%3A%22convex%22%2C%22protocol%22%3A%22storage%22%7D%5D)
 
 That flow clones this repository into your own Git account, installs the Convex integration from the
 Vercel Marketplace and provisions a Convex project under your own Convex team, asks you for one
@@ -168,15 +168,23 @@ deploy key. `vercel.json` guards the command on `CONVEX_DEPLOY_KEY` and falls ba
 browser build, so the same file also covers a deployment you provisioned yourself and now want a
 hosted page for. Without the guard that case would fail its build.
 
-The one value it asks for is `VITE_CLERK_PUBLISHABLE_KEY`. A deployed book is private, so it needs an
-identity provider to know who you are, and it is better to be asked at import than to find out
-afterwards. Then two commands on the Convex side, because the issuer is a Convex deployment variable
-rather than a Vercel one:
+It asks you for nothing. Sign-in needs no key because it runs inside the deployment that was just
+created: authentication is [Convex Auth](https://labs.convex.dev/auth) with a password provider, so
+your deployment mints and verifies its own tokens and a sign-in never leaves it. No auth company in
+the path, no account to create anywhere else. Convex Auth is in beta upstream, which is the honest
+cost of the choice.
+
+Then one command on the Convex side, to generate the deployment's signing keys and create the first
+book. The first sign-up owns it:
 
 ```bash
-npx convex env set CLERK_ISSUER_URL https://your-app.clerk.accounts.dev
+npx @convex-dev/auth
 npx convex run tenants:create '{"slug":"home","name":"Home","baseCurrency":"GBP"}'
 ```
+
+Sign-ups then close on their own: a caller who belongs to no tenant may only ever create the very
+first book, so a public URL does not become someone else's backend. `OPENPORTFOLIO_OPEN_SIGNUP=1`
+reopens it.
 
 The sync worker is not part of this and cannot be. It reads your accounts through the adapters and
 dispatches model work to an agent CLI you are signed in to, and there is no signed-in CLI inside a
@@ -192,12 +200,12 @@ Two things are open on localhost and must be closed before the deployment is rea
 internet.
 
 1. **The dev tenant.** While `OPENPORTFOLIO_DEV_TENANT` is set, any unauthenticated caller is
-   scoped to that tenant. Unset it and configure Clerk.
+   scoped to that tenant. Unset it. Sign-in is already there and needs no configuration.
 2. **Service keys.** Workers and the MCP server have no browser session, so they present a key.
    Generate it locally and send only its hash.
 
 ```bash
-npx convex env set CLERK_ISSUER_URL https://your-app.clerk.accounts.dev
+npx @convex-dev/auth          # once, generates this deployment's signing keys
 npx convex env unset OPENPORTFOLIO_DEV_TENANT
 
 KEY="$(openssl rand -hex 32)"
@@ -255,8 +263,8 @@ Details: **[openportfolio.app/docs/adapters](https://openportfolio.app/docs/adap
 - A [Convex](https://convex.dev) account (free tier is enough)
 - At least one agent CLI signed in, if you want the agent worker: `codex`, `antigravity` (`agy`),
   or `claude`
-- Optional: [Clerk](https://clerk.com) for auth, needed once more than one person uses the
-  deployment or it is reachable from the internet
+- Nothing else. Authentication is Convex Auth running in your own deployment, so there is no
+  identity provider to sign up for
 
 ## Development
 

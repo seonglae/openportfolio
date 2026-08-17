@@ -412,8 +412,8 @@ npx tsx sync-worker.mts --once</code></pre>
 <p>The BTC row is priced at 0 on purpose: the worker re-quotes crypto through the keyless CoinGecko adapter, converts both rows into GBP, and writes one total.</p>
 
 <h2>6. Before exposing it</h2>
-<div class="callout"><p><strong>Two things are open on localhost.</strong> While <code>OPENPORTFOLIO_DEV_TENANT</code> is set, any unauthenticated caller is scoped to that tenant. Unset it and configure Clerk before the deployment is reachable from the internet.</p></div>
-<pre><code class="lang-bash">npx convex env set CLERK_ISSUER_URL https://your-app.clerk.accounts.dev
+<div class="callout"><p><strong>Two things are open on localhost.</strong> While <code>OPENPORTFOLIO_DEV_TENANT</code> is set, any unauthenticated caller is scoped to that tenant. Unset it before the deployment is reachable from the internet; sign-in is already there and needs no configuration.</p></div>
+<pre><code class="lang-bash">npx @convex-dev/auth          # once, generates this deployment's signing keys
 npx convex env unset OPENPORTFOLIO_DEV_TENANT
 
 KEY="$(openssl rand -hex 32)"
@@ -432,32 +432,34 @@ page(
 <h1>Deploying</h1>
 <p>The dashboard and the backend deploy together in one click. The sync loop does not, and that is a property of the design rather than a gap.</p>
 
-<p><a class="btn btn-primary" href="https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fseonglae%2Fopenportfolio&amp;project-name=openportfolio&amp;repository-name=openportfolio&amp;demo-title=openportfolio&amp;demo-description=Every%20account%20as%20one%20book%2C%20every%20call%20on%20the%20record.%20One%20net%20worth%2C%20the%20investor%20flows%20behind%20the%20price%2C%20and%20a%20Brier-scored%20record%20of%20the%20calls%20you%20registered%20before%20the%20fact.&amp;demo-url=https%3A%2F%2Fopenportfolio.app%2Fdemo%2F&amp;products=%5B%7B%22type%22%3A%22integration%22%2C%22integrationSlug%22%3A%22convex%22%2C%22productSlug%22%3A%22convex%22%2C%22protocol%22%3A%22storage%22%7D%5D&amp;env=VITE_CLERK_PUBLISHABLE_KEY&amp;envDescription=Clerk%20publishable%20key.%20A%20deployed%20book%20is%20private%2C%20so%20it%20needs%20an%20identity%20provider%20to%20know%20who%20you%20are.&amp;envLink=https%3A%2F%2Fopenportfolio.app%2Fdocs%2Fdeploy">Deploy to Vercel</a></p>
+<p><a class="btn btn-primary" href="https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fseonglae%2Fopenportfolio&amp;project-name=openportfolio&amp;repository-name=openportfolio&amp;demo-title=openportfolio&amp;demo-description=Every%20account%20as%20one%20book%2C%20every%20call%20on%20the%20record.%20One%20net%20worth%2C%20the%20investor%20flows%20behind%20the%20price%2C%20and%20a%20Brier-scored%20record%20of%20the%20calls%20you%20registered%20before%20the%20fact.&amp;demo-url=https%3A%2F%2Fopenportfolio.app%2Fdemo%2F&amp;products=%5B%7B%22type%22%3A%22integration%22%2C%22integrationSlug%22%3A%22convex%22%2C%22productSlug%22%3A%22convex%22%2C%22protocol%22%3A%22storage%22%7D%5D">Deploy to Vercel</a></p>
 
 <h2>What the button does</h2>
 <p>In order, that flow:</p>
 <ol>
 <li>clones this repository into your own GitHub, GitLab or Bitbucket account</li>
 <li>installs the Convex integration from the Vercel Marketplace and provisions a Convex project under your own Convex team, handing the build a deploy key</li>
-<li>asks you for one value, <code>VITE_CLERK_PUBLISHABLE_KEY</code></li>
 <li>builds both halves in a single command</li>
 </ol>
-<p>Step 2 is the only reason this is one click rather than two. Convex is a Marketplace integration, so Vercel can create the backend during the import instead of asking you to go and make one first.</p>
+<p>It asks you for nothing. Step 2 is the only reason this is one click rather than two: Convex is a Marketplace integration, so Vercel can create the backend during the import instead of asking you to go and make one first. And sign-in needs no key, because it runs inside the deployment that was just created.</p>
 
 <h3>What the build runs</h3>
 <pre><code class="lang-bash">npx convex deploy --cmd-url-env-var-name VITE_CONVEX_URL --cmd 'pnpm --filter openportfolio-browser build'</code></pre>
 <p><code>convex deploy</code> pushes the schema, functions and indexes to the project the integration just created, then runs the browser build with that deployment's URL in <code>VITE_CONVEX_URL</code>. The <code>--cmd-url-env-var-name</code> flag is load-bearing: the default variable is <code>CONVEX_URL</code>, and Vite only exposes names prefixed <code>VITE_</code>.</p>
 <p><code>vercel.json</code> guards that on <code>CONVEX_DEPLOY_KEY</code> and falls back to a plain browser build. Without the guard the file would only ever serve the button: a deployment you provisioned yourself and now want a hosted page for has no deploy key, and an unconditional <code>convex deploy</code> would fail its build. With it, one file covers both, and the fallback build uses whatever <code>VITE_CONVEX_URL</code> you set on the project.</p>
 
-<h3>Clerk</h3>
-<p>A deployed book is private. There is no anonymous mode to fall back to once the page is on the public internet, so the import asks for a Clerk publishable key rather than letting you discover the gap later. Publishable keys are public by design; the secret never appears here.</p>
+<h3>Sign-in, with nothing to sign up for</h3>
+<p>A deployed book is private, and the thing that makes it private ships with it. Authentication is <a href="https://labs.convex.dev/auth">Convex Auth</a> with a password provider: your deployment mints and verifies its own tokens using a key it generates for itself, and a sign-in never leaves it. There is no auth company in the path, no account to create, and no publishable key to paste.</p>
+<p>That was a deliberate reversal. This page briefly asked for a Clerk key, which contradicted the premise of the project: a tool whose first claim is that it holds no provider key cannot require an account with an identity SaaS to read your own portfolio. Convex Auth is in beta upstream, and that is the honest cost of the choice.</p>
+<p>Password only, on purpose. Magic links and one-time codes need an email service, which would put a third party back in the path for a deployment with one user who already controls the machine.</p>
 
-<h2>Then two commands, on the Convex side</h2>
-<p>Convex has to be told which issuer to trust, and that is a Convex deployment variable rather than a Vercel one, so the button cannot set it:</p>
-<pre><code class="lang-bash">npx convex env set CLERK_ISSUER_URL https://your-app.clerk.accounts.dev
+<h2>Then one command, on the Convex side</h2>
+<p>Generate the deployment's signing keys and create the first book. The first sign-up owns it:</p>
+<pre><code class="lang-bash">npx @convex-dev/auth
 npx convex run tenants:create '{"slug":"home","name":"Home","baseCurrency":"GBP"}'</code></pre>
+<p>Sign-ups then close on their own. Convex Auth will create an account for anyone who finds a public URL, and while the tenant gate means a stranger could never read your book, they could make their own inside your deployment and spend your quota. So a caller who belongs to no tenant may only ever create the very first one. Set <code>OPENPORTFOLIO_OPEN_SIGNUP=1</code> for a deployment meant to serve several households.</p>
 
-<div class="callout"><p><strong>Never set <code>OPENPORTFOLIO_DEV_TENANT</code> on a deployment with a public URL.</strong> It is the localhost escape hatch, and while it is set every unauthenticated caller is scoped to that book. The reason this matters more than it sounds: the deployment URL is compiled into the browser bundle, so the moment the page is reachable the backend is reachable too, by anyone who reads the JavaScript. Clerk configured and the hatch unset is the private configuration. The header prints which of the two you are in, so it is visible rather than assumed.</p></div>
+<div class="callout"><p><strong>Never set <code>OPENPORTFOLIO_DEV_TENANT</code> on a deployment with a public URL.</strong> It is the localhost escape hatch, and while it is set every unauthenticated caller is scoped to that book. The reason this matters more than it sounds: the deployment URL is compiled into the browser bundle, so the moment the page is reachable the backend is reachable too, by anyone who reads the JavaScript. Auth on and the hatch unset is the private configuration, and it is the default. The header prints which of the two you are in, so it is visible rather than assumed.</p></div>
 
 <p>The deployment also ships <code>X-Frame-Options: DENY</code>, <code>X-Content-Type-Options: nosniff</code> and a strict <code>Referrer-Policy</code>, from <code>vercel.json</code>. A page showing a net worth should not be embeddable in someone else's frame.</p>
 
@@ -494,7 +496,8 @@ page(
 <tbody>
 <tr><td><code>OPENPORTFOLIO_TENANT</code></td><td>Which book a worker acts on. Only needed when one identity belongs to several tenants; a service key is never ambiguous.</td></tr>
 <tr><td><code>OPENPORTFOLIO_DEV_TENANT</code> <em>(deployment)</em></td><td>Localhost escape hatch. While set, any unauthenticated caller is scoped to that tenant. Unset before the deployment is reachable.</td></tr>
-<tr><td><code>CLERK_ISSUER_URL</code> <em>(deployment)</em></td><td>Clerk JWT issuer. Required once more than one person uses the deployment.</td></tr>
+<tr><td><code>OPENPORTFOLIO_OPEN_SIGNUP</code> <em>(deployment)</em></td><td>Set to <code>1</code> to let a caller who belongs to no tenant create a book after the first one exists. Off by default, so a public URL does not become someone else's backend.</td></tr>
+<tr><td><code>VITE_DISABLE_AUTH</code></td><td>Set to <code>1</code> to skip sign-in for local work. Requires <code>OPENPORTFOLIO_DEV_TENANT</code>, and makes the deployment open to anyone who reaches it.</td></tr>
 </tbody>
 </table>
 
