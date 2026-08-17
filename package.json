@@ -41,7 +41,7 @@
   },
   "homepage": "https://github.com/seonglae/openportfolio#readme",
   "dependencies": {
-    "@auth/core": "0.41.1",
+    "@auth/core": "0.41.3",
     "@convex-dev/auth": "^0.0.95",
     "@modelcontextprotocol/sdk": "^1.29.0",
     "@openportfolio/core": "workspace:*",
