@@ -7,3 +7,4 @@ export * from "./adapters/coingecko.ts";
 export * from "./adapters/csv.ts";
 export * from "./adapters/manual.ts";
 export * from "./adapters/yahoo.ts";
+export * from "./flows/cot.ts";

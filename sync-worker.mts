@@ -20,6 +20,7 @@ import {
   createCoingeckoAdapter,
   createConvexClient,
   createCsvAdapter,
+  fetchCotFlows,
   createManualAdapter,
   createYahooAdapter,
   fetchFxRates,
@@ -61,6 +62,10 @@ const FORECAST_QUOTE_VENUE = PINNED_QUOTE_VENUE ?? "coingecko";
 const MANUAL_HOLDINGS = process.env.OPENPORTFOLIO_MANUAL_HOLDINGS;
 // A directory of broker exports, one <accountKey>.csv per account.
 const CSV_DIR = process.env.OPENPORTFOLIO_CSV_DIR;
+// Positioning by participant class. On unless switched off: it is free and
+// keyless, and a checkout that syncs once should see the flows view populated
+// rather than have to be told the pillar works.
+const COT_ENABLED = process.env.OPENPORTFOLIO_COT !== "0";
 
 async function convexCli(fn: string, args: unknown): Promise<unknown> {
   const { stdout } = await execFileP(CONVEX_BIN, ["run", fn, JSON.stringify(args)], {
@@ -252,6 +257,31 @@ async function settleDue(): Promise<number> {
   return settled;
 }
 
+// COT is published weekly, and the sweep runs every fifteen minutes. Writing
+// the same eight weeks on every pass would be several hundred pointless
+// mutations a day, so the newest report date already written is remembered and
+// an unchanged one is skipped. Restarting the process rewrites once, which the
+// upsert in flows:record absorbs.
+let lastCotReport: string | null = null;
+
+async function syncFlows(): Promise<number> {
+  if (!COT_ENABLED) return 0;
+  const rows = await fetchCotFlows();
+  if (rows.length === 0) return 0;
+  let newest = rows[0].date;
+  for (const row of rows) {
+    if (row.date > newest) newest = row.date;
+  }
+  if (newest === lastCotReport) return 0;
+  let written = 0;
+  for (const row of rows) {
+    await call("flows:record", row);
+    written += 1;
+  }
+  lastCotReport = newest;
+  return written;
+}
+
 type Whoami = { tenantSlug: string | null; baseCurrency: string | null };
 
 async function syncOnce(): Promise<void> {
@@ -280,6 +310,15 @@ async function syncOnce(): Promise<void> {
 
   const settled = await settleDue();
   if (settled > 0) console.log(`  settled ${settled} forecasts`);
+
+  // Last, and caught on its own: an outage at the CFTC must not cost the book
+  // its balances, its snapshot or its settlements, all of which already ran.
+  try {
+    const flows = await syncFlows();
+    if (flows > 0) console.log(`  recorded ${flows} flow rows`);
+  } catch (e) {
+    console.warn(`  ! flows: ${(e as Error).message}`);
+  }
 }
 
 // One drain at a time. A push arriving mid-sync must not start a second pass
