@@ -110,7 +110,11 @@ Bucket a probability by multiplying, never by dividing by the bucket width.
    `[]`, because an empty list reads as "you hold nothing" and produces a wrong
    net worth instead of a missing one.
 3. Register it in `defaultRegistry()`, or conditionally in the worker when it
-   needs configuration.
+   needs configuration. A quote source also needs an entry in
+   `QUOTE_VENUE_BY_CLASS`, which is what decides who prices a row. Do not add a
+   fallback to another source: both shipped ones answer the wrong instrument
+   with an HTTP 200 (Yahoo prices `BTC` as a Grayscale trust, CoinGecko has an
+   `aapl` token), and a wrong net worth is worse than a missing one.
 4. Credentials come from the worker's environment. Never from a table, never
    from an argument, never from this repo.
 

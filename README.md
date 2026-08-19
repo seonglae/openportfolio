@@ -98,7 +98,7 @@ on your machine under your own logins, against your own accounts.
 | Surface       |                                                                                                                       |
 | ------------- | --------------------------------------------------------------------------------------------------------------------- |
 | Net worth     | accounts, balances, per-venue and per-asset-class breakdown, snapshots in one base currency, keyless FX               |
-| Venues        | adapter contract with declared capabilities; a reference keyless quote adapter and a manual one                       |
+| Venues        | adapter contract with declared capabilities; keyless quote adapters for listed instruments and for coins, plus a manual one |
 | Flows         | net buying and turnover by investor type per session, per market or per symbol                                        |
 | Forecasts     | probability, horizon and resolution criterion; auto-resolution on horizon expiry; Brier score and reliability buckets |
 | Decisions     | the deferred-decision queue, with trigger conditions and outcomes                                                     |
@@ -145,8 +145,9 @@ npx convex run accounts:link '{"accountKey":"wallet","venue":"manual","kind":"wa
 npx tsx sync-worker.mts --once
 ```
 
-The BTC row is priced at 0 in the file on purpose: the worker re-quotes crypto through the keyless
-CoinGecko adapter, converts both rows into GBP, and writes one total.
+Prices in the file are a starting point, not the record: the worker re-quotes every row it can
+through a keyless source, routed by asset class, converts them into GBP and writes one total. Shares,
+ETFs and funds go to Yahoo, coins to CoinGecko.
 
 Full walkthrough: **[openportfolio.app/docs/quickstart](https://openportfolio.app/docs/quickstart)**
 
@@ -245,10 +246,18 @@ type VenueAdapter = {
 };
 ```
 
-Two ship. `coingecko` reads quotes and refuses balances, because a price source does not know what
-you hold and returning an empty list would read as "you hold nothing". `manual` reads a JSON file
-you maintain, which is how a pension or an unlisted holding gets into the total instead of being
-left out of it.
+Three ship, none of them keyed. `yahoo` prices anything listed anywhere, in whatever currency the
+listing trades in, so a book of US shares, LSE ETFs and KRX names stays current without an account
+at any of them. `coingecko` prices coins. Both refuse balances, because a price source does not know
+what you hold and returning an empty list would read as "you hold nothing". `manual` reads a JSON
+file you maintain, which is how a pension or an unlisted holding gets into the total instead of
+being left out of it.
+
+Which source prices which row is decided by the asset class already on it, and nothing falls back to
+the other one. Both answer the wrong instrument with an HTTP 200: ask Yahoo for `BTC` and it returns
+a Grayscale trust near $30 rather than bitcoin near $68,000, and CoinGecko has a token with the id
+`aapl` worth about 18 cents. A wrong number in the total is worse than a missing one, so a class
+neither source should be asked about is simply not repriced.
 
 No keyed broker adapter ships. Adding one means writing a module in
 `packages/node/src/adapters/`, taking its credential from the worker's environment, and registering

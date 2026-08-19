@@ -20,9 +20,12 @@ import {
   createCoingeckoAdapter,
   createConvexClient,
   createManualAdapter,
+  createYahooAdapter,
   fetchFxRates,
   loadEnvLocal,
   rateFor,
+  quoteSymbolFor,
+  quoteVenueFor,
   readManualHoldingsFile,
   resolveConvexUrl,
   resolveServiceKey,
@@ -45,7 +48,14 @@ for (const [key, val] of Object.entries(loadEnvLocal(PROJECT_ROOT))) {
 const SERVICE_KEY = resolveServiceKey();
 const CONVEX_URL = resolveConvexUrl(PROJECT_ROOT);
 const TENANT_SLUG = process.env.OPENPORTFOLIO_TENANT;
-const QUOTE_VENUE = process.env.OPENPORTFOLIO_QUOTE_VENUE ?? "coingecko";
+// An operator's single-venue override. Unset is the normal case: the asset
+// class on each row picks the venue instead, so a book of shares and coins is
+// priced correctly without anyone configuring anything.
+const PINNED_QUOTE_VENUE = process.env.OPENPORTFOLIO_QUOTE_VENUE;
+// A forecast criterion names a symbol and nothing else, so this path cannot
+// route on asset class the way repricing does. It stays pinned, and guessing is
+// what it refuses to do: see quoteVenueFor for what a wrong guess costs.
+const FORECAST_QUOTE_VENUE = PINNED_QUOTE_VENUE ?? "coingecko";
 const MANUAL_HOLDINGS = process.env.OPENPORTFOLIO_MANUAL_HOLDINGS;
 
 async function convexCli(fn: string, args: unknown): Promise<unknown> {
@@ -100,7 +110,7 @@ type StoredBalance = {
 type SyncRow = StoredBalance & { valueBase: number; fxRate?: number };
 
 function buildRegistry() {
-  const adapters: VenueAdapter[] = [createCoingeckoAdapter()];
+  const adapters: VenueAdapter[] = [createCoingeckoAdapter(), createYahooAdapter()];
   if (MANUAL_HOLDINGS && existsSync(MANUAL_HOLDINGS)) {
     adapters.push(createManualAdapter({ rows: readManualHoldingsFile(MANUAL_HOLDINGS) }));
   }
@@ -117,16 +127,26 @@ async function registerVenues(): Promise<void> {
   }
 }
 
-// Only crypto is re-quoted, and only when the account's own venue cannot quote.
-// Sending a stock ticker to a coin price endpoint costs a request per cycle to
-// learn nothing.
+// Re-quote a row whose own account cannot price it, through the venue that can
+// price that asset class.
+//
+// This used to reprice crypto and nothing else, which meant every share, ETF
+// and fund kept whatever price was typed into the manual holdings file: the
+// equity side of a net worth stopped moving the day it was entered, and only
+// the coins were live. The class-routed lookup is what makes the single number
+// current for a book that is not all crypto.
 async function repriced(row: StoredBalance, holder: VenueAdapter): Promise<StoredBalance> {
   if (holder.capabilities.canReadQuotes) return row;
-  if (row.assetClass !== "crypto") return row;
-  if (!registry.has(QUOTE_VENUE)) return row;
+  const venue = quoteVenueFor(registry, row.assetClass, PINNED_QUOTE_VENUE);
+  if (!venue) return row;
   try {
-    const quote = await registry.get(QUOTE_VENUE).readQuote({ symbol: row.symbol, currency: row.currency });
-    return { ...row, lastPrice: quote.price, valueLocal: row.qty * quote.price };
+    const symbol = quoteSymbolFor(venue, row.symbol, row.assetClass);
+    const quote = await registry.get(venue).readQuote({ symbol, currency: row.currency });
+    // The currency comes off the quote, not off the stored row. A quote source
+    // reports the listing currency and cannot convert, so a new price under the
+    // old currency label is how an LSE share priced in pence gets converted at
+    // the pound rate. They move together or the total is wrong.
+    return { ...row, lastPrice: quote.price, currency: quote.currency, valueLocal: row.qty * quote.price };
   } catch {
     // A venue outage leaves the last known price in place rather than blanking
     // a position out of the total.
@@ -206,13 +226,13 @@ async function settleDue(): Promise<number> {
   let settled = 0;
   for (const forecast of due) {
     if (!forecast.symbol) continue;
-    if (!registry.has(QUOTE_VENUE)) continue;
+    if (!registry.has(FORECAST_QUOTE_VENUE)) continue;
     try {
-      const quote = await registry.get(QUOTE_VENUE).readQuote({ symbol: forecast.symbol });
+      const quote = await registry.get(FORECAST_QUOTE_VENUE).readQuote({ symbol: forecast.symbol });
       await call("forecasts:settle", {
         forecastId: forecast.id,
         observedValue: quote.price,
-        note: `${QUOTE_VENUE} @ ${new Date(quote.asOf).toISOString()}`,
+        note: `${FORECAST_QUOTE_VENUE} @ ${new Date(quote.asOf).toISOString()}`,
       });
       settled += 1;
     } catch (e) {
