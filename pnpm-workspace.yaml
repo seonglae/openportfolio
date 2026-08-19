@@ -7,7 +7,14 @@ packages:
 allowBuilds:
   # Its postinstall only prints a telemetry notice and writes a "already told
   # you" marker into the user's config dir. Nothing the package needs to work, so
-  # it does not get to run. Clerk's telemetry itself is disabled at the provider
-  # in browser/src/Auth.tsx.
+  # it does not get to run. Nothing imports Clerk here any more either: it is an
+  # optional peer of `convex` that pnpm installs on its own.
   '@clerk/shared': false
   esbuild: true
+
+# Convex declares @clerk/clerk-react as an optional peer, so pnpm installs it
+# even though no file in this repo imports Clerk. The version it picks carries
+# an authorization-bypass advisory, and an open alert on dead weight is an alert
+# that hides a real one. Pinned forward to the patched line instead.
+overrides:
+  '@clerk/clerk-react': '^5.61.6'
