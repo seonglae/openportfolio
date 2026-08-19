@@ -21,10 +21,15 @@ export const MANUAL_VENUE = "manual";
 export type ManualHolding = {
   accountKey: string;
   symbol: string;
+  // Also decides whether the worker re-quotes this row. A listed class sends
+  // the symbol to a quote source, so a manual row naming a real ticker goes
+  // live; `other` is never repriced, which is how a pension, a property or
+  // anything else whose recorded price is the record stays at the number here.
   assetClass: AssetClass;
   qty: number;
-  // The price the operator recorded. There is no market to ask, which is the
-  // whole reason the row is manual.
+  // The price the operator recorded. For an unlisted holding there is no market
+  // to ask, which is the whole reason the row is manual. For a listed one it is
+  // a starting point the worker replaces on the next sweep.
   price: number;
   currency: string;
   costBasis?: number;

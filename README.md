@@ -147,7 +147,8 @@ npx tsx sync-worker.mts --once
 
 Prices in the file are a starting point, not the record: the worker re-quotes every row it can
 through a keyless source, routed by asset class, converts them into GBP and writes one total. Shares,
-ETFs and funds go to Yahoo, coins to CoinGecko.
+ETFs and funds go to Yahoo, coins to CoinGecko. A row whose recorded price *is* the record, a
+pension or a property, is given the class `other`, which no quote source is asked about.
 
 Full walkthrough: **[openportfolio.app/docs/quickstart](https://openportfolio.app/docs/quickstart)**
 

@@ -6,6 +6,7 @@
 
 import { type AssetClass, type VenueAdapter, type VenueCapabilities, assertCapability } from "@openportfolio/domain";
 import { COINGECKO_VENUE, createCoingeckoAdapter } from "./coingecko.ts";
+import { MANUAL_VENUE } from "./manual.ts";
 import { YAHOO_VENUE, createYahooAdapter } from "./yahoo.ts";
 
 export type AdapterRegistry = {
@@ -84,6 +85,21 @@ export function quoteSymbolFor(venue: string, symbol: string, assetClass: AssetC
   if (venue !== YAHOO_VENUE || assetClass !== "crypto") return symbol;
   if (symbol.includes("-")) return symbol.toUpperCase();
   return `${symbol.toUpperCase()}-USD`;
+}
+
+// Whether a venue's own balances already arrive with a market price, in which
+// case a second lookup buys nothing.
+//
+// `canReadQuotes` alone is the wrong test and reading it that way is how the
+// keyless quote sources ended up unreachable: `manual` answers readQuote with
+// the number the operator typed into the holdings file, which is the very
+// number a re-quote exists to replace. The adapter says as much about its own
+// timestamps ("stale by construction, and shown as such rather than passed off
+// as a live quote"), so a worker that treats it as a live source is arguing
+// with the adapter.
+export function pricesOwnBalances(holder: VenueAdapter): boolean {
+  if (holder.venue === MANUAL_VENUE) return false;
+  return holder.capabilities.canReadQuotes;
 }
 
 // `pinned` is the operator's single-venue override. Returns null when nothing

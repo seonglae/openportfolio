@@ -7,6 +7,7 @@ import {
   balancesThrough,
   createAdapterRegistry,
   defaultRegistry,
+  pricesOwnBalances,
   quoteSymbolFor,
   quoteThrough,
   quoteVenueFor,
@@ -251,5 +252,21 @@ describe("routing a quote to the venue that can price it", () => {
     expect(quoteSymbolFor("yahoo", "BTC-USD", "crypto")).toBe("BTC-USD");
     expect(quoteSymbolFor("coingecko", "BTC", "crypto")).toBe("BTC");
     expect(quoteSymbolFor("yahoo", "NVDA", "equity")).toBe("NVDA");
+  });
+});
+
+describe("deciding whether a row needs a second price", () => {
+  // The bug this pins: `manual` declares canReadQuotes because readQuote works,
+  // and a worker that read that flag as "already priced" skipped every manual
+  // row. Since manual is the only venue that ships holdings, that made both
+  // keyless quote sources unreachable and left the documented quickstart with a
+  // bitcoin row still valued at the 0 the file was seeded with.
+  it("does not treat the operator's own typed price as a market price", () => {
+    expect(pricesOwnBalances(createManualAdapter({ rows: HOLDINGS }))).toBe(false);
+  });
+
+  it("leaves a real quote source alone", () => {
+    expect(pricesOwnBalances(createCoingeckoAdapter())).toBe(true);
+    expect(pricesOwnBalances(createYahooAdapter())).toBe(true);
   });
 });

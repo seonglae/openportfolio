@@ -24,6 +24,7 @@ import {
   fetchFxRates,
   loadEnvLocal,
   rateFor,
+  pricesOwnBalances,
   quoteSymbolFor,
   quoteVenueFor,
   readManualHoldingsFile,
@@ -136,7 +137,7 @@ async function registerVenues(): Promise<void> {
 // the coins were live. The class-routed lookup is what makes the single number
 // current for a book that is not all crypto.
 async function repriced(row: StoredBalance, holder: VenueAdapter): Promise<StoredBalance> {
-  if (holder.capabilities.canReadQuotes) return row;
+  if (pricesOwnBalances(holder)) return row;
   const venue = quoteVenueFor(registry, row.assetClass, PINNED_QUOTE_VENUE);
   if (!venue) return row;
   try {
