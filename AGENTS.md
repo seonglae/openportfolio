@@ -60,6 +60,7 @@ package rather than being copied.
 | `actor.mts`        | CLI dispatch: `ORDERS`, `orderFor`, `nextProvider`, `spawnProvider`, `runActor`                                                                                                    |
 | `sync-worker.mts`  | pulls accounts through adapters, converts, snapshots, settles what a quote can settle                                                                                              |
 | `agent-worker.mts` | wakes a CLI for what a machine cannot decide                                                                                                                                       |
+| `ios/`             | native SwiftUI client over the same Convex backend, XcodeGen spec in `ios/Openportfolio/project.yml`. Not a web view: no `browser/` code reaches it                                 |
 | `mcp/`             | stdio MCP server, plain node, imports no workspace package                                                                                                                         |
 
 Intra-package imports end in `.ts`, not `.js`: node strips types but does not

@@ -22,3 +22,9 @@ tmp/
 browser/dist-demo/
 browser/.vite-temp-demo/
 site/sitesrv.pid
+
+# iOS: the signing config, the generated project, and the generated plist.
+ios/**/Secrets.xcconfig
+ios/**/*.xcodeproj/
+ios/**/Info.plist
+ios/**/build/
