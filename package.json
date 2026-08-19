@@ -4,6 +4,7 @@
   "description": "Open, self-hosted, multi-tenant portfolio intelligence: one net worth across every account, the flows behind the price, and a Brier-scored track record of every call.",
   "private": true,
   "type": "module",
+  "packageManager": "pnpm@11.22.0",
   "scripts": {
     "test": "vitest run",
     "test:watch": "vitest",
