@@ -1,0 +1,34 @@
+name: tests
+
+# No secrets and no services. The suite covers the shared packages, the Convex
+# handlers under Convex's own runtime, and the browser helpers under a DOM, all
+# against a fresh checkout. Nothing here reaches a deployment, and nothing here
+# reads a real book: the demo bundle's figures are invented.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: pnpm
+      # Frozen, so a lockfile that disagrees with package.json fails here rather
+      # than resolving to something no one has run.
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm typecheck
+      - run: pnpm test
+      # tsc reads the sources; this reads what the bundler makes of them, which
+      # is where a bad import or a missing asset actually shows up.
+      - run: pnpm --filter openportfolio-browser build
+      # The demo bundle is what openportfolio.app/demo serves. It builds from a
+      # separate vite config and its own fixtures, so it breaks independently of
+      # the app bundle and needs its own step.
+      - run: pnpm --filter openportfolio-browser build:demo

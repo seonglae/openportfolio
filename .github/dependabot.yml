@@ -1,0 +1,17 @@
+# Security updates only, batched weekly. openworks and openportfolio share a
+# dependency surface; ungrouped daily bumps on both of them is more noise than
+# any of it is worth.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      all:
+        patterns: ["*"]
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
