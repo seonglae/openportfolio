@@ -19,6 +19,7 @@ import {
   createAdapterRegistry,
   createCoingeckoAdapter,
   createConvexClient,
+  createCsvAdapter,
   createManualAdapter,
   createYahooAdapter,
   fetchFxRates,
@@ -58,6 +59,8 @@ const PINNED_QUOTE_VENUE = process.env.OPENPORTFOLIO_QUOTE_VENUE;
 // what it refuses to do: see quoteVenueFor for what a wrong guess costs.
 const FORECAST_QUOTE_VENUE = PINNED_QUOTE_VENUE ?? "coingecko";
 const MANUAL_HOLDINGS = process.env.OPENPORTFOLIO_MANUAL_HOLDINGS;
+// A directory of broker exports, one <accountKey>.csv per account.
+const CSV_DIR = process.env.OPENPORTFOLIO_CSV_DIR;
 
 async function convexCli(fn: string, args: unknown): Promise<unknown> {
   const { stdout } = await execFileP(CONVEX_BIN, ["run", fn, JSON.stringify(args)], {
@@ -114,6 +117,12 @@ function buildRegistry() {
   const adapters: VenueAdapter[] = [createCoingeckoAdapter(), createYahooAdapter()];
   if (MANUAL_HOLDINGS && existsSync(MANUAL_HOLDINGS)) {
     adapters.push(createManualAdapter({ rows: readManualHoldingsFile(MANUAL_HOLDINGS) }));
+  }
+  // Registered on the directory existing, not on it having files in it: an
+  // empty statements directory is an account whose export is late, and the
+  // adapter names the file it wanted rather than reporting no holdings.
+  if (CSV_DIR && existsSync(CSV_DIR)) {
+    adapters.push(createCsvAdapter({ dir: CSV_DIR }));
   }
   return createAdapterRegistry(adapters);
 }

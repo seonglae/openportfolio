@@ -247,12 +247,14 @@ type VenueAdapter = {
 };
 ```
 
-Three ship, none of them keyed. `yahoo` prices anything listed anywhere, in whatever currency the
+Four ship, none of them keyed. `yahoo` prices anything listed anywhere, in whatever currency the
 listing trades in, so a book of US shares, LSE ETFs and KRX names stays current without an account
 at any of them. `coingecko` prices coins. Both refuse balances, because a price source does not know
 what you hold and returning an empty list would read as "you hold nothing". `manual` reads a JSON
 file you maintain, which is how a pension or an unlisted holding gets into the total instead of
-being left out of it.
+being left out of it. `csv` reads a broker's own export: point `OPENPORTFOLIO_CSV_DIR` at a folder
+and drop `<accountKey>.csv` into it. Columns are matched by name, so most exports work unedited, and
+it covers the accounts that will never have an API at all.
 
 Which source prices which row is decided by the asset class already on it, and nothing falls back to
 the other one. Both answer the wrong instrument with an HTTP 200: ask Yahoo for `BTC` and it returns
