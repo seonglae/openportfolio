@@ -14,7 +14,16 @@ export default defineConfig({
   base: "/demo/",
   plugins: [react(), tailwindcss()],
   resolve: {
-    alias: { "convex/react": resolve(import.meta.dirname, "demo/convex-react.ts") },
+    // The array form, because the second entry has to be a pattern. An alias key
+    // is matched against the import specifier as written, not against the file
+    // it resolves to, and App.tsx asks for "./Auth.tsx" relative to itself, so
+    // an absolute path here would never match. src/main.tsx is the only other
+    // module that imports it and the demo entry is demo/main.tsx, so nothing
+    // else is caught.
+    alias: [
+      { find: "convex/react", replacement: resolve(import.meta.dirname, "demo/convex-react.ts") },
+      { find: /^\.\/Auth\.tsx$/, replacement: resolve(import.meta.dirname, "demo/auth.tsx") },
+    ],
   },
   build: {
     outDir: "dist-demo",
