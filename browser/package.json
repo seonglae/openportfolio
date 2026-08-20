@@ -14,17 +14,17 @@
     "@openportfolio/core": "workspace:*",
     "@openportfolio/domain": "workspace:*",
     "@tailwindcss/vite": "^4.3.3",
-    "convex": "^1.42.3",
+    "convex": "^1.44.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "tailwindcss": "^4.3.3"
   },
   "devDependencies": {
-    "@types/node": "^25.7.0",
+    "@types/node": "^26.2.0",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
-    "@vitejs/plugin-react": "^5.2.0",
-    "typescript": "~5.9.3",
+    "@vitejs/plugin-react": "^6.0.5",
+    "typescript": "~7.0.2",
     "vite": "^8.0.16"
   }
 }
