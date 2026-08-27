@@ -38,6 +38,17 @@ struct OpenportfolioApp: App {
                     .tag(Tab.settings)
             }
             .tint(Theme.accent)
+            // The tab bar floats over the content on the iOS 26 SDK, and this
+            // TabView is what reserves room for it: measured inside the Book
+            // list on an iPhone 17 Pro, safeAreaInsets.bottom is 83.0pt, of
+            // which 34 is the home indicator. So the last row of a scrollable
+            // clears the bar with nothing added, and a bottom contentMargins
+            // here would be breathing room rather than a fix. One was added and
+            // taken back out in d211b1d; the note survives so the next person
+            // measures instead of guessing. Reproduced independently in
+            // openworks, which uses listStyle(.plain) inside a NavigationStack
+            // and reads the same 83.0, so the inset comes from the TabView and
+            // not from anything about the list.
             .environmentObject(state)
             // On the root, so it reaches the dynamic colours in Theme and not
             // only the system chrome: forcing light while the phone is dark is
