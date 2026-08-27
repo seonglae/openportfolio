@@ -37,9 +37,6 @@ struct PositionsView: View {
                     .buttonStyle(.bordered)
                 }
             }
-            // The tab bar floats over the content on the current SDK, so the
-            // last row of every list ends up under it without this.
-            .contentMargins(.bottom, 28, for: .scrollContent)
             .refreshable { await load() }
             .task { await load() }
             .onChange(of: state.reloadNonce) { _, _ in Task { await load() } }
@@ -189,7 +186,6 @@ struct ExposureDetail: View {
                 }
             }
         }
-        .contentMargins(.bottom, 28, for: .scrollContent)
         .navigationTitle(exposure.symbol)
         .navigationBarTitleDisplayMode(.inline)
     }

@@ -2,9 +2,17 @@
   "compilerOptions": {
     "target": "ES2022",
     // No "types", no DOM lib, and no workspace dependency either. The Convex
-    // runtime, the browser bundle, the tsx workers and the bare-node MCP server
-    // all import this package, so anything reachable from src must be plain
-    // ECMAScript with nothing underneath it.
+    // runtime, the browser bundle and the tsx workers all import this package,
+    // so anything reachable from src must be plain ECMAScript with nothing
+    // underneath it.
+    //
+    // The MCP server is NOT in that list and must not be added to it. It runs
+    // under bare node, where a .ts specifier resolves to nothing, so it imports
+    // no workspace package at all and states its tool schemas separately. An
+    // earlier version of this comment claimed it imported this package, which
+    // is the kind of thing that gets someone to helpfully add the import and
+    // put a node-version floor on all 25 tools. test/webmcp-manifest.test.ts is
+    // what keeps the two lists in step instead.
     "lib": ["ES2022"],
     "module": "ESNext",
     "moduleResolution": "bundler",

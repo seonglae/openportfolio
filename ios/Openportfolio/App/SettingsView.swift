@@ -72,7 +72,6 @@ struct SettingsView: View {
                         .foregroundStyle(Theme.link)
                 }
             }
-            .contentMargins(.bottom, 28, for: .scrollContent)
             .navigationTitle("Settings")
             .task { await check() }
         }
