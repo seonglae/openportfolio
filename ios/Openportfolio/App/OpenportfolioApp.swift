@@ -19,6 +19,7 @@ final class AppState: ObservableObject {
 @main
 struct OpenportfolioApp: App {
     @StateObject private var state = AppState.shared
+    @AppStorage(ThemeChoice.storageKey) private var appearance = ThemeChoice.system
 
     var body: some Scene {
         WindowGroup {
@@ -38,6 +39,10 @@ struct OpenportfolioApp: App {
             }
             .tint(Theme.accent)
             .environmentObject(state)
+            // On the root, so it reaches the dynamic colours in Theme and not
+            // only the system chrome: forcing light while the phone is dark is
+            // what proves the preference is actually plumbed through.
+            .preferredColorScheme(appearance.colorScheme)
         }
     }
 }

@@ -13,6 +13,7 @@ struct SettingsView: View {
     @State private var who: Whoami?
     @State private var msg: String?
     @State private var checking = false
+    @AppStorage(ThemeChoice.storageKey) private var appearance = ThemeChoice.system
 
     var body: some View {
         NavigationStack {
@@ -56,11 +57,22 @@ struct SettingsView: View {
                     Section { Text(msg).font(.caption).foregroundStyle(.secondary) }
                 }
 
+                Section("Appearance") {
+                    Picker("Theme", selection: $appearance) {
+                        ForEach(ThemeChoice.allCases) { choice in
+                            Text(choice.label).tag(choice)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                }
+
                 Section("About") {
                     LabeledContent("Version", value: versionLabel)
                     Link("openportfolio.app", destination: URL(string: "https://openportfolio.app")!)
+                        .foregroundStyle(Theme.link)
                 }
             }
+            .contentMargins(.bottom, 28, for: .scrollContent)
             .navigationTitle("Settings")
             .task { await check() }
         }

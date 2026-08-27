@@ -1,11 +1,31 @@
 import SwiftUI
+import UIKit
 
-// Design tokens shared with the browser: warm paper, the openportfolio indigo
-// as accent. One place, so every screen agrees.
+// Design tokens shared with the browser: the openportfolio indigo as accent.
+// One place, so every screen agrees.
 enum Theme {
-    static let accent = Color(red: 0x5b / 255, green: 0x6c / 255, blue: 0xf0 / 255)
-    static let accentSoft = Color(red: 0x8b / 255, green: 0x9c / 255, blue: 0xff / 255)
-    static let paper = Color(red: 0xfa / 255, green: 0xf8 / 255, blue: 0xf4 / 255)
+    // Each accent is a pair. The single values these replaced were picked for
+    // the browser's warm paper, so on a dark screen the indigo used for tint,
+    // pills and the net worth ring sat at a fraction of the contrast it has on
+    // white. The light half is unchanged, so nothing moves in light mode.
+    static let accent = pair(light: 0x5b_6c_f0, dark: 0x8b_9c_ff)
+    static let accentSoft = pair(light: 0x8b_9c_ff, dark: 0xb4_be_ff)
+    // A link should not be the system's cornflower blue, which belongs to no
+    // palette here, nor the accent, which already means "this book".
+    static let link = pair(light: 0x5b_4b_8a, dark: 0xb0_a0_e0)
+
+    static func pair(light: Int, dark: Int) -> Color {
+        Color(UIColor { $0.userInterfaceStyle == .dark ? rgb(dark) : rgb(light) })
+    }
+
+    private static func rgb(_ hex: Int) -> UIColor {
+        UIColor(
+            red: CGFloat((hex >> 16) & 0xff) / 255,
+            green: CGFloat((hex >> 8) & 0xff) / 255,
+            blue: CGFloat(hex & 0xff) / 255,
+            alpha: 1
+        )
+    }
 
     static func pnlColor(_ v: Double?) -> Color {
         guard let v, v != 0 else { return .secondary }
@@ -117,6 +137,33 @@ struct LoadState<Content: View>: View {
             ContentUnavailableView(emptyTitle, systemImage: "tray", description: Text(emptyHint))
         } else {
             content()
+        }
+    }
+}
+
+
+// Light / dark / follow the phone. Stored rather than derived because the
+// point of the setting is to disagree with the system when the reader wants to.
+enum ThemeChoice: String, CaseIterable, Identifiable {
+    case system, light, dark
+
+    static let storageKey = "appearance"
+
+    var id: String { rawValue }
+
+    var label: LocalizedStringKey {
+        switch self {
+        case .system: return "System"
+        case .light: return "Light"
+        case .dark: return "Dark"
+        }
+    }
+
+    var colorScheme: ColorScheme? {
+        switch self {
+        case .system: return nil
+        case .light: return .light
+        case .dark: return .dark
         }
     }
 }

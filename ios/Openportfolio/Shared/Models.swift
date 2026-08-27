@@ -1,5 +1,19 @@
 import Foundation
 
+// A string worth showing, or nothing.
+//
+// `as? String ?? fallback` only fires the fallback when the key is absent, and
+// Convex stores a string field the caller left blank as "" rather than omitting
+// it. So `d["label"] as? String ?? key` finds a value in the empty string and
+// draws a row with no text on it, which reads as a loading bug rather than a
+// blank field. Both `label` and `name` are v.string() in the schema with no
+// minimum length, so this is reachable without anything going wrong.
+func text(_ d: [String: Any], _ key: String) -> String? {
+    guard let s = d[key] as? String else { return nil }
+    let trimmed = s.trimmingCharacters(in: .whitespacesAndNewlines)
+    return trimmed.isEmpty ? nil : trimmed
+}
+
 private func num(_ d: [String: Any], _ k: String) -> Double? { (d[k] as? NSNumber)?.doubleValue }
 
 // netWorth:current. Computed on read, so it is the live number rather than the
@@ -67,7 +81,7 @@ struct Account: Identifiable {
         accountKey = key
         venue = d["venue"] as? String ?? ""
         kind = d["kind"] as? String ?? ""
-        label = d["label"] as? String ?? key
+        label = text(d, "label") ?? key
         currency = d["currency"] as? String ?? ""
         syncedAt = num(d, "syncedAt")
     }
@@ -266,7 +280,7 @@ struct Whoami {
     init?(_ d: [String: Any]) {
         guard let slug = d["tenantSlug"] as? String else { return nil }
         tenantSlug = slug
-        tenantName = d["tenantName"] as? String ?? slug
+        tenantName = text(d, "tenantName") ?? slug
         baseCurrency = d["baseCurrency"] as? String ?? ""
         role = d["role"] as? String ?? ""
         via = d["via"] as? String ?? ""
