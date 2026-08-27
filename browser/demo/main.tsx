@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 
 import { App } from "../src/App.tsx";
 import "../src/index.css";
+import { installDemoTools } from "./webmcp.ts";
 
 // ?bare=1 drops the banner for product screenshots. The hosted demo never
 // sets it, so a visitor always sees the disclosure.
@@ -21,8 +22,8 @@ function Demo() {
     <>
       <div className="glass-bar flex flex-wrap items-center justify-between gap-3 border-b border-rule px-6 py-2.5 text-[13px] text-ink-2">
         <span>
-          <strong className="font-semibold text-ink">Demo.</strong> Every figure on this page is invented. No real account
-          is connected.
+          <strong className="font-semibold text-ink">Demo.</strong> Every figure on this page is invented. No real
+          account is connected.
         </span>
         <a className={SOURCE_LINK} href="https://github.com/seonglae/openportfolio">
           Source
@@ -32,6 +33,11 @@ function Demo() {
     </>
   );
 }
+
+// Before render, not from an effect: the tools belong to the page rather than
+// to a component, and StrictMode double-invokes effects. A browser without
+// navigator.modelContext gets a no-op.
+installDemoTools();
 
 const root = document.getElementById("root");
 if (!root) throw new Error("no #root element");

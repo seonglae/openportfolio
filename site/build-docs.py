@@ -661,7 +661,7 @@ page(
 page(
     "mcp.html",
     "MCP and agents",
-    "Why there is no provider API key, how work is dispatched to an agent CLI you already signed in to, and what the 25 MCP tools expose.",
+    "Why there is no provider API key, how work is dispatched to an agent CLI you already signed in to, what the 25 MCP tools expose, and how the demo offers the read-only half of them to a browser agent with no install.",
     """
 <h1>MCP and agents</h1>
 <p>Watching a book is only useful if something is actually watching: reconciling after the close, settling a call the day its horizon passes, noticing that a deferred decision came due three weeks ago.</p>
@@ -694,6 +694,24 @@ const ORDERS = {
 </tbody>
 </table>
 <p>There is no order tool, because there is no order function to expose.</p>
+
+<h2>The same tools in a browser</h2>
+<p>The stdio server is the right shape for a machine that runs unattended, and the wrong shape for someone who wants to see what an agent can do with a book before installing anything. Trying it today means cloning the repo, installing, minting a service key and editing a client config, which is a lot to ask of a question as small as "is this useful".</p>
+<p><a href="/demo/">The demo</a> answers that question with nothing installed. It registers the read-only tools through <code>navigator.modelContext</code>, the browser API in the W3C WebMCP draft, so an agent attached to the browser can ask the demo book the same questions a CLI agent asks a real one.</p>
+<pre><code class="lang-ts"><span class="c">// browser/demo/webmcp.ts</span>
+for (const tool of readOnlyAgentTools()) {
+  if (!servable(tool)) continue;
+  navigator.modelContext.registerTool({
+    name: tool.name,
+    description: tool.description,
+    inputSchema: tool.inputSchema,
+    annotations: { readOnlyHint: true },
+    execute: async () => ({ fn: tool.fn, data: FIXTURES[tool.fn] }),
+  });
+}</code></pre>
+<p>Twelve of the twenty-five are registered there. The nine that write are excluded on purpose: a page served from the open internet should not hand an agent a path into a table, even a fixture one. Four more read tools are left out only because the demo book has no fixture for them yet, and adding one makes the tool appear with no code change.</p>
+<div class="callout"><p><strong>Chrome 146 and Edge 147 ship the API; Chrome 149 is in an origin trial.</strong> Firefox and Safari are in the spec process without a date, and the spec is a draft that will still move. So this is an addition to the demo, not a replacement for the stdio server: a browser without the API gets the same page with nothing registered, and no agent CLI depends on it.</p></div>
+<p>Two transports can drift, so the tool list is stated once in <code>packages/domain</code> and the browser imports it. The stdio server cannot: it runs under bare node, where a TypeScript specifier would put a version floor on all 25 tools. What keeps them honest instead is a test that parses the server source and fails when a tool exists on one side and not the other.</p>
 """,
 )
 

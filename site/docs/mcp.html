@@ -7,7 +7,7 @@
     <title>MCP and agents · openportfolio docs</title>
     <meta
       name="description"
-      content="Why there is no provider API key, how work is dispatched to an agent CLI you already signed in to, and what the 25 MCP tools expose."
+      content="Why there is no provider API key, how work is dispatched to an agent CLI you already signed in to, what the 25 MCP tools expose, and how the demo offers the read-only half of them to a browser agent with no install."
     />
     <link rel="canonical" href="https://openportfolio.app/docs/mcp" />
     <meta property="og:type" content="article" />
@@ -16,7 +16,7 @@
     <meta property="og:title" content="MCP and agents · openportfolio docs" />
     <meta
       property="og:description"
-      content="Why there is no provider API key, how work is dispatched to an agent CLI you already signed in to, and what the 25 MCP tools expose."
+      content="Why there is no provider API key, how work is dispatched to an agent CLI you already signed in to, what the 25 MCP tools expose, and how the demo offers the read-only half of them to a browser agent with no install."
     />
     <meta property="og:image" content="https://openportfolio.app/og.png" />
     <meta name="twitter:card" content="summary_large_image" />
@@ -37,7 +37,7 @@
         "@context": "https://schema.org",
         "@type": "TechArticle",
         "headline": "MCP and agents",
-        "description": "Why there is no provider API key, how work is dispatched to an agent CLI you already signed in to, and what the 25 MCP tools expose.",
+        "description": "Why there is no provider API key, how work is dispatched to an agent CLI you already signed in to, what the 25 MCP tools expose, and how the demo offers the read-only half of them to a browser agent with no install.",
         "url": "https://openportfolio.app/docs/mcp",
         "isPartOf": { "@type": "WebSite", "name": "openportfolio", "url": "https://openportfolio.app/" },
         "author": { "@type": "Person", "name": "Seonglae Cho" },
@@ -203,6 +203,58 @@
             </tbody>
           </table>
           <p>There is no order tool, because there is no order function to expose.</p>
+
+          <h2>The same tools in a browser</h2>
+          <p>
+            The stdio server is the right shape for a machine that runs unattended, and the wrong shape for someone who
+            wants to see what an agent can do with a book before installing anything. Trying it today means cloning the
+            repo, installing, minting a service key and editing a client config, which is a lot to ask of a question as
+            small as "is this useful".
+          </p>
+          <p>
+            <a href="/demo/">The demo</a> answers that question with nothing installed. It registers the read-only tools
+            through <code>navigator.modelContext</code>, the browser API in the W3C WebMCP draft, so an agent attached
+            to the browser can ask the demo book the same questions a CLI agent asks a real one.
+          </p>
+          <div class="code">
+            <button class="copy" type="button" aria-label="Copy code to clipboard">
+              <svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true">
+                <rect x="9" y="9" width="11" height="11" rx="2" />
+                <path d="M5 15V5a2 2 0 0 1 2-2h8" /></svg
+              ><svg class="i-ok" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 13 4 4L19 7" /></svg>
+            </button>
+            <pre><code class="lang-ts"><span class="c">// browser/demo/webmcp.ts</span>
+<span class="k">for</span> <span class="o">(</span><span class="k">const</span> tool <span class="k">of</span> <span class="f">readOnlyAgentTools</span><span class="o">())</span> <span class="o">{</span>
+  <span class="k">if</span> <span class="o">(!</span><span class="f">servable</span><span class="o">(</span>tool<span class="o">))</span> continue<span class="o">;</span>
+  navigator<span class="o">.</span>modelContext<span class="o">.</span><span class="f">registerTool</span><span class="o">({</span>
+    <span class="p">name</span><span class="o">:</span> tool<span class="o">.</span>name<span class="o">,</span>
+    <span class="p">description</span><span class="o">:</span> tool<span class="o">.</span>description<span class="o">,</span>
+    <span class="p">inputSchema</span><span class="o">:</span> tool<span class="o">.</span>inputSchema<span class="o">,</span>
+    <span class="p">annotations</span><span class="o">:</span> <span class="o">{</span> <span class="p">readOnlyHint</span><span class="o">:</span> <span class="k">true</span> <span class="o">},</span>
+    <span class="p">execute</span><span class="o">:</span> <span class="k">async</span> <span class="o">()</span> <span class="o">=&gt;</span> <span class="o">({</span> <span class="p">fn</span><span class="o">:</span> tool<span class="o">.</span>fn<span class="o">,</span> <span class="p">data</span><span class="o">:</span> <span class="t">FIXTURES</span><span class="o">[</span>tool<span class="o">.</span>fn<span class="o">]</span> <span class="o">}),</span>
+  <span class="o">});</span>
+<span class="o">}</span></code></pre>
+          </div>
+          <p>
+            Twelve of the twenty-five are registered there. The nine that write are excluded on purpose: a page served
+            from the open internet should not hand an agent a path into a table, even a fixture one. Four more read
+            tools are left out only because the demo book has no fixture for them yet, and adding one makes the tool
+            appear with no code change.
+          </p>
+          <div class="callout">
+            <p>
+              <strong>Chrome 146 and Edge 147 ship the API; Chrome 149 is in an origin trial.</strong> Firefox and
+              Safari are in the spec process without a date, and the spec is a draft that will still move. So this is an
+              addition to the demo, not a replacement for the stdio server: a browser without the API gets the same page
+              with nothing registered, and no agent CLI depends on it.
+            </p>
+          </div>
+          <p>
+            Two transports can drift, so the tool list is stated once in <code>packages/domain</code> and the browser
+            imports it. The stdio server cannot: it runs under bare node, where a TypeScript specifier would put a
+            version floor on all 25 tools. What keeps them honest instead is a test that parses the server source and
+            fails when a tool exists on one side and not the other.
+          </p>
         </article>
       </div>
     </div>
