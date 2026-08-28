@@ -48,17 +48,17 @@
     "@openportfolio/core": "workspace:*",
     "@openportfolio/domain": "workspace:*",
     "@openportfolio/node": "workspace:*",
-    "convex": "^1.32.0",
-    "zod": "^3.25.76"
+    "convex": "^1.44.0",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@edge-runtime/vm": "^5.0.0",
-    "@types/node": "^25.7.0",
-    "convex-test": "^0.0.54",
-    "happy-dom": "^20.11.1",
+    "@types/node": "^26.2.0",
+    "convex-test": "^0.0.56",
+    "happy-dom": "^20.11.6",
     "prettier": "^3.8.2",
-    "tsx": "^4.21.0",
-    "typescript": "^6.0.3",
-    "vitest": "^4.1.10"
+    "tsx": "^4.23.12",
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.11"
   }
 }
