@@ -49,16 +49,16 @@
     "@openportfolio/domain": "workspace:*",
     "@openportfolio/node": "workspace:*",
     "convex": "^1.45.0",
-    "zod": "^4.4.3"
+    "zod": "^4.5.4"
   },
   "devDependencies": {
     "@edge-runtime/vm": "^5.0.0",
-    "@types/node": "^26.4.0",
+    "@types/node": "^26.4.1",
     "convex-test": "^0.0.56",
-    "happy-dom": "^20.11.9",
+    "happy-dom": "^20.13.2",
     "prettier": "^3.8.2",
-    "tsx": "^4.23.12",
+    "tsx": "^4.23.13",
     "typescript": "^7.0.2",
-    "vitest": "^4.1.11"
+    "vitest": "^5.0.0"
   }
 }
