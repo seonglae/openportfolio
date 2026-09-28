@@ -23,9 +23,9 @@ forecasts you registered before the fact. No provider API key, anywhere in it.
 
 </div>
 
-<img src="assets/screenshots/net-worth.png" alt="The openportfolio net worth view: one total, then breakdowns by venue and by asset class, then the full position table" />
+<img src="assets/demo.gif" alt="A walk through the openportfolio demo: the net worth view with its breakdowns by venue and asset class, then flows by investor type, then the track record with its mean Brier score and reliability table, then the decisions queue" />
 
-<sub>Screenshots show the demo book. Every figure in them is invented.</sub>
+<sub>The recording and the screenshots show the demo book. Every figure in them is invented.</sub>
 
 > **Status: pre-release.** It runs and the setup below works. Interfaces will still move.
 
