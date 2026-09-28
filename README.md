@@ -112,6 +112,30 @@ on your machine under your own logins, against your own accounts.
 
 ## Quick start
 
+### With Docker
+
+Nothing but Docker, and no Convex account: the backend is Convex's own self-hosted image, running on your machine.
+
+```bash
+git clone https://github.com/seonglae/openportfolio.git
+cd openportfolio
+docker compose up -d        # http://127.0.0.1:6101
+```
+
+That starts the backend, pushes the functions to it, creates a book called `home` in GBP (`OPENPORTFOLIO_DEV_TENANT` and `OPENPORTFOLIO_BASE_CURRENCY` change both), then serves the dashboard and runs the sync worker. The Convex dashboard is on `127.0.0.1:6791`; it asks for an admin key, which `docker compose exec backend ./generate_admin_key.sh` prints. `docker compose down` stops it and keeps the data; `down -v` deletes the book.
+
+Every port is published on `127.0.0.1` only, because sign-in is off in this mode and the dev tenant answers anyone who reaches the backend. Read [Before exposing it](#before-exposing-it) before changing that. The agent worker is not in the compose file: it dispatches to an agent CLI you are signed in to, and a container has none. Run it on the host against the same backend.
+
+To drive the book from the host, point the Convex CLI at the container:
+
+```bash
+export CONVEX_SELF_HOSTED_URL=http://127.0.0.1:3210
+export CONVEX_SELF_HOSTED_ADMIN_KEY="$(docker compose exec -T backend ./generate_admin_key.sh)"
+npx convex run accounts:link '{"accountKey":"isa","venue":"manual","kind":"brokerage","label":"ISA","currency":"GBP"}'
+```
+
+### With a Convex account
+
 Node 22+, pnpm, and a [Convex](https://convex.dev) account. The free tier is enough.
 
 ```bash

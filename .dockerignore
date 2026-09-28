@@ -1,0 +1,22 @@
+# The build context is the whole checkout, and a checkout on a real machine
+# holds a real book: an .env.local with a service key, a holdings file, a
+# folder of broker exports. None of it may land in an image layer.
+.env*
+!.env.example
+**/holdings*.json
+**/*.csv
+**/.env*.local
+
+.git
+**/node_modules
+**/dist
+**/dist-demo
+**/.vite-temp*
+browser/convex
+site
+ios
+tmp
+.codex-home
+.wrangler
+assets/screenshots
+assets/demo.gif

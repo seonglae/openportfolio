@@ -1,0 +1,103 @@
+# Self-hosted openportfolio in one command: `docker compose up -d`, then
+# http://127.0.0.1:6101.
+#
+# Every port is published on 127.0.0.1 only. The book is created through
+# OPENPORTFOLIO_DEV_TENANT with sign-in off, which means anyone who can reach
+# the backend reaches the book. That is right for one machine and wrong for a
+# network: read "Before exposing it" in the README before changing a port.
+#
+# Not here: agent-worker.mts. It dispatches to an agent CLI you are signed in
+# to, and a container has no signed-in CLI. Run it on the host against the same
+# backend if you want it.
+
+x-app: &app
+  build: .
+  image: openportfolio-app
+  volumes:
+    - keys:/keys:ro
+  environment:
+    CONVEX_SELF_HOSTED_URL: http://backend:3210
+    CONVEX_URL: http://backend:3210
+    OPENPORTFOLIO_DEV_TENANT: ${OPENPORTFOLIO_DEV_TENANT:-home}
+    OPENPORTFOLIO_BASE_CURRENCY: ${OPENPORTFOLIO_BASE_CURRENCY:-GBP}
+
+services:
+  backend:
+    # Pinned to the revision this file was written against. Newer tags are at
+    # ghcr.io/get-convex/convex-backend.
+    image: ghcr.io/get-convex/convex-backend:27ef2346e0fea1f7e9fbfe7bfae895164c89dbec
+    stop_grace_period: 10s
+    stop_signal: SIGINT
+    ports:
+      - "127.0.0.1:3210:3210"
+      - "127.0.0.1:3211:3211"
+    volumes:
+      - data:/convex/data
+    environment:
+      CONVEX_CLOUD_ORIGIN: http://127.0.0.1:3210
+      CONVEX_SITE_ORIGIN: http://127.0.0.1:3211
+      DISABLE_BEACON: "true"
+    healthcheck:
+      test: curl -f http://localhost:3210/version
+      interval: 5s
+      start_period: 10s
+
+  # The backend generates its instance secret on first start and keeps it in
+  # its data volume. This reads it from there and writes the admin key the app
+  # needs, so no secret is fixed in this file.
+  admin-key:
+    image: ghcr.io/get-convex/convex-backend:27ef2346e0fea1f7e9fbfe7bfae895164c89dbec
+    entrypoint: ["/bin/bash", "-c", "./generate_admin_key.sh > /keys/admin_key"]
+    volumes:
+      - data:/convex/data
+      - keys:/keys
+    depends_on:
+      backend:
+        condition: service_healthy
+
+  init:
+    <<: *app
+    command: ["init"]
+    depends_on:
+      admin-key:
+        condition: service_completed_successfully
+
+  web:
+    <<: *app
+    command: ["web"]
+    ports:
+      - "127.0.0.1:6101:6101"
+    restart: unless-stopped
+    depends_on:
+      init:
+        condition: service_completed_successfully
+
+  sync:
+    <<: *app
+    command: ["sync"]
+    restart: unless-stopped
+    environment:
+      CONVEX_SELF_HOSTED_URL: http://backend:3210
+      CONVEX_URL: http://backend:3210
+      # Optional. Channel credentials stay in this process, never on the backend.
+      OPENPORTFOLIO_TELEGRAM_BOT_TOKEN: ${OPENPORTFOLIO_TELEGRAM_BOT_TOKEN:-}
+      OPENPORTFOLIO_TELEGRAM_CHAT_ID: ${OPENPORTFOLIO_TELEGRAM_CHAT_ID:-}
+    depends_on:
+      init:
+        condition: service_completed_successfully
+
+  dashboard:
+    image: ghcr.io/get-convex/convex-dashboard:27ef2346e0fea1f7e9fbfe7bfae895164c89dbec
+    stop_grace_period: 10s
+    stop_signal: SIGINT
+    ports:
+      - "127.0.0.1:6791:6791"
+    environment:
+      NEXT_PUBLIC_DEPLOYMENT_URL: http://127.0.0.1:3210
+    depends_on:
+      backend:
+        condition: service_healthy
+
+volumes:
+  data:
+  keys:

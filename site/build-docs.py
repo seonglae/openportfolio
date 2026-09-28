@@ -375,6 +375,20 @@ page(
     "Clone, install, create a Convex deployment, create the first book, and get a real net worth on screen from a manual holdings file.",
     """
 <h1>Quick start</h1>
+<p>Two ways in. Docker runs everything on your machine, the backend included, with no Convex account. The steps after it use a Convex deployment and give you the whole toolchain.</p>
+
+<h2>With Docker</h2>
+<pre><code class="lang-bash">git clone https://github.com/seonglae/openportfolio.git
+cd openportfolio
+docker compose up -d        <span class="c"># http://127.0.0.1:6101</span></code></pre>
+<p>The compose file starts Convex's own self-hosted backend image, pushes the functions to it, creates a book called <code>home</code> in GBP (<code>OPENPORTFOLIO_DEV_TENANT</code> and <code>OPENPORTFOLIO_BASE_CURRENCY</code> change both), then serves the dashboard and runs the sync worker. The Convex dashboard is on <code>127.0.0.1:6791</code>; <code>docker compose exec backend ./generate_admin_key.sh</code> prints the admin key it asks for. <code>docker compose down</code> keeps the data and <code>down -v</code> deletes the book.</p>
+<div class="callout"><p><strong>Every port is published on 127.0.0.1 only.</strong> Sign-in is off in this mode and the dev tenant answers anyone who reaches the backend, which is right for one machine and wrong for a network. Step 6 below, Before exposing it, applies before changing a port.</p></div>
+<p>The agent worker is not in the compose file. It dispatches to an agent CLI you are signed in to, and a container has none; run it on the host against the same backend. To drive the book from the host, point the Convex CLI at the container:</p>
+<pre><code class="lang-bash">export CONVEX_SELF_HOSTED_URL=http://127.0.0.1:3210
+export CONVEX_SELF_HOSTED_ADMIN_KEY="$(docker compose exec -T backend ./generate_admin_key.sh)"
+npx convex run accounts:link '{"accountKey":"isa","venue":"manual","kind":"brokerage","label":"ISA","currency":"GBP"}'</code></pre>
+
+<h2>With a Convex account</h2>
 <p>Node 22+, pnpm, and a <a href="https://convex.dev">Convex</a> account. The free tier is enough.</p>
 
 <h2>1. Install</h2>
