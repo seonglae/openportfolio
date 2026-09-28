@@ -127,11 +127,23 @@ export function AuthProvider({ client, children }: Props): React.ReactElement {
   );
 }
 
-/** Sign-out control, rendered in the header only when auth is the access path. */
+/**
+ * Sign-out control, rendered in the header only when auth is the access path.
+ *
+ * The check comes before any hook. With auth disabled there is no
+ * ConvexAuthProvider above this, useAuthActions() returns undefined, and
+ * destructuring it threw on every render: the VITE_DISABLE_AUTH=1 page was
+ * blank.
+ */
 export function AuthButton(): React.ReactElement | null {
+  if (DISABLED) return null;
+  return <SignOutButton />;
+}
+
+function SignOutButton(): React.ReactElement | null {
   const { signOut } = useAuthActions();
   const { isAuthenticated } = useConvexAuth();
-  if (DISABLED || !isAuthenticated) return null;
+  if (!isAuthenticated) return null;
   return (
     <button
       className="text-xs text-ink-3 hover:text-ink"
