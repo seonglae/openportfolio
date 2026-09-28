@@ -107,6 +107,7 @@ on your machine under your own logins, against your own accounts.
 | Catalysts     | dated forward events and the assets they touch                                                                        |
 | Audit         | append-only record of every state-changing mutation, including what the cron did unattended                           |
 | MCP           | 25 tools so `codex` / `antigravity` / `claude` can read and write the book directly                                   |
+| Notifications | optional Telegram messages from the workers: calls settled, decisions come due. The token stays in the worker process |
 | Multi-tenancy | every table scoped to a tenant, every index leading with it, one service key per tenant                               |
 
 ## Quick start

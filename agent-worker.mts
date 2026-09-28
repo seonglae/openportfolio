@@ -19,9 +19,12 @@ import { promisify } from "node:util";
 import {
   connectConvexWatcher,
   createConvexClient,
+  createNotifier,
+  formatNeedsReading,
   loadEnvLocal,
   resolveConvexUrl,
   resolveServiceKey,
+  unannounced,
 } from "@openportfolio/node";
 import { ORDERS, runActor } from "./actor.mts";
 
@@ -47,6 +50,10 @@ for (const [key, val] of Object.entries(loadEnvLocal(PROJECT_ROOT))) {
 const SERVICE_KEY = resolveServiceKey();
 const CONVEX_URL = resolveConvexUrl(PROJECT_ROOT);
 const TENANT_SLUG = process.env.OPENPORTFOLIO_TENANT;
+const notify = createNotifier();
+// What has already been sent, so an item still overdue next hour is not sent
+// again. In-process: a restart announces the queue once more, which is fine.
+const announced = new Set<string>();
 
 async function convexCli(fn: string, args: unknown): Promise<unknown> {
   const { stdout } = await execFileP(CONVEX_BIN, ["run", fn, JSON.stringify(args)], {
@@ -118,6 +125,21 @@ function buildPrompt(decisions: Decision[], forecasts: DueForecast[]): string {
   return lines.join("\n");
 }
 
+async function announce(decisions: Decision[], forecasts: DueForecast[]): Promise<void> {
+  if (!notify) return;
+  const fresh = unannounced(announced, [
+    ...decisions.map((row) => `decision:${row.key}`),
+    ...forecasts.map((row) => `forecast:${row.id}`),
+  ]);
+  if (fresh.length === 0) return;
+  await notify(
+    formatNeedsReading(
+      decisions.filter((row) => fresh.includes(`decision:${row.key}`)),
+      forecasts.filter((row) => fresh.includes(`forecast:${row.id}`)),
+    ),
+  );
+}
+
 let lastRunAt = 0;
 let running = false;
 
@@ -132,6 +154,7 @@ async function drain(): Promise<void> {
     if (decisions.length === 0 && needsReading.length === 0) return;
 
     lastRunAt = Date.now();
+    await announce(decisions, needsReading);
     console.log(
       `[${new Date().toISOString()}] dispatch: ${decisions.length} decisions, ${needsReading.length} forecasts`,
     );

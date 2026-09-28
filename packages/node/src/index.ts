@@ -8,3 +8,4 @@ export * from "./adapters/csv.ts";
 export * from "./adapters/manual.ts";
 export * from "./adapters/yahoo.ts";
 export * from "./flows/cot.ts";
+export * from "./notify/telegram.ts";

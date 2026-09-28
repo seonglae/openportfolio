@@ -20,10 +20,12 @@ import {
   createCoingeckoAdapter,
   createConvexClient,
   createCsvAdapter,
+  createNotifier,
   fetchCotFlows,
   createManualAdapter,
   createYahooAdapter,
   fetchFxRates,
+  formatSettled,
   loadEnvLocal,
   rateFor,
   pricesOwnBalances,
@@ -32,6 +34,7 @@ import {
   readManualHoldingsFile,
   resolveConvexUrl,
   resolveServiceKey,
+  type SettledCall,
 } from "@openportfolio/node";
 
 const execFileP = promisify(execFile);
@@ -66,6 +69,8 @@ const CSV_DIR = process.env.OPENPORTFOLIO_CSV_DIR;
 // keyless, and a checkout that syncs once should see the flows view populated
 // rather than have to be told the pillar works.
 const COT_ENABLED = process.env.OPENPORTFOLIO_COT !== "0";
+// Null unless a channel is configured in this process's environment.
+const notify = createNotifier();
 
 async function convexCli(fn: string, args: unknown): Promise<unknown> {
   const { stdout } = await execFileP(CONVEX_BIN, ["run", fn, JSON.stringify(args)], {
@@ -234,22 +239,22 @@ function withoutAccountKey(row: SyncRow) {
 
 // Settling from a live quote rather than waiting for the backend cron to find a
 // balance row: a call can name a symbol nobody in the book holds.
-type DueForecast = { id: string; subject: string; symbol: string | null };
+type DueForecast = { id: string; subject: string; probability: number; symbol: string | null };
 
-async function settleDue(): Promise<number> {
+async function settleDue(): Promise<SettledCall[]> {
   const due = await call<DueForecast[]>("forecasts:listDue", {});
-  let settled = 0;
+  const settled: SettledCall[] = [];
   for (const forecast of due) {
     if (!forecast.symbol) continue;
     if (!registry.has(FORECAST_QUOTE_VENUE)) continue;
     try {
       const quote = await registry.get(FORECAST_QUOTE_VENUE).readQuote({ symbol: forecast.symbol });
-      await call("forecasts:settle", {
+      const result = await call<{ outcome: boolean; brier: number }>("forecasts:settle", {
         forecastId: forecast.id,
         observedValue: quote.price,
         note: `${FORECAST_QUOTE_VENUE} @ ${new Date(quote.asOf).toISOString()}`,
       });
-      settled += 1;
+      settled.push({ subject: forecast.subject, probability: forecast.probability, ...result });
     } catch (e) {
       console.warn(`  ! ${forecast.symbol}: ${(e as Error).message}`);
     }
@@ -309,7 +314,10 @@ async function syncOnce(): Promise<void> {
   console.log(`  net worth ${snapshot.totalBase.toFixed(2)} ${baseCurrency}`);
 
   const settled = await settleDue();
-  if (settled > 0) console.log(`  settled ${settled} forecasts`);
+  if (settled.length > 0) {
+    console.log(`  settled ${settled.length} forecasts`);
+    if (notify) await notify(formatSettled(settled));
+  }
 
   // Last, and caught on its own: an outage at the CFTC must not cost the book
   // its balances, its snapshot or its settlements, all of which already ran.

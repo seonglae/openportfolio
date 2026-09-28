@@ -510,6 +510,17 @@ page(
 </tbody>
 </table>
 
+<h2>Notifications</h2>
+<p>Optional. With both set, the sync worker sends a message when it settles calls, saying what was said, what happened and the Brier score, and the agent worker sends one when a deferred decision passes its trigger date or a prose forecast comes due, before it wakes a CLI, so you hear about it even when every provider in the chain fails. Each item is announced once per worker process, not on every sweep.</p>
+<table>
+<thead><tr><th>Variable</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td><code>OPENPORTFOLIO_TELEGRAM_BOT_TOKEN</code></td><td>The token <a href="https://t.me/BotFather">@BotFather</a> gives you for a bot of your own.</td></tr>
+<tr><td><code>OPENPORTFOLIO_TELEGRAM_CHAT_ID</code></td><td>The chat it writes to. Message the bot once, then read <code>chat.id</code> from <code>https://api.telegram.org/bot&lt;token&gt;/getUpdates</code>.</td></tr>
+</tbody>
+</table>
+<div class="callout"><p><strong>The bot token is a channel credential, and gets the venue-credential rule.</strong> It lives in the worker process environment only. It is never set on the deployment, no table stores it, and no error message quotes it. A send that fails logs a line and the sync carries on.</p></div>
+
 <div class="callout"><p><strong>There is no model provider key.</strong> Not omitted from this table: there is no variable to set. See <a href="/docs/mcp">MCP and agents</a>.</p></div>
 """,
 )
