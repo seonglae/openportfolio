@@ -33,6 +33,8 @@ forecasts you registered before the fact. No provider API key, anywhere in it.
 ship declare `canPlaceOrders: false`, and `PlaceOrderRequest` requires an `OrderConfirmation` that
 has no default. What it does is aggregate, watch, and keep score.
 
+**Nor is it an AI analyst.** Plenty of tools will now have a model read the market and hand you a view. What openportfolio adds is the part they leave out: every call, a model's or your own, is registered with a probability and a horizon before the fact and Brier-scored after it, so a fluent analyst and an accurate one stop looking the same.
+
 ## Why
 
 Two problems that look unrelated and are the same problem.
