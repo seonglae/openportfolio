@@ -706,6 +706,12 @@ const ORDERS = {
 </table>
 <p>There is no order tool, because there is no order function to expose.</p>
 
+<h2>Skills</h2>
+<p>The tools say what an agent can do to a book; they do not say what it should do first, which criterion form settles itself, or that a call it cannot establish is voided rather than guessed. That lives in <code>skills/</code>, as four <code>SKILL.md</code> files written against the tools the server registers: reading the book, registering a forecast, checking the record, and working the deferred-decision queue. A test fails if a skill names a tool that does not exist.</p>
+<pre><code class="lang-bash">pnpm skills install            <span class="c"># into ./.claude/skills</span>
+pnpm skills install --global   <span class="c"># into ~/.claude/skills, for every project</span></code></pre>
+<p>Both run <code>bin/openportfolio.mjs</code>, which is also the package's <code>bin</code>. The <code>openportfolio</code> package on npm is a placeholder that predates the command, so <code>npx openportfolio skills install</code> works once a release carries it, and not before. A skill that is already installed is skipped unless you pass <code>--force</code>, in case you edited it.</p>
+
 <h2>The same tools in a browser</h2>
 <p>The stdio server is the right shape for a machine that runs unattended, and the wrong shape for someone who wants to see what an agent can do with a book before installing anything. Trying it today means cloning the repo, installing, minting a service key and editing a client config, which is a lot to ask of a question as small as "is this useful".</p>
 <p><a href="/demo/">The demo</a> answers that question with nothing installed. It registers the read-only tools through <code>navigator.modelContext</code>, the browser API in the W3C WebMCP draft, so an agent attached to the browser can ask the demo book the same questions a CLI agent asks a real one.</p>

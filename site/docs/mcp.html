@@ -204,6 +204,31 @@
           </table>
           <p>There is no order tool, because there is no order function to expose.</p>
 
+          <h2>Skills</h2>
+          <p>
+            The tools say what an agent can do to a book; they do not say what it should do first, which criterion form
+            settles itself, or that a call it cannot establish is voided rather than guessed. That lives in
+            <code>skills/</code>, as four <code>SKILL.md</code> files written against the tools the server registers:
+            reading the book, registering a forecast, checking the record, and working the deferred-decision queue. A
+            test fails if a skill names a tool that does not exist.
+          </p>
+          <div class="code">
+            <button class="copy" type="button" aria-label="Copy code to clipboard">
+              <svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true">
+                <rect x="9" y="9" width="11" height="11" rx="2" />
+                <path d="M5 15V5a2 2 0 0 1 2-2h8" /></svg
+              ><svg class="i-ok" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 13 4 4L19 7" /></svg>
+            </button>
+            <pre><code class="lang-bash"><span class="k">pnpm</span> skills install            <span class="c"># into ./.claude/skills</span>
+<span class="k">pnpm</span> skills install <span class="a">--global</span>   <span class="c"># into ~/.claude/skills, for every project</span></code></pre>
+          </div>
+          <p>
+            Both run <code>bin/openportfolio.mjs</code>, which is also the package's <code>bin</code>. The
+            <code>openportfolio</code> package on npm is a placeholder that predates the command, so
+            <code>npx openportfolio skills install</code> works once a release carries it, and not before. A skill that
+            is already installed is skipped unless you pass <code>--force</code>, in case you edited it.
+          </p>
+
           <h2>The same tools in a browser</h2>
           <p>
             The stdio server is the right shape for a machine that runs unattended, and the wrong shape for someone who

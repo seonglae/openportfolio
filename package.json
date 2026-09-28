@@ -5,12 +5,16 @@
   "private": true,
   "type": "module",
   "packageManager": "pnpm@11.22.0",
+  "bin": {
+    "openportfolio": "bin/openportfolio.mjs"
+  },
   "scripts": {
     "test": "vitest run",
     "test:watch": "vitest",
     "sync-worker": "tsx sync-worker.mts",
     "agent-worker": "tsx agent-worker.mts",
     "mcp": "node mcp/portfolio-server.mjs",
+    "skills": "node bin/openportfolio.mjs skills",
     "format": "prettier --write .",
     "typecheck": "tsc -p tsconfig.json && tsc -p tsconfig.test.json && pnpm --filter @openportfolio/core typecheck && pnpm --filter @openportfolio/domain typecheck && pnpm --filter @openportfolio/node typecheck && tsc -p convex/tsconfig.json && tsc -p convex/tsconfig.test.json && pnpm --filter openportfolio-browser typecheck",
     "site:demo": "pnpm --filter openportfolio-browser build:demo && rm -rf site/demo && cp -R browser/dist-demo site/demo",

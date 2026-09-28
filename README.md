@@ -272,6 +272,17 @@ and neither does this repo.
 
 Details: **[openportfolio.app/docs/adapters](https://openportfolio.app/docs/adapters)**
 
+## Agent skills
+
+The MCP server gives an agent the tools; `skills/` tells it how to use them without being walked through it. Four skills ship: reading the book, registering a forecast, checking the record, and working the deferred-decision queue. Each is written against the tools `mcp/portfolio-server.mjs` actually registers, and a test fails if one names a tool that does not exist.
+
+```bash
+pnpm skills install            # into ./.claude/skills
+pnpm skills install --global   # into ~/.claude/skills, for every project
+```
+
+That runs `bin/openportfolio.mjs`, which is also the package's `bin`. The `openportfolio` package on npm is a placeholder that predates it, so `npx openportfolio skills install` will work once a release carries the command, and not before. An installed skill is left alone on a second run unless you pass `--force`, in case you edited it.
+
 ## Requirements
 
 - Node 22+, pnpm
