@@ -48,21 +48,21 @@
   "dependencies": {
     "@auth/core": "^0.41.3",
     "@convex-dev/auth": "^0.0.95",
-    "@modelcontextprotocol/sdk": "^1.29.0",
+    "@modelcontextprotocol/sdk": "^1.30.1",
     "@openportfolio/core": "workspace:*",
     "@openportfolio/domain": "workspace:*",
     "@openportfolio/node": "workspace:*",
-    "convex": "^1.45.0",
-    "zod": "^4.4.3"
+    "convex": "^1.46.0",
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@edge-runtime/vm": "^5.0.0",
-    "@types/node": "^26.4.0",
-    "convex-test": "^0.0.56",
-    "happy-dom": "^20.11.9",
-    "prettier": "^3.8.2",
-    "tsx": "^4.23.12",
+    "@types/node": "^26.6.2",
+    "convex-test": "^0.0.60",
+    "happy-dom": "^20.14.5",
+    "prettier": "^3.9.9",
+    "tsx": "^4.23.15",
     "typescript": "^7.0.2",
-    "vitest": "^4.1.11"
+    "vitest": "^5.0.2"
   }
 }
