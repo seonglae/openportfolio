@@ -35,6 +35,8 @@ import {
   resolveConvexUrl,
   resolveServiceKey,
   type SettledCall,
+  type DuePage,
+  drainHistoricalForecasts,
 } from "@openportfolio/node";
 
 const execFileP = promisify(execFile);
@@ -58,10 +60,6 @@ const TENANT_SLUG = process.env.OPENPORTFOLIO_TENANT;
 // class on each row picks the venue instead, so a book of shares and coins is
 // priced correctly without anyone configuring anything.
 const PINNED_QUOTE_VENUE = process.env.OPENPORTFOLIO_QUOTE_VENUE;
-// A forecast criterion names a symbol and nothing else, so this path cannot
-// route on asset class the way repricing does. It stays pinned, and guessing is
-// what it refuses to do: see quoteVenueFor for what a wrong guess costs.
-const FORECAST_QUOTE_VENUE = PINNED_QUOTE_VENUE ?? "coingecko";
 const MANUAL_HOLDINGS = process.env.OPENPORTFOLIO_MANUAL_HOLDINGS;
 // A directory of broker exports, one <accountKey>.csv per account.
 const CSV_DIR = process.env.OPENPORTFOLIO_CSV_DIR;
@@ -237,37 +235,18 @@ function withoutAccountKey(row: SyncRow) {
   return rest;
 }
 
-// Settling from a live quote rather than waiting for the backend cron to find a
-// balance row: a call can name a symbol nobody in the book holds.
-type DueForecast = { id: string; subject: string; probability: number; symbol: string | null };
-
+// Historical lookup is opt-in per immutable target. Legacy ticker-only calls
+// and unsupported providers stay pending; live quotes are never a fallback.
 async function settleDue(): Promise<SettledCall[]> {
-  const due = await call<DueForecast[]>("forecasts:listDue", {});
-  const settled: SettledCall[] = [];
-  for (const forecast of due) {
-    if (!forecast.symbol) continue;
-    if (!registry.has(FORECAST_QUOTE_VENUE)) continue;
-    try {
-      const quote = await registry.get(FORECAST_QUOTE_VENUE).readQuote({ symbol: forecast.symbol });
-      const result = await call<{ outcome: boolean; brier: number }>("forecasts:settle", {
-        forecastId: forecast.id,
-        observedValue: quote.price,
-        note: `${FORECAST_QUOTE_VENUE} @ ${new Date(quote.asOf).toISOString()}`,
-      });
-      settled.push({ subject: forecast.subject, probability: forecast.probability, ...result });
-    } catch (e) {
-      console.warn(`  ! ${forecast.symbol}: ${(e as Error).message}`);
-    }
-  }
-  return settled;
+  return drainHistoricalForecasts(
+    registry,
+    (cursor, now) => call<DuePage>("forecasts:listDuePage", { now, paginationOpts: { cursor, numItems: 100 } }),
+    (input) => call("forecasts:settle", input),
+    (forecast, reason) => console.warn(`  ! forecast ${forecast.id} pending: ${reason}`),
+  );
 }
 
-// COT is published weekly, and the sweep runs every fifteen minutes. Writing
-// the same eight weeks on every pass would be several hundred pointless
-// mutations a day, so the newest report date already written is remembered and
-// an unchanged one is skipped. Restarting the process rewrites once, which the
-// upsert in flows:record absorbs.
-let lastCotReport: string | null = null;
+let lastCotReport = "";
 
 async function syncFlows(): Promise<number> {
   if (!COT_ENABLED) return 0;

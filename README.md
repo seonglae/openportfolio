@@ -53,11 +53,11 @@ forecaster who is merely fluent are indistinguishable from the outside, and from
 
 Both are bookkeeping failures, so openportfolio treats them as bookkeeping.
 
-|                            |                                                                                                                                                                                                                                                                                                             |
-| -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **One net worth**          | Accounts pulled through venue adapters into a single base currency, with the rate stored on the row it converted, so a snapshot records what the book was worth then rather than what today's rates say. Positions held in three places are one exposure.                                                   |
+|                            |                                                                                                                                                                                                                                                                                                                                                                                           |
+| -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **One net worth**          | Accounts pulled through venue adapters into a single base currency, with the rate stored on the row it converted, so a snapshot records what the book was worth then rather than what today's rates say. Positions held in three places are one exposure.                                                                                                                                 |
 | **Flows, not just prices** | Price is the output of who was buying and who was made to sell. Net buying by investor type, turnover, and a calendar of dated forward events are stored as first-class series, not derived when somebody remembers to ask. A forced seller is on a schedule, and the schedule is public. Positioning by participant class arrives keyless from the CFTC's weekly Commitments of Traders. |
-| **A scored track record**  | A call is registered before the fact with a probability, a horizon and the condition that settles it. When the horizon passes, the machine-resolvable ones settle themselves and are Brier-scored. The reliability diagram is the product: it shows what you said, what happened, and the gap between them. |
+| **A scored track record**  | A call is registered before the fact with a probability, a horizon and the condition that settles it. When the horizon passes, supported preregistered historical targets settle from matching evidence and are Brier-scored; missing evidence stays pending. The reliability diagram is the product: it shows what you said, what happened, and the gap between them.                    |
 
 There is a fourth table that exists for one reason. A recommendation phrased as "wait for the
 print, then decide" evaporates the moment it is said out loud. `decisions` is a queue of those,
@@ -97,18 +97,18 @@ on your machine under your own logins, against your own accounts.
 
 ## What it does
 
-| Surface       |                                                                                                                       |
-| ------------- | --------------------------------------------------------------------------------------------------------------------- |
-| Net worth     | accounts, balances, per-venue and per-asset-class breakdown, snapshots in one base currency, keyless FX               |
+| Surface       |                                                                                                                             |
+| ------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| Net worth     | accounts, balances, per-venue and per-asset-class breakdown, snapshots in one base currency, keyless FX                     |
 | Venues        | adapter contract with declared capabilities; keyless quote adapters for listed instruments and for coins, plus a manual one |
-| Flows         | net buying and turnover by investor type per session, per market or per symbol                                        |
-| Forecasts     | probability, horizon and resolution criterion; auto-resolution on horizon expiry; Brier score and reliability buckets |
-| Decisions     | the deferred-decision queue, with trigger conditions and outcomes                                                     |
-| Catalysts     | dated forward events and the assets they touch                                                                        |
-| Audit         | append-only record of every state-changing mutation, including what the cron did unattended                           |
-| MCP           | 25 tools so `codex` / `antigravity` / `claude` can read and write the book directly                                   |
-| Notifications | optional Telegram messages from the workers: calls settled, decisions come due. The token stays in the worker process |
-| Multi-tenancy | every table scoped to a tenant, every index leading with it, one service key per tenant                               |
+| Flows         | net buying and turnover by investor type per session, per market or per symbol                                              |
+| Forecasts     | probability, horizon and resolution criterion; auto-resolution on horizon expiry; Brier score and reliability buckets       |
+| Decisions     | the deferred-decision queue, with trigger conditions and outcomes                                                           |
+| Catalysts     | dated forward events and the assets they touch                                                                              |
+| Audit         | append-only record of every state-changing mutation, including what the cron did unattended                                 |
+| MCP           | 25 tools so `codex` / `antigravity` / `claude` can read and write the book directly                                         |
+| Notifications | optional Telegram messages from the workers: calls settled, decisions come due. The token stays in the worker process       |
+| Multi-tenancy | every table scoped to a tenant, every index leading with it, one service key per tenant                                     |
 
 ## Quick start
 
@@ -174,7 +174,7 @@ npx tsx sync-worker.mts --once
 
 Prices in the file are a starting point, not the record: the worker re-quotes every row it can
 through a keyless source, routed by asset class, converts them into GBP and writes one total. Shares,
-ETFs and funds go to Yahoo, coins to CoinGecko. A row whose recorded price *is* the record, a
+ETFs and funds go to Yahoo, coins to CoinGecko. A row whose recorded price _is_ the record, a
 pension or a property, is given the class `other`, which no quote source is asked about.
 
 Full walkthrough: **[openportfolio.app/docs/quickstart](https://openportfolio.app/docs/quickstart)**
@@ -335,3 +335,12 @@ Conventions, the tenant invariant in full, and notes for agent CLIs working in t
 ## License
 
 Apache-2.0. See [LICENSE](LICENSE).
+
+## Evidence and measurement
+
+See [the resolution contract and correctness checklist](docs/CORRECTNESS.md) for
+supported Yahoo equity/ETF minute-close history, immutable asset/currency/time
+policies, legacy migration, paired baseline scoring, and reproducible tests.
+The public demo and screenshots use synthetic figures, not investment returns
+or measured forecasting performance. Net-worth snapshots are valuations; without
+cash-flow accounting they must not be labeled TWR, IRR, or benchmark-relative returns.

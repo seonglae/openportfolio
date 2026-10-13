@@ -200,26 +200,50 @@ tool(
     market: z.string(),
     symbol: z.string().optional(),
     date: z.string().describe("YYYY-MM-DD session date"),
-    investorType: z.enum(["retail", "foreign", "institution", "other"]),
+    investorType: z.enum([
+      "retail",
+      "foreign",
+      "institution",
+      "other",
+      "non_commercial",
+      "commercial",
+      "non_reportable",
+    ]),
     netBuyValue: z.number(),
     turnoverValue: z.number().optional(),
+    openInterestContracts: z.number().optional(),
+    measurement: z.enum(["net_buying", "net_position_change"]).optional(),
     currency: z.string(),
     source: z.string().describe("where the number came from"),
   },
   "flows:record",
 );
 
+const targetFields = {
+  assetId: z.string(),
+  symbol: z.string(),
+  assetClass: z.enum(["equity", "etf", "fund", "bond", "crypto", "cash", "derivative", "other"]),
+  venue: z.string(),
+  currency: z.string(),
+  observationPolicy: z.enum(["exact", "last_completed_minute"]).optional(),
+  maxAgeMs: z.number().optional(),
+  priceBasis: z.literal("provider_close").optional(),
+  sessions: z.literal("all").optional(),
+};
+
 // ── The track record ────────────────────────────────────────────────────
 
 tool(
   "record_forecast",
   "Register a forecast",
-  "A call, with the condition that settles it and the horizon it settles on. Use a machine-resolvable criterion ('BTCUSDT > 100000') whenever the claim allows one; prose criteria have to be settled by hand.",
+  "Register an immutable call. Numeric settlement requires a resolutionTarget committed now and matching historical evidence under its exact-time or preregistered minute-close policy. Otherwise settlement is manual with a source note. baselineProbability is a preregistered comparator.",
   {
     subject: z.string(),
     probability: z.number().describe("0 to 1"),
     horizonSec: z.number().describe("seconds until it comes due; at least 3600"),
     resolutionCriterion: z.string(),
+    resolutionTarget: z.object(targetFields).optional(),
+    baselineProbability: z.number().min(0).max(1).optional(),
     rationale: z.string().optional(),
     author: z.string().optional().describe("agent identifier, e.g. 'codex'"),
     authorType: z.enum(["user", "agent"]).optional(),
@@ -250,10 +274,19 @@ tool(
 tool(
   "settle_forecast",
   "Settle a forecast",
-  "Score a call. Pass observedValue for a machine-resolvable criterion, or outcome to say what happened. An explicit outcome wins.",
+  "After the horizon, pass observedValue with matching evidence for a precommitted resolutionTarget, or an outcome with a source note for manual calls. Never substitute a current quote for historical evidence. Never pass both.",
   {
     forecastId: z.string(),
     observedValue: z.number().optional(),
+    evidence: z
+      .object({
+        ...targetFields,
+        observedAt: z.number(),
+        source: z.string(),
+        retrievedAt: z.number().optional(),
+        parsedResponseSha256: z.string().optional(),
+      })
+      .optional(),
     outcome: z.boolean().optional(),
     note: z.string().optional(),
   },
@@ -271,7 +304,7 @@ tool(
 tool(
   "calibration",
   "Calibration and Brier score",
-  "The track record: mean Brier, expected calibration error, and the reliability buckets behind them. 0.25 is the coin-flip line.",
+  "The track record: mean Brier, expected calibration error, and the reliability buckets behind them. 0.25 is a constant-50% reference, not a skill threshold. Paired comparisons use only preregistered baselines on the same calls. Legacy settlements without provenance are excluded.",
   { windowDays: z.number().optional(), author: z.string().optional(), buckets: z.number().optional() },
   "forecasts:calibration",
 );

@@ -9,3 +9,4 @@ export * from "./adapters/manual.ts";
 export * from "./adapters/yahoo.ts";
 export * from "./flows/cot.ts";
 export * from "./notify/telegram.ts";
+export * from "./settlement.ts";

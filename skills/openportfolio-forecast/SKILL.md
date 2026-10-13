@@ -25,7 +25,7 @@ Needs the openportfolio MCP server. See the `openportfolio-book` skill for setup
 
 ## Write a criterion a machine can settle
 
-The form `SYMBOL comparator VALUE` settles itself when the horizon passes, with no one having to remember:
+The form `SYMBOL comparator VALUE` can be evaluated against evidence. A symbol alone never authorizes automatic settlement:
 
 ```
 BTC > 100000
@@ -35,11 +35,22 @@ KOSPI < 3,000
 
 Comparators are `>`, `>=`, `<`, `<=`, `==`, `!=`. Symbols may carry dots, colons, slashes and dashes (`035420.KS`, `BRK-B`). Anything else, for example "the central bank cuts in March", is valid but prose: it waits in `due_forecasts` with a null symbol until someone settles it by hand. Prefer the machine form whenever the claim allows it.
 
-The symbol is observed through the sync worker's quote source, which is CoinGecko unless the operator pinned another with `OPENPORTFOLIO_QUOTE_VENUE`. A share ticker in a criterion only settles itself on a deployment priced by a source that knows it.
+Automatic settlement requires a resolutionTarget registered with the call: assetId,
+symbol, assetClass, venue and currency. For the supported Yahoo equity/ETF path,
+set observationPolicy to last_completed_minute, priceBasis to provider_close,
+sessions to all and maxAgeMs to a value from 60000 to 345600000. The policy uses
+the most recent completed provider-returned minute at or before dueAt, including
+extended hours, within that precommitted age. It uses the provider's quote.close
+basis, which can reflect corporate-action adjustments or later provider revisions.
+The source, retrieval time and parsed-response hash are recorded. This is not an
+immutable as-traded exchange tape. Missing or expired historical data stays open.
+Other numeric targets use exact dueAt evidence. Legacy symbol-only calls remain
+manual and require a source note. No quote-source environment override affects
+settlement. An optional baselineProbability registers a comparator before outcomes.
 
 ## Before registering
 
 - Choose the probability before looking for reasons, then check it against the record with the `openportfolio-record` skill. A forecaster whose 80% calls land half the time should say 60%.
-- 0.5 registers a coin flip. It scores 0.25 whatever happens, which is the line every other call is measured against.
+- 0.5 scores 0.25 whatever happens. This is a reference, not a universal skill threshold. Compare a preregistered baseline on the same calls, with counts.
 - Check `list_forecasts` for an open call on the same subject. A second call is a new record, not a correction of the first.
 - A call is not a recommendation. Never attach a size, a price to trade at, or an instruction to buy or sell.

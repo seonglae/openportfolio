@@ -43,22 +43,24 @@ export const COT_MARKETS: readonly CotMarket[] = [
   { code: "133741", market: "BTC", label: "Bitcoin (CME)" },
 ];
 
-// COT's three participant classes onto the vocabulary the flows table already
-// has. Non-reportable means a position too small to have to report, which is
-// retail by construction. Non-commercial is the large speculator: managed money
-// and the funds. Commercial is the hedger, a producer or a dealer with the
-// underlying exposure, and it is genuinely a fourth thing rather than a kind of
-// institution, so it lands on `other` rather than being flattened into one.
-//
-// `foreign` never appears: COT reports what a participant is, not where it is.
-export type InvestorType = "retail" | "foreign" | "institution" | "other";
+// Preserve the CFTC classifications. Reporting thresholds do not establish
+// whether a trader is retail, and commercial status is not residency.
+import type { InvestorType } from "@openportfolio/domain";
 
 type ClassMapping = { investorType: InvestorType; longField: string; shortField: string };
 
 const CLASSES: readonly ClassMapping[] = [
-  { investorType: "institution", longField: "change_in_noncomm_long_all", shortField: "change_in_noncomm_short_all" },
-  { investorType: "other", longField: "change_in_comm_long_all", shortField: "change_in_comm_short_all" },
-  { investorType: "retail", longField: "change_in_nonrept_long_all", shortField: "change_in_nonrept_short_all" },
+  {
+    investorType: "non_commercial",
+    longField: "change_in_noncomm_long_all",
+    shortField: "change_in_noncomm_short_all",
+  },
+  { investorType: "commercial", longField: "change_in_comm_long_all", shortField: "change_in_comm_short_all" },
+  {
+    investorType: "non_reportable",
+    longField: "change_in_nonrept_long_all",
+    shortField: "change_in_nonrept_short_all",
+  },
 ];
 
 export type CotRow = Record<string, string | undefined>;
@@ -70,7 +72,8 @@ export type FlowRow = {
   // The week's change in net position, long minus short, in contracts. The
   // level is a position; the change is the flow, and the flow is the question.
   netBuyValue: number;
-  turnoverValue?: number;
+  openInterestContracts?: number;
+  measurement: "net_position_change";
   currency: string;
   source: string;
 };
@@ -109,7 +112,8 @@ export function flowRowsFrom(market: string, rows: readonly CotRow[]): FlowRow[]
         date,
         investorType: cls.investorType,
         netBuyValue: long - short,
-        turnoverValue: openInterest,
+        openInterestContracts: openInterest,
+        measurement: "net_position_change",
         currency: COT_UNIT,
         source: COT_SOURCE,
       });

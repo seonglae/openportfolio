@@ -17,15 +17,23 @@ export function FlowsView() {
       <div className="headline">
         <input value={market} onChange={(e) => setMarket(e.target.value)} aria-label="market" />
         <span className="text-ink-3">
-          net buying over the last {net?.sessions ?? 0} sessions{net?.currency ? ` (${net.currency})` : ""}
+          {net?.measurement === "net_position_change" ? "Change in net position" : "Net buying"} over{" "}
+          {net?.sessions ?? 0} reporting periods{net?.currency ? ` (${net.currency})` : ""}
+          {net?.truncated ? " (partial data)" : ""}
         </span>
       </div>
+
+      {net?.warning && (
+        <p className="text-ink-3" role="status">
+          {net.warning}
+        </p>
+      )}
 
       <table className="sheet glass-strong">
         <thead>
           <tr>
             <th>Investor</th>
-            <th className="num">Net bought</th>
+            <th className="num">{net?.measurement === "net_position_change" ? "Net position change" : "Net bought"}</th>
           </tr>
         </thead>
         <tbody>
@@ -37,11 +45,13 @@ export function FlowsView() {
           ))}
         </tbody>
       </table>
-      {(net?.byInvestor ?? []).length === 0 && (
-        <p className="text-ink-3">No flow recorded for {market}. Feed it with the record_flow tool or the MCP server.</p>
+      {!net?.warning && (net?.byInvestor ?? []).length === 0 && (
+        <p className="text-ink-3">
+          No flow recorded for {market}. Feed it with the record_flow tool or the MCP server.
+        </p>
       )}
 
-      <h2 className="section-title">Sessions</h2>
+      <h2 className="section-title">Reporting periods</h2>
       <table className="sheet glass-strong">
         <thead>
           <tr>
@@ -49,6 +59,7 @@ export function FlowsView() {
             <th>Investor</th>
             <th className="num">Net</th>
             <th className="num">Turnover</th>
+            <th className="num">Open interest (contracts)</th>
             <th>Source</th>
           </tr>
         </thead>
@@ -59,6 +70,7 @@ export function FlowsView() {
               <td>{row.investorType}</td>
               <td className={row.netBuyValue < 0 ? "num text-loss" : "num"}>{row.netBuyValue.toLocaleString()}</td>
               <td className="num">{row.turnoverValue?.toLocaleString() ?? "-"}</td>
+              <td className="num">{row.openInterestContracts?.toLocaleString() ?? "-"}</td>
               <td className="text-ink-3">{row.source}</td>
             </tr>
           ))}

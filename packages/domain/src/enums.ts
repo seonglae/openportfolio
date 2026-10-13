@@ -38,7 +38,15 @@ export type DecisionStatus = (typeof DECISION_STATUSES)[number];
 // Investor types as market operators publish them. The four KRX categories map
 // onto these one for one, in this order, which is why "other" is a category
 // here rather than a fallback: exchanges publish it as its own line.
-export const INVESTOR_TYPES = ["retail", "foreign", "institution", "other"] as const;
+export const INVESTOR_TYPES = [
+  "retail",
+  "foreign",
+  "institution",
+  "other",
+  "non_commercial",
+  "commercial",
+  "non_reportable",
+] as const;
 export type InvestorType = (typeof INVESTOR_TYPES)[number];
 
 export const AUTHOR_TYPES = ["user", "agent"] as const;

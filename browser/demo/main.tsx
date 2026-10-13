@@ -5,9 +5,7 @@ import { App } from "../src/App.tsx";
 import "../src/index.css";
 import { installDemoTools } from "./webmcp.ts";
 
-// ?bare=1 drops the banner for product screenshots. The hosted demo never
-// sets it, so a visitor always sees the disclosure.
-const BARE = new URLSearchParams(window.location.search).has("bare");
+// The disclosure stays visible in screenshots and all query-string modes.
 
 const SOURCE_LINK =
   "rounded-md border border-rule px-2.5 py-1.5 font-medium text-ink-2 no-underline transition-colors hover:border-accent hover:text-ink";
@@ -16,8 +14,6 @@ const SOURCE_LINK =
 // instead of only existing on this page. demo.html applies the stored choice
 // before first paint.
 function Demo() {
-  if (BARE) return <App />;
-
   return (
     <>
       <div className="glass-bar flex flex-wrap items-center justify-between gap-3 border-b border-rule px-6 py-2.5 text-[13px] text-ink-2">

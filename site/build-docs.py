@@ -559,8 +559,9 @@ page(
 </table>
 
 <h2>Settlement</h2>
-<p>Criteria that parse into a comparison resolve themselves: a cron sweeps every book's due calls, evaluates the criterion against the stored price series and scores the result. Nothing waits on you remembering that you made a prediction three weeks ago.</p>
-<p>The sweep is the one deliberate exception to tenant scoping. It runs on a tenant-less index and is an <code>internalMutation</code> for exactly that reason, unreachable from any client, with a test asserting each book is scored against its own prices.</p>
+<p>A parseable comparison still needs a preregistered <code>resolutionTarget</code>: provider-qualified asset identity, symbol, asset class, source venue and currency. The Yahoo equity/ETF path uses <code>last_completed_minute</code>, <code>priceBasis: provider_close</code>, <code>sessions: all</code> and an immutable <code>maxAgeMs</code> between one minute and four days. It selects the latest completed provider-returned one-minute bar at or before the horizon, including extended hours, within that age.</p>
+<p>Provider close is not a guaranteed unadjusted exchange tape: corporate actions and provider revisions can change historical data. Source, observed time, retrieval time and parsed-response hash are retained. Unsupported, stale or missing history stays pending; current quotes and balances never substitute for historical evidence. Exact-time targets require an observation at precisely <code>dueAt</code>. Legacy calls can be settled manually after their horizon with a source note. Target-bound calls cannot bypass evidence with a manual outcome.</p>
+<p>The worker paginates due calls under its tenant scope, so old unsupported calls cannot hide newer supported ones. The legacy internal cron reports queue counts but never infers outcomes from balance rows.</p>
 
 <h2>The score</h2>
 <p>Brier is the mean squared error of the probabilities you gave:</p>
@@ -569,7 +570,7 @@ page(
 <thead><tr><th>Value</th><th>Reading</th></tr></thead>
 <tbody>
 <tr><td>0.00</td><td>Perfect, and if you see it, check the criteria.</td></tr>
-<tr><td>0.25</td><td>What a coin flip earns. The bar, not the goal.</td></tr>
+<tr><td>0.25</td><td>Constant 50% reference, not a universal skill threshold.</td></tr>
 <tr><td>&gt; 0.25</td><td>Worse than saying 50% to everything.</td></tr>
 </tbody>
 </table>
@@ -581,7 +582,7 @@ page(
 <li><strong>Observed above said, at the bottom end.</strong> Underconfidence, which costs less but is still a miscalibration.</li>
 <li><strong>Bars level across every bucket.</strong> Calibrated. Your 70% means 70%.</li>
 </ul>
-<p>Calibration and discrimination are different things. A forecaster who says 50% to everything is perfectly calibrated and completely useless, which is why the bucket counts are on the page next to the rates.</p>
+<p>Calibration and discrimination are different things. A forecaster who says 50% to everything is calibrated only if those events occur half the time. Compare preregistered baselines on the same calls, report counts and pending/void/legacy exclusions, and avoid significance claims when event dependence is unknown.</p>
 """,
 )
 
@@ -601,7 +602,8 @@ page(
 <tr><td><code>date</code></td><td>Session date in the venue's local calendar.</td></tr>
 <tr><td><code>investorType</code></td><td><code>individual</code>, <code>foreigner</code>, <code>institution</code>, <code>other_corporation</code>.</td></tr>
 <tr><td><code>netBuyValue</code></td><td>Buy minus sell, in the market's own currency.</td></tr>
-<tr><td><code>turnoverValue</code></td><td>Session turnover. Stored on the same row on purpose.</td></tr>
+<tr><td><code>turnoverValue</code></td><td>Traded turnover where the source publishes it. Never open interest.</td></tr>
+<tr><td><code>openInterestContracts</code></td><td>CFTC open interest, distinct from turnover. COT measures weekly net-position change in contracts and retains commercial, non-commercial and non-reportable classes; non-reportable does not mean retail.</td></tr>
 <tr><td><code>source</code></td><td>Where the figure came from, because same-day numbers are provisional until the close.</td></tr>
 </tbody>
 </table>

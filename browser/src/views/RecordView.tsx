@@ -18,11 +18,23 @@ export function RecordView() {
       <div className="headline">
         <span className="headline-figure">{formatBrier(record.meanBrier)}</span>
         <span className="text-ink-3">
-          mean Brier over {record.n} scored calls · coin flip is {record.randomBaseline} · calibration error{" "}
+          mean Brier over {record.n} scored calls · constant 50% reference {record.randomBaseline} · calibration error{" "}
           {formatPercent(record.expectedCalibrationError)}
         </span>
       </div>
 
+      <p className="text-ink-3">
+        {record.open ?? 0} open · {record.voided ?? 0} void · {record.legacyResolved ?? 0} legacy settlements excluded.
+        A score below 0.25 alone does not establish skill. Event dependence is unknown; no confidence interval is
+        claimed.
+      </p>
+      {record.paired && (
+        <p className="text-ink-3">
+          Paired baseline: {record.paired.n} calls · forecast {formatBrier(record.paired.meanBrier)} · preregistered
+          baseline {formatBrier(record.paired.baselineMeanBrier)} · difference{" "}
+          {formatBrier(record.paired.meanDifference)} (negative favors forecast)
+        </p>
+      )}
       <h2 className="section-title">Reliability</h2>
       <table className="sheet glass-strong">
         <thead>

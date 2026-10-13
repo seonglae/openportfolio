@@ -24,9 +24,9 @@ describe("reading a COT report", () => {
     const byType = Object.fromEntries(rows.map((r) => [r.investorType, r.netBuyValue]));
     // Long change minus short change. The large speculators covered 29,382
     // shorts and added 9,156 longs, which is one number, not two.
-    expect(byType.institution).toBe(9156 - -29382);
-    expect(byType.other).toBe(-21101 - 36963);
-    expect(byType.retail).toBe(7075 - -12451);
+    expect(byType.non_commercial).toBe(9156 - -29382);
+    expect(byType.commercial).toBe(-21101 - 36963);
+    expect(byType.non_reportable).toBe(7075 - -12451);
   });
 
   // COT reports what a participant is, not where it is, so the residency
@@ -39,8 +39,8 @@ describe("reading a COT report", () => {
   // "institution" would merge the two sides the report exists to separate.
   it("keeps hedgers apart from the funds", () => {
     const rows = flowRowsFrom("ES", [WEEK]);
-    expect(rows.find((r) => r.investorType === "other")?.netBuyValue).toBeLessThan(0);
-    expect(rows.find((r) => r.investorType === "institution")?.netBuyValue).toBeGreaterThan(0);
+    expect(rows.find((r) => r.investorType === "commercial")?.netBuyValue).toBeLessThan(0);
+    expect(rows.find((r) => r.investorType === "non_commercial")?.netBuyValue).toBeGreaterThan(0);
   });
 
   // Contracts, said out loud on the row. A notional would need a multiplier and
@@ -50,14 +50,16 @@ describe("reading a COT report", () => {
     for (const row of flowRowsFrom("ES", [WEEK])) {
       expect(row.currency).toBe(COT_UNIT);
       expect(row.source).toBe(COT_SOURCE);
-      expect(row.turnoverValue).toBe(2119506);
+      expect(row.openInterestContracts).toBe(2119506);
+      expect(row.measurement).toBe("net_position_change");
+      expect(row).not.toHaveProperty("turnoverValue");
     }
   });
 
   // A week with no published change is not a week nobody moved.
   it("skips a class whose change the report did not carry", () => {
     const partial = { ...WEEK, change_in_nonrept_long_all: undefined };
-    expect(flowRowsFrom("ES", [partial]).some((r) => r.investorType === "retail")).toBe(false);
+    expect(flowRowsFrom("ES", [partial]).some((r) => r.investorType === "non_reportable")).toBe(false);
   });
 });
 
