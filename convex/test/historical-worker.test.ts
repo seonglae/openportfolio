@@ -1,6 +1,7 @@
 // Test-only imports: node adapters are never imported by deployed handlers.
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { api } from "../_generated/api";
+import type { Id } from "../_generated/dataModel";
 import { seedTenant, withConvex } from "./harness.setup";
 import { createYahooAdapter } from "../../packages/node/src/adapters/yahoo.ts";
 import { createAdapterRegistry } from "../../packages/node/src/adapters/registry.ts";
@@ -80,7 +81,12 @@ describe("worker to historical provider fixture to real backend", () => {
         pages.push(page.page.length);
         return page;
       },
-      (args) => t.mutation(api.forecasts.settle, { ...args, forecastId: emitted.id, serviceKey: tenant.serviceKey }),
+      (args) =>
+        t.mutation(api.forecasts.settle, {
+          ...args,
+          forecastId: args.forecastId as Id<"forecasts">,
+          serviceKey: tenant.serviceKey,
+        }),
       pending,
       now,
     );
