@@ -28,7 +28,7 @@ export function RecordView() {
         A score below 0.25 alone does not establish skill. Event dependence is unknown; no confidence interval is
         claimed.
       </p>
-      {record.paired && (
+      {record.paired && record.paired.n > 0 && (
         <p className="text-ink-3">
           Paired baseline: {record.paired.n} calls · forecast {formatBrier(record.paired.meanBrier)} · preregistered
           baseline {formatBrier(record.paired.baselineMeanBrier)} · difference{" "}
