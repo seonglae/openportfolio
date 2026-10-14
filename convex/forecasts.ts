@@ -285,13 +285,25 @@ export const calibration = query({
   },
   handler: async (ctx, args) => {
     const scope = await requireTenant(ctx, args);
-    const rows = await ctx.db
-      .query("forecasts")
-      .withIndex("by_tenant_created", (q) => q.eq("tenantId", scope.tenantId))
-      .collect();
-
+    if (args.windowDays !== undefined && (!Number.isFinite(args.windowDays) || args.windowDays <= 0)) {
+      throw new Error("windowDays must be positive and finite");
+    }
     let cutoff = 0;
     if (args.windowDays) cutoff = Date.now() - args.windowDays * MS_PER_DAY;
+    // Read only the rows the window and author can count, from their index.
+    let rows;
+    if (args.author) {
+      const author = args.author;
+      rows = await ctx.db
+        .query("forecasts")
+        .withIndex("by_tenant_author", (q) => q.eq("tenantId", scope.tenantId).eq("author", author))
+        .collect();
+    } else {
+      rows = await ctx.db
+        .query("forecasts")
+        .withIndex("by_tenant_created", (q) => q.eq("tenantId", scope.tenantId).gte("createdAt", cutoff))
+        .collect();
+    }
 
     const points: CalibrationPoint[] = [];
     const scores: number[] = [];
@@ -299,9 +311,6 @@ export const calibration = query({
     let open = 0;
     let voided = 0;
     let legacyResolved = 0;
-    if (args.windowDays !== undefined && (!Number.isFinite(args.windowDays) || args.windowDays <= 0)) {
-      throw new Error("windowDays must be positive and finite");
-    }
     for (const row of rows) {
       if (row.createdAt < cutoff) continue;
       if (args.author && row.author !== args.author) continue;
