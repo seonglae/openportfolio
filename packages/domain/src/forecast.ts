@@ -65,8 +65,11 @@ export function validateForecast(draft: ForecastDraft): string[] {
       ) {
         problems.push("minute-close resolution supports exact Yahoo equity and ETF identifiers only");
       }
-    } else if (target.maxAgeMs !== undefined) {
-      problems.push("maxAgeMs is only valid for last_completed_minute");
+    } else {
+      // No adapter can observe a price at the exact millisecond a call comes
+      // due, so an exact-time target could only ever be voided or settled by a
+      // hand-typed timestamp.
+      problems.push("resolutionTarget must use last_completed_minute; no adapter observes the exact dueAt");
     }
     const criterion = parseCriterion(draft.resolutionCriterion);
     if (!criterion || criterion.symbol !== target.symbol) problems.push("resolutionTarget must match criterion symbol");
@@ -114,6 +117,17 @@ export type ResolutionTarget = {
   sessions?: "all";
 };
 
+// Whether a worker can settle this target from historical evidence. Anything
+// else, including a ticker-only call and a target stored before exact-time
+// registration was refused, is settled by hand with a source note.
+export function isMachineSettleable(target: ResolutionTarget | undefined): boolean {
+  return (
+    target?.observationPolicy === "last_completed_minute" &&
+    target.venue === "yahoo" &&
+    ["equity", "etf"].includes(target.assetClass)
+  );
+}
+
 export type ResolutionEvidence = ResolutionTarget & {
   observedAt: number;
   source: string;
@@ -121,9 +135,10 @@ export type ResolutionEvidence = ResolutionTarget & {
   parsedResponseSha256?: string;
 };
 
-// Exact time is the default. The optional minute-close contract preregisters
-// a bounded age, provider-close basis and all-session scope. Choosing a wider
-// window after seeing the outcome is prohibited. Unknown data stays pending.
+// The minute-close contract preregisters a bounded age, provider-close basis
+// and all-session scope. Choosing a wider window after seeing the outcome is
+// prohibited. Unknown data stays pending. Exact time is only checked for rows
+// stored before it stopped being registrable.
 export function validateEvidence(
   target: ResolutionTarget | undefined,
   evidence: ResolutionEvidence | undefined,

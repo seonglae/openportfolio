@@ -20,10 +20,10 @@ Needs the openportfolio MCP server. See the `openportfolio-book` skill for setup
 
 ## Settling what is due
 
-`due_forecasts` lists open calls whose horizon has passed, with the symbol each needs observed.
+`due_forecasts` lists open calls whose horizon has passed. `requiresHistoricalEvidence` false means no worker will settle the row.
 
 - A row with a supported resolutionTarget can be settled by the worker from historical evidence under the policy frozen at registration. A symbol alone is insufficient. For `settle_forecast`, observedValue requires evidence matching the assetId, symbol, assetClass, venue, currency and registered time policy, with a source. Never use a current price for an old horizon or widen the allowed age after seeing prices.
-- Legacy symbol-only calls require a documented manual outcome and source note. Calls with a committed target cannot bypass it with a manual outcome. Both paths reject early settlement; do not pass outcome and observedValue together.
+- Legacy symbol-only calls and stored unsupported targets require a documented manual outcome and source note. Calls with a supported target cannot bypass it with a manual outcome. Both paths reject early settlement; do not pass outcome and observedValue together.
 - A row with a null symbol is prose and needs reading. Establish whether the criterion was met, then `settle_forecast` with an explicit `outcome` of true or false and a `note` saying how you know.
 - If the criterion became unresolvable (the event was cancelled or the wording turned out ambiguous), use `void_forecast` with a `reason`. A void drops out of the mean. Never settle a call you cannot establish: a guess scored as an outcome corrupts the record it is meant to test.
 

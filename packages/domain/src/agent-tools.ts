@@ -236,7 +236,7 @@ export const AGENT_TOOLS: readonly AgentTool[] = [
     name: "record_forecast",
     title: "Register a forecast",
     description:
-      "Register an immutable call. Numeric settlement requires a resolutionTarget committed now and matching historical evidence under its exact-time or preregistered minute-close policy. Otherwise settlement is manual with a source note. baselineProbability is a preregistered comparator.",
+      "Register an immutable call. Numeric settlement requires a resolutionTarget committed now: a Yahoo equity or ETF under the preregistered last_completed_minute policy, settled from matching historical evidence. Otherwise settlement is manual with a source note. baselineProbability is a preregistered comparator.",
     fn: "forecasts:emit",
     readOnly: false,
     inputSchema: {
@@ -270,7 +270,7 @@ export const AGENT_TOOLS: readonly AgentTool[] = [
     name: "due_forecasts",
     title: "Forecasts past their horizon",
     description:
-      "Open calls whose horizon has passed, with the symbol each one needs observed. A null symbol means a human has to read it.",
+      "Open calls whose horizon has passed. requiresHistoricalEvidence false means no worker will settle it and a human has to read it.",
     fn: "forecasts:listDue",
     readOnly: true,
     inputSchema: { type: "object", properties: { limit: num() } },

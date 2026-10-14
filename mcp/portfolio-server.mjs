@@ -236,7 +236,7 @@ const targetFields = {
 tool(
   "record_forecast",
   "Register a forecast",
-  "Register an immutable call. Numeric settlement requires a resolutionTarget committed now and matching historical evidence under its exact-time or preregistered minute-close policy. Otherwise settlement is manual with a source note. baselineProbability is a preregistered comparator.",
+  "Register an immutable call. Numeric settlement requires a resolutionTarget committed now: a Yahoo equity or ETF under the preregistered last_completed_minute policy, settled from matching historical evidence. Otherwise settlement is manual with a source note. baselineProbability is a preregistered comparator.",
   {
     subject: z.string(),
     probability: z.number().describe("0 to 1"),
@@ -266,7 +266,7 @@ tool(
 tool(
   "due_forecasts",
   "Forecasts past their horizon",
-  "Open calls whose horizon has passed, with the symbol each one needs observed. A null symbol means a human has to read it.",
+  "Open calls whose horizon has passed. requiresHistoricalEvidence false means no worker will settle it and a human has to read it.",
   { limit: z.number().optional() },
   "forecasts:listDue",
 );

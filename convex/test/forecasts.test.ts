@@ -1,18 +1,32 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { api, internal } from "../_generated/api";
 import { type Harness, type SeededTenant, seedTenant, withConvex } from "./harness.setup";
+import { needsReading } from "../../packages/node/src/settlement.ts";
 
 const DAY_SEC = 86_400;
 const START = Date.UTC(2026, 0, 1);
 const DUE = START + DAY_SEC * 1000;
 const TARGET = {
+  assetId: "yahoo:AAPL",
+  symbol: "AAPL",
+  assetClass: "equity" as const,
+  venue: "yahoo",
+  currency: "USD",
+  observationPolicy: "last_completed_minute" as const,
+  priceBasis: "provider_close" as const,
+  sessions: "all" as const,
+  maxAgeMs: 120000,
+};
+const TARGETED = { resolutionCriterion: "AAPL > 100", resolutionTarget: TARGET };
+const EVIDENCE = { ...TARGET, observedAt: DUE, source: "fixture://yahoo/AAPL/2026-01-02T00:00:00Z" };
+// What registration accepted before exact-time targets were refused.
+const EXACT_TARGET = {
   assetId: "coingecko:bitcoin",
   symbol: "BTCUSDT",
   assetClass: "crypto" as const,
   venue: "coingecko",
   currency: "USD",
 };
-const EVIDENCE = { ...TARGET, observedAt: DUE, source: "fixture://bitcoin/2026-01-02T00:00:00Z" };
 let now = START;
 beforeEach(() => {
   now = START;
@@ -42,7 +56,7 @@ async function seedPrice(t: Harness, tenant: SeededTenant, asOf: number) {
   await t.mutation(api.accounts.link, {
     serviceKey: tenant.serviceKey,
     accountKey: "exchange",
-    venue: "coingecko",
+    venue: "yahoo",
     kind: "exchange",
     label: "fixture",
     currency: "USD",
@@ -53,12 +67,12 @@ async function seedPrice(t: Harness, tenant: SeededTenant, asOf: number) {
     asOf,
     rows: [
       {
-        symbol: "BTCUSDT",
-        assetClass: "crypto",
+        symbol: "AAPL",
+        assetClass: "equity",
         qty: 1,
-        lastPrice: 104000,
-        valueLocal: 104000,
-        valueBase: 104000,
+        lastPrice: 104,
+        valueLocal: 104,
+        valueBase: 104,
         currency: "USD",
       },
     ],
@@ -67,7 +81,7 @@ async function seedPrice(t: Harness, tenant: SeededTenant, asOf: number) {
 
 describe("registration", () => {
   it("freezes target identity, comparator and horizon before observing outcomes", async () => {
-    const { t, tenant, call } = await setup({ resolutionTarget: TARGET, baselineProbability: 0.6 });
+    const { t, tenant, call } = await setup({ ...TARGETED, baselineProbability: 0.6 });
     expect(call.dueAt).toBe(DUE);
     const row = (await t.query(api.forecasts.list, { serviceKey: tenant.serviceKey }))[0];
     expect(row.resolutionTarget).toEqual(TARGET);
@@ -79,7 +93,9 @@ describe("registration", () => {
     { horizonSec: 5 },
     { horizonSec: NaN },
     { baselineProbability: -0.1 },
-    { resolutionTarget: { ...TARGET, symbol: "AAPL" } },
+    { ...TARGETED, resolutionTarget: { ...TARGET, symbol: "MSFT" } },
+    { resolutionTarget: EXACT_TARGET },
+    { resolutionTarget: { ...EXACT_TARGET, observationPolicy: "exact" } },
   ])("rejects invalid registration %j", async (over) => {
     await expect(setup(over)).rejects.toThrow();
   });
@@ -87,7 +103,7 @@ describe("registration", () => {
 
 describe("evidence settlement", () => {
   it("stores matched historical identity, timestamp, value, source and audit", async () => {
-    const { t, tenant, call } = await setup({ resolutionTarget: TARGET });
+    const { t, tenant, call } = await setup(TARGETED);
     now = DUE + 30 * DAY_SEC * 1000;
     expect(
       await t.mutation(api.forecasts.settle, {
@@ -114,15 +130,15 @@ describe("evidence settlement", () => {
   });
   it.each([
     { assetId: "coingecko:aapl" },
-    { venue: "yahoo" },
+    { venue: "coingecko" },
     { currency: "GBP" },
-    { assetClass: "equity" as const },
-    { symbol: "AAPL" },
+    { assetClass: "crypto" as const },
+    { symbol: "MSFT" },
     { observedAt: DUE - 1 },
     { observedAt: DUE + 1 },
     { source: " " },
   ])("refuses mismatched or untraceable evidence %j", async (over) => {
-    const { t, tenant, call } = await setup({ resolutionTarget: TARGET });
+    const { t, tenant, call } = await setup(TARGETED);
     now = DUE;
     await expect(
       t.mutation(api.forecasts.settle, {
@@ -135,7 +151,7 @@ describe("evidence settlement", () => {
     expect((await t.query(api.forecasts.list, { serviceKey: tenant.serviceKey }))[0].status).toBe("open");
   });
   it("rejects early settlements and manual bypasses of committed evidence", async () => {
-    const { t, tenant, call } = await setup({ resolutionTarget: TARGET });
+    const { t, tenant, call } = await setup(TARGETED);
     await expect(
       t.mutation(api.forecasts.settle, {
         serviceKey: tenant.serviceKey,
@@ -191,7 +207,7 @@ describe("evidence settlement", () => {
     ).toMatchObject({ brier: expect.closeTo(0.64, 10) });
   });
   it("enforces the tenant gate even with matching evidence", async () => {
-    const { t, tenant, call } = await setup({ resolutionTarget: TARGET });
+    const { t, tenant, call } = await setup(TARGETED);
     const beta = await seedTenant(t, "beta");
     now = DUE;
     await expect(
@@ -210,7 +226,7 @@ describe("fail-closed automatic resolution", () => {
   it.each([START, DUE, DUE + DAY_SEC * 1000])(
     "never treats balance timestamp %d as settlement evidence",
     async (asOf) => {
-      const { t, tenant, call } = await setup({ resolutionTarget: TARGET });
+      const { t, tenant, call } = await setup(TARGETED);
       await seedPrice(t, tenant, asOf);
       now = DUE + DAY_SEC * 1000;
       expect(await t.mutation(internal.forecasts.resolveDue, {})).toMatchObject({
@@ -232,6 +248,58 @@ describe("fail-closed automatic resolution", () => {
     expect(await t.mutation(internal.forecasts.resolveDue, {})).toMatchObject({ seen: 0 });
     now = DUE;
     expect(await t.mutation(internal.forecasts.resolveDue, {})).toMatchObject({ human: 1, resolved: 0 });
+  });
+});
+
+describe("calls no worker will settle", () => {
+  it("routes a ticker-only call to a reader and keeps a supported target with the worker", async () => {
+    const { t, tenant, call: legacy } = await setup({ resolutionCriterion: "AAPL > 100" });
+    const supported = await emit(t, tenant, TARGETED);
+    now = DUE;
+    const due = await t.query(api.forecasts.listDue, { serviceKey: tenant.serviceKey });
+    expect(needsReading(due).map((row) => row.id)).toEqual([legacy.id]);
+    expect(due.find((row) => row.id === supported.id)?.requiresHistoricalEvidence).toBe(true);
+    await expect(
+      t.mutation(api.forecasts.settle, { serviceKey: tenant.serviceKey, forecastId: legacy.id, outcome: true }),
+    ).rejects.toThrow(/note/);
+    expect(
+      await t.mutation(api.forecasts.settle, {
+        serviceKey: tenant.serviceKey,
+        forecastId: legacy.id,
+        outcome: true,
+        note: "fixture://nasdaq/AAPL/close",
+      }),
+    ).toMatchObject({ outcome: true });
+  });
+  it("lets a stored exact-time target be read and settled by hand with a note", async () => {
+    const t = withConvex();
+    const tenant = await seedTenant(t, "alpha");
+    const id = await t.run(async (ctx) =>
+      ctx.db.insert("forecasts", {
+        tenantId: tenant.tenantId,
+        subject: "BTC holds six figures",
+        probability: 0.8,
+        horizonSec: DAY_SEC,
+        resolutionCriterion: "BTCUSDT > 100000",
+        resolutionTarget: EXACT_TARGET,
+        author: "service:fixture",
+        authorType: "agent",
+        status: "open",
+        createdAt: START,
+        dueAt: DUE,
+      }),
+    );
+    now = DUE;
+    const due = await t.query(api.forecasts.listDue, { serviceKey: tenant.serviceKey });
+    expect(needsReading(due).map((row) => row.id)).toEqual([id]);
+    expect(
+      await t.mutation(api.forecasts.settle, {
+        serviceKey: tenant.serviceKey,
+        forecastId: id,
+        outcome: false,
+        note: "fixture://coingecko/bitcoin/2026-01-02",
+      }),
+    ).toMatchObject({ outcome: false, brier: expect.closeTo(0.64, 10) });
   });
 });
 

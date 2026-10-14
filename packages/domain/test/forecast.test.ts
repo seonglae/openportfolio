@@ -4,6 +4,7 @@ import {
   MIN_HORIZON_SEC,
   dueAt,
   isDue,
+  isMachineSettleable,
   resolveFromObservation,
   resolveFromOutcome,
   validateForecast,
@@ -54,6 +55,44 @@ describe("registering a forecast", () => {
         resolutionCriterion: "X > 1",
       }),
     ).toContain(`horizonSec above ${MAX_HORIZON_SEC}`);
+  });
+});
+
+describe("resolution targets", () => {
+  const minute = {
+    assetId: "yahoo:AAPL",
+    symbol: "AAPL",
+    assetClass: "equity" as const,
+    venue: "yahoo",
+    currency: "USD",
+    observationPolicy: "last_completed_minute" as const,
+    priceBasis: "provider_close" as const,
+    sessions: "all" as const,
+    maxAgeMs: 120000,
+  };
+  const exact = {
+    assetId: "coingecko:bitcoin",
+    symbol: "BTCUSDT",
+    assetClass: "crypto" as const,
+    venue: "coingecko",
+    currency: "USD",
+  };
+  const draft = { subject: "s", probability: 0.5, horizonSec: HOUR_SEC };
+
+  it("accepts the Yahoo minute-close target the worker can settle", () => {
+    expect(validateForecast({ ...draft, resolutionCriterion: "AAPL > 100", resolutionTarget: minute })).toEqual([]);
+    expect(isMachineSettleable(minute)).toBe(true);
+  });
+
+  // No adapter observes a price at the exact millisecond a call comes due.
+  it.each([exact, { ...exact, observationPolicy: "exact" as const }])("refuses an exact-time target %j", (target) => {
+    const problems = validateForecast({ ...draft, resolutionCriterion: "BTCUSDT > 100000", resolutionTarget: target });
+    expect(problems.join("; ")).toMatch(/last_completed_minute/);
+    expect(isMachineSettleable(target)).toBe(false);
+  });
+
+  it("leaves a call with no target to a reader", () => {
+    expect(isMachineSettleable(undefined)).toBe(false);
   });
 });
 

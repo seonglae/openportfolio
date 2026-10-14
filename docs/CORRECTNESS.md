@@ -10,11 +10,12 @@ Register probability, horizon, criterion, and (for numeric evidence) a
 resolutionTarget before the outcome. The target is immutable and contains a
 provider-qualified assetId, symbol, assetClass, venue, and currency.
 
-Two explicit policies exist:
+One policy can be registered:
 
-1. `exact` (default): the evidence timestamp must equal `dueAt`. This is for
-   sources that can establish that precise observation. A nearby value is not
-   substituted. No shipped quote adapter claims this capability.
+1. `exact`: the evidence timestamp must equal `dueAt`. No adapter observes a
+   price at that millisecond, so registration refuses it. Rows stored with it
+   earlier, and any target no adapter supports, are settled by hand with a
+   source note or voided.
 2. `last_completed_minute`: Yahoo equities and ETFs only. Set assetId to
    `yahoo:AAPL`, symbol to `AAPL`, assetClass to `equity`, venue to `yahoo`,
    currency to `USD`, priceBasis to `provider_close`, sessions to `all`, and

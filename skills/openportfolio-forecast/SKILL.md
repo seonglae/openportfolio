@@ -44,8 +44,9 @@ extended hours, within that precommitted age. It uses the provider's quote.close
 basis, which can reflect corporate-action adjustments or later provider revisions.
 The source, retrieval time and parsed-response hash are recorded. This is not an
 immutable as-traded exchange tape. Missing or expired historical data stays open.
-Other numeric targets use exact dueAt evidence. Legacy symbol-only calls remain
-manual and require a source note. No quote-source environment override affects
+Registration refuses any other target: no adapter observes a price at the exact
+dueAt. Legacy symbol-only calls and stored unsupported targets remain manual and
+require a source note. No quote-source environment override affects
 settlement. An optional baselineProbability registers a comparator before outcomes.
 
 ## Before registering

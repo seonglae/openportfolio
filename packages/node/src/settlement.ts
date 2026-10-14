@@ -71,3 +71,10 @@ export async function drainHistoricalForecasts(
     cursor = result.continueCursor;
   }
 }
+
+// The due calls only a reader can settle: prose, ticker-only and unsupported
+// targets alike. Filtering on the symbol instead left ticker-only calls with
+// no worker and no reader, open for good.
+export function needsReading<T extends { requiresHistoricalEvidence: boolean }>(due: readonly T[]): T[] {
+  return due.filter((row) => !row.requiresHistoricalEvidence);
+}

@@ -8,6 +8,7 @@ import {
   criterionSymbol,
   dueAt as horizonEnd,
   expectedCalibrationError,
+  isMachineSettleable,
   meanBrier,
   reliabilityBuckets,
   resolveFromObservation,
@@ -127,9 +128,9 @@ export const list = query({
   },
 });
 
-// Open calls whose horizon has passed, with the symbol each one needs an
-// observation for. The sync worker reads this to know which quotes to fetch;
-// a null symbol means the criterion is prose and a human has to settle it.
+// Open calls whose horizon has passed. requiresHistoricalEvidence marks the
+// ones the sync worker settles from a supported target; every other row,
+// prose or ticker-only or an unsupported target, needs a reader.
 export const listDue = query({
   args: {
     now: v.optional(v.number()),
@@ -153,7 +154,7 @@ export const listDue = query({
       dueAt: row.dueAt,
       symbol: criterionSymbol(row.resolutionCriterion),
       resolutionTarget: row.resolutionTarget,
-      requiresHistoricalEvidence: row.resolutionTarget !== undefined,
+      requiresHistoricalEvidence: isMachineSettleable(row.resolutionTarget),
     }));
   },
 });
@@ -210,7 +211,9 @@ export const settle = mutation({
       throw new Error("pass either an outcome or an observation with evidence, never both");
     }
     if (args.outcome !== undefined) {
-      if (row.resolutionTarget) throw new Error("this forecast requires matching historical evidence");
+      if (isMachineSettleable(row.resolutionTarget)) {
+        throw new Error("this forecast requires matching historical evidence");
+      }
       if (!args.note?.trim()) throw new Error("manual resolution requires a note naming the evidence source");
     }
     if (args.observedValue !== undefined) validateEvidence(row.resolutionTarget, args.evidence, row.dueAt, resolvedAt);
