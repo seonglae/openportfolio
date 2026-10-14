@@ -31,6 +31,10 @@ export function NetWorthView() {
         </span>
       </div>
 
+      <p className="text-ink-3">
+        Account valuations at recorded prices and FX rates. Changes in net worth include deposits and withdrawals; they
+        are not investment returns or a benchmark comparison.
+      </p>
       <h2 className="section-title">By venue</h2>
       <table className="sheet glass-strong">
         <thead>
@@ -98,7 +102,9 @@ export function NetWorthView() {
           ))}
         </tbody>
       </table>
-      {positions.length === 0 && <p className="text-ink-3">No positions yet. Link an account and run the sync worker.</p>}
+      {positions.length === 0 && (
+        <p className="text-ink-3">No positions yet. Link an account and run the sync worker.</p>
+      )}
     </section>
   );
 }

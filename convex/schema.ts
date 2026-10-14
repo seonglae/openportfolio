@@ -12,6 +12,7 @@ import {
   MEMBER_ROLES,
 } from "@openportfolio/domain";
 import { literals } from "./validators";
+import { resolutionTarget, resolutionEvidence } from "./forecastValidators";
 
 // THE TENANT INVARIANT
 //
@@ -162,6 +163,10 @@ export default defineSchema({
     // "BTCUSDT > 100000" resolves itself. Prose does not, and is resolved by a
     // human instead of being guessed at.
     resolutionCriterion: v.string(),
+    resolutionTarget: v.optional(resolutionTarget),
+    baselineProbability: v.optional(v.number()),
+    resolutionEvidence: v.optional(resolutionEvidence),
+    resolutionMethod: v.optional(v.union(v.literal("evidence"), v.literal("manual"))),
     rationale: v.optional(v.string()),
     author: v.string(),
     authorType: literals(AUTHOR_TYPES),
@@ -194,6 +199,8 @@ export default defineSchema({
     investorType: literals(INVESTOR_TYPES),
     netBuyValue: v.number(),
     turnoverValue: v.optional(v.number()),
+    openInterestContracts: v.optional(v.number()),
+    measurement: v.optional(v.union(v.literal("net_buying"), v.literal("net_position_change"))),
     currency: v.string(),
     source: v.string(),
     createdAt: v.number(),

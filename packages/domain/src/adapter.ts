@@ -10,6 +10,7 @@
 // See AGENTS.md for how to add a keyed broker adapter without putting a
 // credential anywhere in this repo.
 
+import type { ResolutionTarget, ResolutionEvidence } from "./forecast.ts";
 import type { AccountKind, AssetClass, OrderSide, OrderType } from "./enums.ts";
 
 export type VenueCapabilities = {
@@ -90,12 +91,16 @@ export type OrderReceipt = {
   note?: string;
 };
 
+export type HistoricalQuote = { price: number; evidence: ResolutionEvidence };
+export type HistoricalQuoteRequest = { target: ResolutionTarget; dueAt: number };
+
 export type VenueAdapter = {
   venue: string;
   kind: AccountKind;
   capabilities: VenueCapabilities;
   readBalances(request: ReadBalancesRequest): Promise<AdapterBalance[]>;
   readQuote(request: ReadQuoteRequest): Promise<AdapterQuote>;
+  readHistoricalQuote?(request: HistoricalQuoteRequest): Promise<HistoricalQuote>;
   placeOrder?(request: PlaceOrderRequest): Promise<OrderReceipt>;
 };
 

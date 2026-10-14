@@ -22,7 +22,9 @@
  */
 
 export type JsonSchemaProperty = {
-  type: "string" | "number" | "boolean" | "array";
+  type: "string" | "number" | "boolean" | "array" | "object";
+  properties?: Record<string, JsonSchemaProperty>;
+  required?: readonly string[];
   description?: string;
   enum?: readonly string[];
   items?: { type: "string" };
@@ -63,6 +65,31 @@ const num = (description?: string): JsonSchemaProperty => {
 };
 
 const oneOf = (values: readonly string[]): JsonSchemaProperty => ({ type: "string", enum: values });
+
+const TARGET_PROPERTIES = {
+  assetId: str("provider-qualified stable identifier"),
+  symbol: str("exact criterion symbol"),
+  assetClass: oneOf(["equity", "etf", "fund", "bond", "crypto", "cash", "derivative", "other"]),
+  venue: str(),
+  currency: str(),
+  observationPolicy: oneOf(["exact", "last_completed_minute"]),
+  maxAgeMs: num("preregistered allowed age for minute-close history, 60000 to 345600000"),
+  priceBasis: oneOf(["provider_close"]),
+  sessions: oneOf(["all"]),
+};
+const TARGET_REQUIRED = ["assetId", "symbol", "assetClass", "venue", "currency"];
+const TARGET: JsonSchemaProperty = { type: "object", properties: TARGET_PROPERTIES, required: TARGET_REQUIRED };
+const EVIDENCE: JsonSchemaProperty = {
+  type: "object",
+  properties: {
+    ...TARGET_PROPERTIES,
+    observedAt: num("epoch milliseconds under the preregistered observation policy"),
+    source: str(),
+    retrievedAt: num(),
+    parsedResponseSha256: str(),
+  },
+  required: [...TARGET_REQUIRED, "observedAt", "source"],
+};
 
 export const AGENT_TOOLS: readonly AgentTool[] = [
   {
@@ -186,9 +213,19 @@ export const AGENT_TOOLS: readonly AgentTool[] = [
         market: str(),
         symbol: str(),
         date: str("YYYY-MM-DD session date"),
-        investorType: oneOf(["retail", "foreign", "institution", "other"]),
+        investorType: oneOf([
+          "retail",
+          "foreign",
+          "institution",
+          "other",
+          "non_commercial",
+          "commercial",
+          "non_reportable",
+        ]),
         netBuyValue: num(),
         turnoverValue: num(),
+        openInterestContracts: num(),
+        measurement: oneOf(["net_buying", "net_position_change"]),
         currency: str(),
         source: str("where the number came from"),
       },
@@ -199,7 +236,7 @@ export const AGENT_TOOLS: readonly AgentTool[] = [
     name: "record_forecast",
     title: "Register a forecast",
     description:
-      "A call, with the condition that settles it and the horizon it settles on. Use a machine-resolvable criterion ('BTCUSDT > 100000') whenever the claim allows one; prose criteria have to be settled by hand.",
+      "Register an immutable call. Numeric settlement requires a resolutionTarget committed now: a Yahoo equity or ETF under the preregistered last_completed_minute policy, settled from matching historical evidence. Otherwise settlement is manual with a source note. baselineProbability is a preregistered comparator.",
     fn: "forecasts:emit",
     readOnly: false,
     inputSchema: {
@@ -209,6 +246,8 @@ export const AGENT_TOOLS: readonly AgentTool[] = [
         probability: num("0 to 1"),
         horizonSec: num("seconds until it comes due; at least 3600"),
         resolutionCriterion: str(),
+        resolutionTarget: TARGET,
+        baselineProbability: num("preregistered baseline probability, 0 to 1"),
         rationale: str(),
         author: str("agent identifier, e.g. 'codex'"),
         authorType: oneOf(["user", "agent"]),
@@ -231,7 +270,7 @@ export const AGENT_TOOLS: readonly AgentTool[] = [
     name: "due_forecasts",
     title: "Forecasts past their horizon",
     description:
-      "Open calls whose horizon has passed, with the symbol each one needs observed. A null symbol means a human has to read it.",
+      "Open calls whose horizon has passed. requiresHistoricalEvidence false means no worker will settle it and a human has to read it.",
     fn: "forecasts:listDue",
     readOnly: true,
     inputSchema: { type: "object", properties: { limit: num() } },
@@ -240,7 +279,7 @@ export const AGENT_TOOLS: readonly AgentTool[] = [
     name: "settle_forecast",
     title: "Settle a forecast",
     description:
-      "Score a call. Pass observedValue for a machine-resolvable criterion, or outcome to say what happened. An explicit outcome wins.",
+      "After the horizon, pass observedValue with matching evidence for a precommitted resolutionTarget, or an outcome with a source note for manual calls. Never substitute a current quote for historical evidence. Never pass both.",
     fn: "forecasts:settle",
     readOnly: false,
     inputSchema: {
@@ -248,6 +287,7 @@ export const AGENT_TOOLS: readonly AgentTool[] = [
       properties: {
         forecastId: str(),
         observedValue: num(),
+        evidence: EVIDENCE,
         outcome: { type: "boolean" },
         note: str(),
       },
@@ -271,7 +311,7 @@ export const AGENT_TOOLS: readonly AgentTool[] = [
     name: "calibration",
     title: "Calibration and Brier score",
     description:
-      "The track record: mean Brier, expected calibration error, and the reliability buckets behind them. 0.25 is the coin-flip line.",
+      "The track record: mean Brier, expected calibration error, and the reliability buckets behind them. 0.25 is a constant-50% reference, not a skill threshold. Paired comparisons use only preregistered baselines on the same calls. Legacy settlements without provenance are excluded.",
     fn: "forecasts:calibration",
     readOnly: true,
     inputSchema: { type: "object", properties: { windowDays: num(), author: str(), buckets: num() } },

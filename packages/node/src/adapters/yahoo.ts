@@ -17,7 +17,13 @@
 // the total, which is a wrong net worth rather than a missing one. Whoever
 // knows the asset class does the mapping; see `quoteVenueFor` in registry.ts.
 
+import { createHash } from "node:crypto";
+
 import {
+  MINUTE_MS,
+  MAX_OBSERVATION_AGE_MS,
+  type HistoricalQuote,
+  type HistoricalQuoteRequest,
   type AdapterBalance,
   type AdapterQuote,
   type ReadQuoteRequest,
@@ -64,13 +70,24 @@ type ChartMeta = {
   regularMarketPrice?: number;
   currency?: string;
   regularMarketTime?: number;
+  instrumentType?: string;
+  dataGranularity?: string;
 };
 type ChartResponse = {
   chart?: {
-    result?: Array<{ meta?: ChartMeta }> | null;
+    result?: Array<{
+      meta?: ChartMeta;
+      timestamp?: number[];
+      indicators?: { quote?: Array<{ close?: Array<number | null> }> };
+    }> | null;
     error?: { code?: string; description?: string } | null;
   };
 };
+
+async function readChart(response: Response): Promise<ChartResponse | null> {
+  // The single JSON boundary for current and historical chart responses.
+  return (await response.json().catch(() => null)) as ChartResponse | null;
+}
 
 export function createYahooAdapter(opts: YahooOptions = {}): VenueAdapter {
   const baseUrl = opts.baseUrl ?? DEFAULT_BASE_URL;
@@ -87,27 +104,110 @@ export function createYahooAdapter(opts: YahooOptions = {}): VenueAdapter {
     });
     // A delisted or misspelled symbol comes back 404 with the reason in the
     // body, so the body is read before the status is judged.
-    const body = (await res.json().catch(() => null)) as ChartResponse | null;
+    const body = await readChart(res);
     const failure = body?.chart?.error;
     if (failure) throw new Error(`yahoo: ${failure.description ?? failure.code ?? "error"} for "${symbol}"`);
     if (!res.ok) throw new Error(`yahoo ${res.status} for "${symbol}"`);
     const meta = body?.chart?.result?.[0]?.meta;
     if (!meta) throw new Error(`yahoo returned no result for "${symbol}"`);
     const price = meta.regularMarketPrice;
-    if (typeof price !== "number") throw new Error(`yahoo has no price for "${symbol}"`);
+    if (typeof price !== "number" || !Number.isFinite(price) || price < 0)
+      throw new Error(`yahoo has no price for "${symbol}"`);
 
     // The listing currency, which is the one the price is actually in. A request
     // that asked for another one gets told what it got instead of having a
     // number relabelled: converting is the caller's job, and it is the caller
     // that knows which rate it wants and when it was taken.
-    const major = toMajorUnit(price, meta.currency ?? request.currency ?? "USD");
+    if (!meta.currency) throw new Error(`yahoo has no currency for "${symbol}"`);
+    if (meta.symbol?.toUpperCase() !== symbol.toUpperCase())
+      throw new Error(`yahoo returned a different symbol for "${symbol}"`);
+    const major = toMajorUnit(price, meta.currency);
 
     // The exchange's own timestamp. Our clock here would let Friday's close
     // claim to be a Sunday price.
-    let asOf = Date.now();
-    if (typeof meta.regularMarketTime === "number") asOf = meta.regularMarketTime * MS_PER_SEC;
+    if (
+      typeof meta.regularMarketTime !== "number" ||
+      !Number.isFinite(meta.regularMarketTime) ||
+      meta.regularMarketTime <= 0
+    ) {
+      throw new Error(`yahoo has no valid source timestamp for "${symbol}"`);
+    }
+    const asOf = meta.regularMarketTime * MS_PER_SEC;
 
     return { symbol: meta.symbol ?? symbol, price: major.price, currency: major.currency, asOf };
+  }
+
+  async function readHistoricalQuote(request: HistoricalQuoteRequest): Promise<HistoricalQuote> {
+    const { target, dueAt } = request;
+    if (
+      target.venue !== YAHOO_VENUE ||
+      target.assetId !== `yahoo:${target.symbol}` ||
+      target.observationPolicy !== "last_completed_minute" ||
+      target.priceBasis !== "provider_close" ||
+      target.sessions !== "all" ||
+      !Number.isFinite(dueAt) ||
+      !target.maxAgeMs ||
+      !Number.isInteger(target.maxAgeMs) ||
+      target.maxAgeMs < MINUTE_MS ||
+      target.maxAgeMs > MAX_OBSERVATION_AGE_MS
+    ) {
+      throw new Error("unsupported Yahoo historical resolution contract");
+    }
+    const instrumentTypes: Record<string, string> = { equity: "EQUITY", etf: "ETF" };
+    const instrumentType = instrumentTypes[target.assetClass];
+    if (!instrumentType) throw new Error("historical Yahoo supports equity and ETF only");
+    // Request the entire precommitted window, never choose an outcome-dependent
+    // retry window. Yahoo minute timestamps mark the bar's start, not its close.
+    const params = new URLSearchParams({
+      period1: String(Math.floor((dueAt - target.maxAgeMs - MINUTE_MS) / MS_PER_SEC)),
+      period2: String(Math.ceil(dueAt / MS_PER_SEC)),
+      interval: "1m",
+      includePrePost: "true",
+    });
+    const source = `${baseUrl}/${encodeURIComponent(target.symbol)}?${params}`;
+    const res = await doFetch(source, {
+      headers: { "User-Agent": USER_AGENT, Accept: "application/json" },
+      signal: AbortSignal.timeout(timeoutMs),
+    });
+    const body = await readChart(res);
+    const result = body?.chart?.result?.[0];
+    if (!res.ok || body?.chart?.error || !result) throw new Error("Yahoo historical evidence unavailable");
+    const meta = result.meta;
+    if (
+      meta?.symbol !== target.symbol ||
+      meta.instrumentType !== instrumentType ||
+      meta.dataGranularity !== "1m" ||
+      !meta.currency
+    ) {
+      throw new Error("Yahoo historical instrument identity mismatch");
+    }
+    const timestamps = result.timestamp;
+    const closes = result.indicators?.quote?.[0]?.close;
+    if (!timestamps || !closes || timestamps.length !== closes.length)
+      throw new Error("Yahoo historical series is incomplete");
+    const retrievedAt = Date.now();
+    const parsedResponseSha256 = createHash("sha256").update(JSON.stringify(body)).digest("hex");
+    let chosen: HistoricalQuote | null = null;
+    const seen = new Set<number>();
+    for (const [index, startSec] of timestamps.entries()) {
+      const observedAt = startSec * MS_PER_SEC + MINUTE_MS;
+      if (!Number.isFinite(observedAt) || observedAt % MINUTE_MS !== 0 || seen.has(observedAt)) {
+        throw new Error("Yahoo historical timestamps are invalid or duplicated");
+      }
+      seen.add(observedAt);
+      if (observedAt > dueAt || dueAt - observedAt > target.maxAgeMs) continue;
+      const close = closes[index];
+      if (close === null) continue;
+      if (typeof close !== "number" || !Number.isFinite(close) || close < 0)
+        throw new Error("Yahoo historical close is invalid");
+      const major = toMajorUnit(close, meta.currency);
+      if (major.currency !== target.currency) throw new Error("Yahoo historical currency mismatch");
+      if (!chosen || observedAt > chosen.evidence.observedAt) {
+        chosen = { price: major.price, evidence: { ...target, observedAt, source, retrievedAt, parsedResponseSha256 } };
+      }
+    }
+    if (!chosen) throw new Error("no completed minute within the precommitted observation window");
+    return chosen;
   }
 
   async function readBalances(): Promise<AdapterBalance[]> {
@@ -122,5 +222,6 @@ export function createYahooAdapter(opts: YahooOptions = {}): VenueAdapter {
     capabilities: { canReadBalances: false, canReadQuotes: true, canPlaceOrders: false },
     readBalances,
     readQuote,
+    readHistoricalQuote,
   };
 }

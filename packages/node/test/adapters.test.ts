@@ -54,7 +54,9 @@ describe("the CoinGecko adapter", () => {
   });
 
   it("honours a requested quote currency", async () => {
-    const adapter = createCoingeckoAdapter({ fetchImpl: stubFetch({ bitcoin: { krw: 91_547_896 } }) });
+    const adapter = createCoingeckoAdapter({
+      fetchImpl: stubFetch({ bitcoin: { krw: 91_547_896, last_updated_at: LAST_UPDATED_SEC } }),
+    });
     const quote = await adapter.readQuote({ symbol: "BTC", currency: "KRW" });
     expect(quote.price).toBe(91_547_896);
     expect(quote.currency).toBe("KRW");
@@ -150,7 +152,7 @@ describe("the registry", () => {
 
   it("checks the capability before dispatching, not after", async () => {
     const registry = createAdapterRegistry([
-      createCoingeckoAdapter({ fetchImpl: stubFetch({ bitcoin: { usd: 1 } }) }),
+      createCoingeckoAdapter({ fetchImpl: stubFetch({ bitcoin: { usd: 1, last_updated_at: LAST_UPDATED_SEC } }) }),
       createManualAdapter({ rows: HOLDINGS }),
     ]);
     await expect(balancesThrough(registry, "coingecko", "isa")).rejects.toThrow(/does not support canReadBalances/);
@@ -169,7 +171,12 @@ const MARKET_TIME_SEC = 1_787_161_202;
 describe("the Yahoo adapter", () => {
   it("reads a quote and reports the exchange's own timestamp", async () => {
     const adapter = createYahooAdapter({
-      fetchImpl: stubChart({ symbol: "NVDA", regularMarketPrice: 218.919, currency: "USD", regularMarketTime: MARKET_TIME_SEC }),
+      fetchImpl: stubChart({
+        symbol: "NVDA",
+        regularMarketPrice: 218.919,
+        currency: "USD",
+        regularMarketTime: MARKET_TIME_SEC,
+      }),
     });
     const quote = await adapter.readQuote({ symbol: "NVDA" });
     expect(quote).toEqual({ symbol: "NVDA", price: 218.919, currency: "USD", asOf: MARKET_TIME_SEC * 1000 });
@@ -180,7 +187,12 @@ describe("the Yahoo adapter", () => {
   // hundred times itself, and the total still looks plausible enough to act on.
   it("converts a price quoted in a minor unit instead of relabelling it", async () => {
     const adapter = createYahooAdapter({
-      fetchImpl: stubChart({ symbol: "LLOY.L", regularMarketPrice: 110.35, currency: "GBp", regularMarketTime: MARKET_TIME_SEC }),
+      fetchImpl: stubChart({
+        symbol: "LLOY.L",
+        regularMarketPrice: 110.35,
+        currency: "GBp",
+        regularMarketTime: MARKET_TIME_SEC,
+      }),
     });
     const quote = await adapter.readQuote({ symbol: "LLOY.L" });
     expect(quote.price).toBeCloseTo(1.1035, 6);
@@ -194,7 +206,12 @@ describe("the Yahoo adapter", () => {
 
   it("reports the listing currency rather than the one that was asked for", async () => {
     const adapter = createYahooAdapter({
-      fetchImpl: stubChart({ symbol: "005930.KS", regularMarketPrice: 247_500, currency: "KRW", regularMarketTime: MARKET_TIME_SEC }),
+      fetchImpl: stubChart({
+        symbol: "005930.KS",
+        regularMarketPrice: 247_500,
+        currency: "KRW",
+        regularMarketTime: MARKET_TIME_SEC,
+      }),
     });
     // Relabelling a KRW number as GBP is how 247,500 won reaches a total as
     // 247,500 pounds. It cannot convert, so it says what it has.
@@ -206,7 +223,9 @@ describe("the Yahoo adapter", () => {
     const impl = async () => ({
       ok: false,
       status: 404,
-      json: async () => ({ chart: { result: null, error: { code: "Not Found", description: "No data found, symbol may be delisted" } } }),
+      json: async () => ({
+        chart: { result: null, error: { code: "Not Found", description: "No data found, symbol may be delisted" } },
+      }),
     });
     const adapter = createYahooAdapter({ fetchImpl: impl as unknown as typeof fetch });
     await expect(adapter.readQuote({ symbol: "ZZZNOTREAL" })).rejects.toThrow(/No data found.*ZZZNOTREAL/);

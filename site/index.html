@@ -354,7 +354,7 @@
               <p>
                 Being wrong costs nothing and leaves no trace, so a forecaster worth reading and one who is merely
                 fluent are indistinguishable. Register the call before the fact with a probability and a resolution
-                criterion, and the machine settles it and scores it.
+                criterion, and score it when matching resolution evidence is available.
               </p>
             </article>
           </div>
@@ -370,12 +370,12 @@
                 what happened, bucket by bucket, and the gap between the two bars is the entire point.
               </p>
               <p>
-                Calls with a parseable criterion resolve themselves when the horizon passes. Nothing waits on you
-                remembering that you made a prediction three weeks ago.
+                Supported preregistered targets resolve from historical evidence after the horizon. Missing or
+                unsupported evidence stays pending.
               </p>
               <ul class="ticks">
                 <li>Probability, horizon and resolution criterion required at registration</li>
-                <li>Automatic settlement on horizon expiry, scored on resolve</li>
+                <li>Historical settlement for supported preregistered targets</li>
                 <li>Calibration error and per-bucket observed rate</li>
               </ul>
             </div>
@@ -390,7 +390,10 @@
                 <div class="panel-body">
                   <p class="panel-total">
                     <b>0.187</b>
-                    <small>mean Brier over 74 scored calls · coin flip is 0.25 · calibration error 6.8%</small>
+                    <small
+                      >Synthetic illustration: 74 invented calls · constant 50% reference 0.25 · not measured
+                      performance</small
+                    >
                   </p>
 
                   <span class="panel-label">Reliability</span>

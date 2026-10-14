@@ -7,13 +7,19 @@
 // Totals are derived from the positions rather than written twice, so the
 // headline always agrees with the table under it.
 
+import {
+  brierScore,
+  reliabilityBuckets,
+  expectedCalibrationError,
+  meanBrier,
+  pairedBrierComparison,
+} from "@openportfolio/domain";
+
 const DAY = 86_400_000;
 const BASE = "GBP";
 
-// A fixed hour of the day, so a screenshot taken twice looks the same.
-const today = new Date();
-today.setUTCHours(16, 30, 0, 0);
-const NOW = today.getTime();
+// Fixed synthetic epoch: reproducible fixtures cannot change with wall time.
+const NOW = Date.UTC(2026, 7, 14, 16, 30);
 
 const day = (offset: number) => NOW + offset * DAY;
 
@@ -175,6 +181,80 @@ const SHAPE = [
   0.977, 0.985, 0.979, 0.988, 0.996, 1.004, 0.999, 1.008, 1.014, 1.011, 1.019, 1.024, 1.0,
 ];
 
+const DEMO_FORECASTS = [
+  {
+    _id: "c1",
+    subject: "MSFT",
+    resolutionCriterion: "MSFT close > 520.00",
+    probability: 0.55,
+    status: "resolved",
+    outcome: true,
+    brier: brierScore(0.55, true),
+    dueAt: day(-2),
+  },
+  {
+    _id: "c2",
+    subject: "Euro area CPI",
+    resolutionCriterion: "HICP yoy < 2.2",
+    probability: 0.66,
+    status: "resolved",
+    outcome: true,
+    brier: brierScore(0.66, true),
+    dueAt: day(-2),
+  },
+  {
+    _id: "c3",
+    subject: "VWRL",
+    resolutionCriterion: "VWRL close > 124.00",
+    probability: 0.61,
+    status: "open",
+    brier: null,
+    dueAt: day(89),
+  },
+  {
+    _id: "c4",
+    subject: "035420",
+    resolutionCriterion: "035420 close > 210000",
+    probability: 0.49,
+    status: "open",
+    brier: null,
+    dueAt: day(4),
+  },
+  {
+    _id: "c5",
+    subject: "ETH",
+    resolutionCriterion: "ETHUSD > 4000",
+    probability: 0.37,
+    status: "open",
+    brier: null,
+    dueAt: day(23),
+  },
+  {
+    _id: "c6",
+    subject: "Gold",
+    resolutionCriterion: "XAUUSD > 4500",
+    probability: 0.44,
+    status: "open",
+    brier: null,
+    dueAt: day(31),
+  },
+  {
+    _id: "c7",
+    subject: "ASML",
+    resolutionCriterion: "ASML bookings beat consensus",
+    probability: 0.58,
+    status: "resolved",
+    outcome: true,
+    brier: brierScore(0.58, true),
+    dueAt: day(-19),
+  },
+];
+const DEMO_POINTS = DEMO_FORECASTS.filter((row) => row.outcome !== undefined).map((row) => ({
+  probability: row.probability,
+  outcome: row.outcome === true,
+}));
+const DEMO_BUCKETS = reliabilityBuckets(DEMO_POINTS);
+
 export const FIXTURES: Record<string, unknown> = {
   "tenants:whoami": { tenantSlug: "demo", tenantName: "Demo book", role: "viewer" },
 
@@ -309,91 +389,19 @@ export const FIXTURES: Record<string, unknown> = {
     },
   ],
 
-  // Slightly overconfident at the top end, which is the usual failure and the
-  // thing the diagram is supposed to expose.
+  // Synthetic illustration only; these are not measured forecast results.
   "forecasts:calibration": {
-    n: 74,
-    meanBrier: 0.187,
+    n: DEMO_POINTS.length,
+    meanBrier: meanBrier(DEMO_POINTS.map((point) => brierScore(point.probability, point.outcome))),
     randomBaseline: 0.25,
-    expectedCalibrationError: 0.068,
-    buckets: [
-      { lower: 0.0, upper: 0.2, count: 9, meanProbability: 0.12, observedRate: 0.111 },
-      { lower: 0.2, upper: 0.4, count: 14, meanProbability: 0.31, observedRate: 0.286 },
-      { lower: 0.4, upper: 0.6, count: 19, meanProbability: 0.51, observedRate: 0.526 },
-      { lower: 0.6, upper: 0.8, count: 21, meanProbability: 0.68, observedRate: 0.619 },
-      { lower: 0.8, upper: 1.0, count: 11, meanProbability: 0.87, observedRate: 0.727 },
-    ],
+    expectedCalibrationError: expectedCalibrationError(DEMO_BUCKETS),
+    buckets: DEMO_BUCKETS,
+    open: DEMO_FORECASTS.length - DEMO_POINTS.length,
+    voided: 0,
+    legacyResolved: 0,
+    paired: pairedBrierComparison([]),
   },
-
-  // Subjects are drawn from the fixture book above, never from a real registered
-  // call. An invented holding is easy to see; an invented forecast is not, and a
-  // list of genuine calls with their real levels and dates is a research record
-  // whether or not it names a position.
-  "forecasts:list": [
-    {
-      _id: "c1",
-      subject: "MSFT",
-      resolutionCriterion: "MSFT close > 520.00",
-      probability: 0.55,
-      status: "resolved",
-      brier: 0.203,
-      dueAt: day(-2),
-    },
-    {
-      _id: "c2",
-      subject: "Euro area CPI",
-      resolutionCriterion: "HICP yoy < 2.2",
-      probability: 0.66,
-      status: "resolved",
-      brier: 0.116,
-      dueAt: day(-2),
-    },
-    {
-      _id: "c3",
-      subject: "VWRL",
-      resolutionCriterion: "VWRL close > 124.00",
-      probability: 0.61,
-      status: "open",
-      brier: null,
-      dueAt: day(89),
-    },
-    {
-      _id: "c4",
-      subject: "035420",
-      resolutionCriterion: "035420 close > 210000",
-      probability: 0.49,
-      status: "open",
-      brier: null,
-      dueAt: day(4),
-    },
-    {
-      _id: "c5",
-      subject: "ETH",
-      resolutionCriterion: "ETHUSD > 4000",
-      probability: 0.37,
-      status: "open",
-      brier: null,
-      dueAt: day(23),
-    },
-    {
-      _id: "c6",
-      subject: "Gold",
-      resolutionCriterion: "XAUUSD > 4500",
-      probability: 0.44,
-      status: "open",
-      brier: null,
-      dueAt: day(31),
-    },
-    {
-      _id: "c7",
-      subject: "ASML",
-      resolutionCriterion: "ASML bookings beat consensus",
-      probability: 0.58,
-      status: "resolved",
-      brier: 0.176,
-      dueAt: day(-19),
-    },
-  ],
+  "forecasts:list": DEMO_FORECASTS,
 
   "decisions:list": [
     {

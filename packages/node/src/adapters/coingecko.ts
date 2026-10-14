@@ -86,12 +86,15 @@ export function createCoingeckoAdapter(opts: CoingeckoOptions = {}): VenueAdapte
     const row = body[id];
     if (!row) throw new Error(`coingecko has no coin "${id}" (from symbol "${request.symbol}")`);
     const price = row[currency];
-    if (typeof price !== "number") throw new Error(`coingecko has no ${currency} price for "${id}"`);
+    if (typeof price !== "number" || !Number.isFinite(price) || price < 0)
+      throw new Error(`coingecko has no ${currency} price for "${id}"`);
     // The endpoint reports when it last saw the price. Falling back to our own
     // clock would let a stale quote claim to be fresh.
     const lastUpdated = row.last_updated_at;
-    let asOf = Date.now();
-    if (typeof lastUpdated === "number") asOf = lastUpdated * MS_PER_SEC;
+    if (typeof lastUpdated !== "number" || !Number.isFinite(lastUpdated) || lastUpdated <= 0) {
+      throw new Error(`coingecko has no valid source timestamp for "${id}"`);
+    }
+    const asOf = lastUpdated * MS_PER_SEC;
     return { symbol: request.symbol.toUpperCase(), price, currency: currency.toUpperCase(), asOf };
   }
 

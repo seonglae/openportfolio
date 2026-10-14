@@ -1,4 +1,5 @@
 import { v } from "convex/values";
+import { paginationOptsValidator } from "convex/server";
 import {
   AUTHOR_TYPES,
   BRIER_RANDOM_BASELINE,
@@ -7,13 +8,16 @@ import {
   criterionSymbol,
   dueAt as horizonEnd,
   expectedCalibrationError,
+  isMachineSettleable,
   meanBrier,
   reliabilityBuckets,
   resolveFromObservation,
   resolveFromOutcome,
   validateForecast,
+  validateEvidence,
+  pairedBrierComparison,
 } from "@openportfolio/domain";
-import { highestBy } from "@openportfolio/core";
+import { resolutionTarget, resolutionEvidence } from "./forecastValidators";
 import { internalMutation, mutation, query } from "./_generated/server";
 import { inTenant, requireRole, requireTenant } from "./auth";
 import { appendAudit } from "./audit";
@@ -34,6 +38,8 @@ export const emit = mutation({
     probability: v.number(),
     horizonSec: v.number(),
     resolutionCriterion: v.string(),
+    resolutionTarget: v.optional(resolutionTarget),
+    baselineProbability: v.optional(v.number()),
     rationale: v.optional(v.string()),
     author: v.optional(v.string()),
     authorType: v.optional(literals(AUTHOR_TYPES)),
@@ -47,6 +53,8 @@ export const emit = mutation({
       probability: args.probability,
       horizonSec: args.horizonSec,
       resolutionCriterion: args.resolutionCriterion,
+      resolutionTarget: args.resolutionTarget,
+      baselineProbability: args.baselineProbability,
     });
     if (problems.length > 0) throw new Error(problems.join("; "));
 
@@ -65,6 +73,8 @@ export const emit = mutation({
       probability: args.probability,
       horizonSec: args.horizonSec,
       resolutionCriterion: args.resolutionCriterion,
+      resolutionTarget: args.resolutionTarget,
+      baselineProbability: args.baselineProbability,
       rationale: args.rationale,
       author,
       authorType,
@@ -118,9 +128,9 @@ export const list = query({
   },
 });
 
-// Open calls whose horizon has passed, with the symbol each one needs an
-// observation for. The sync worker reads this to know which quotes to fetch;
-// a null symbol means the criterion is prose and a human has to settle it.
+// Open calls whose horizon has passed. requiresHistoricalEvidence marks the
+// ones the sync worker settles from a supported target; every other row,
+// prose or ticker-only or an unsupported target, needs a reader.
 export const listDue = query({
   args: {
     now: v.optional(v.number()),
@@ -143,17 +153,48 @@ export const listDue = query({
       resolutionCriterion: row.resolutionCriterion,
       dueAt: row.dueAt,
       symbol: criterionSymbol(row.resolutionCriterion),
+      resolutionTarget: row.resolutionTarget,
+      requiresHistoricalEvidence: isMachineSettleable(row.resolutionTarget),
     }));
   },
 });
 
-// Settle one call. An explicit `outcome` wins over an observation: it is a
-// human saying what happened, and the parser exists to save them the typing,
-// not to overrule them.
+// Cursor pagination prevents old unsupported calls from starving newer calls.
+// The worker pins now across pages so concurrent emissions cannot extend a run.
+export const listDuePage = query({
+  args: {
+    paginationOpts: paginationOptsValidator,
+    now: v.number(),
+    serviceKey: v.optional(v.string()),
+    tenantSlug: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const scope = await requireTenant(ctx, args);
+    const result = await ctx.db
+      .query("forecasts")
+      .withIndex("by_tenant_status_due", (q) =>
+        q.eq("tenantId", scope.tenantId).eq("status", "open").lte("dueAt", args.now),
+      )
+      .paginate(args.paginationOpts);
+    return {
+      ...result,
+      page: result.page.map((row) => ({
+        id: row._id,
+        subject: row.subject,
+        probability: row.probability,
+        dueAt: row.dueAt,
+        resolutionTarget: row.resolutionTarget,
+      })),
+    };
+  },
+});
+
+// Evidence-bound and manual resolutions are distinct, mutually exclusive paths.
 export const settle = mutation({
   args: {
     forecastId: v.id("forecasts"),
     observedValue: v.optional(v.number()),
+    evidence: v.optional(resolutionEvidence),
     outcome: v.optional(v.boolean()),
     note: v.optional(v.string()),
     serviceKey: v.optional(v.string()),
@@ -164,6 +205,18 @@ export const settle = mutation({
     const row = inTenant(scope, await ctx.db.get(args.forecastId));
     if (row.status !== "open") throw new Error(`forecast is already ${row.status}`);
 
+    const resolvedAt = Date.now();
+    if (resolvedAt < row.dueAt) throw new Error("forecast horizon has not passed");
+    if (args.outcome !== undefined && (args.observedValue !== undefined || args.evidence !== undefined)) {
+      throw new Error("pass either an outcome or an observation with evidence, never both");
+    }
+    if (args.outcome !== undefined) {
+      if (isMachineSettleable(row.resolutionTarget)) {
+        throw new Error("this forecast requires matching historical evidence");
+      }
+      if (!args.note?.trim()) throw new Error("manual resolution requires a note naming the evidence source");
+    }
+    if (args.observedValue !== undefined) validateEvidence(row.resolutionTarget, args.evidence, row.dueAt, resolvedAt);
     let resolution = null;
     if (args.outcome !== undefined) resolution = resolveFromOutcome(row.probability, args.outcome);
     else if (args.observedValue !== undefined) {
@@ -173,7 +226,6 @@ export const settle = mutation({
       throw new Error("pass an outcome, or an observedValue for a machine-resolvable criterion");
     }
 
-    const resolvedAt = Date.now();
     await ctx.db.patch(row._id, {
       status: "resolved",
       resolvedAt,
@@ -181,11 +233,20 @@ export const settle = mutation({
       brier: resolution.brier,
       observedValue: args.observedValue,
       resolutionNote: args.note,
+      resolutionEvidence: args.evidence,
+      resolutionMethod: args.outcome === undefined ? "evidence" : "manual",
     });
     await appendAudit(ctx, scope, {
       kind: "forecast.resolved",
       subject: row.subject,
-      detail: `outcome=${resolution.outcome} brier=${resolution.brier.toFixed(4)}`,
+      detail: JSON.stringify({
+        forecastId: row._id,
+        outcome: resolution.outcome,
+        brier: resolution.brier,
+        dueAt: row.dueAt,
+        evidence: args.evidence,
+        note: args.note,
+      }),
     });
     return { outcome: resolution.outcome, brier: resolution.brier };
   },
@@ -205,6 +266,7 @@ export const voidForecast = mutation({
     const scope = await requireRole(ctx, args, "member");
     const row = inTenant(scope, await ctx.db.get(args.forecastId));
     if (row.status !== "open") throw new Error(`forecast is already ${row.status}`);
+    if (!args.reason.trim()) throw new Error("void reason is required");
     await ctx.db.patch(row._id, { status: "void", resolvedAt: Date.now(), resolutionNote: args.reason });
     await appendAudit(ctx, scope, { kind: "forecast.voided", subject: row.subject, detail: args.reason });
     return { voided: true };
@@ -223,20 +285,55 @@ export const calibration = query({
   },
   handler: async (ctx, args) => {
     const scope = await requireTenant(ctx, args);
-    const rows = await ctx.db
-      .query("forecasts")
-      .withIndex("by_tenant_status_due", (q) => q.eq("tenantId", scope.tenantId).eq("status", "resolved"))
-      .collect();
-
+    if (args.windowDays !== undefined && (!Number.isFinite(args.windowDays) || args.windowDays <= 0)) {
+      throw new Error("windowDays must be positive and finite");
+    }
     let cutoff = 0;
     if (args.windowDays) cutoff = Date.now() - args.windowDays * MS_PER_DAY;
+    // Read only the rows the window and author can count, from their index.
+    let rows;
+    if (args.author) {
+      const author = args.author;
+      rows = await ctx.db
+        .query("forecasts")
+        .withIndex("by_tenant_author", (q) => q.eq("tenantId", scope.tenantId).eq("author", author))
+        .collect();
+    } else {
+      rows = await ctx.db
+        .query("forecasts")
+        .withIndex("by_tenant_created", (q) => q.eq("tenantId", scope.tenantId).gte("createdAt", cutoff))
+        .collect();
+    }
 
     const points: CalibrationPoint[] = [];
     const scores: number[] = [];
+    const paired: Array<CalibrationPoint & { baselineProbability: number }> = [];
+    let open = 0;
+    let voided = 0;
+    let legacyResolved = 0;
     for (const row of rows) {
       if (row.createdAt < cutoff) continue;
       if (args.author && row.author !== args.author) continue;
+      if (row.status === "open") {
+        open += 1;
+        continue;
+      }
+      if (row.status === "void") {
+        voided += 1;
+        continue;
+      }
+      if (!row.resolutionMethod) {
+        legacyResolved += 1;
+        continue;
+      }
       if (row.outcome === undefined || row.brier === undefined) continue;
+      if (row.baselineProbability !== undefined) {
+        paired.push({
+          probability: row.probability,
+          outcome: row.outcome,
+          baselineProbability: row.baselineProbability,
+        });
+      }
       points.push({ probability: row.probability, outcome: row.outcome });
       scores.push(row.brier);
     }
@@ -244,6 +341,14 @@ export const calibration = query({
     const buckets = reliabilityBuckets(points, args.buckets ?? DEFAULT_BUCKETS);
     return {
       n: points.length,
+      open,
+      voided,
+      legacyResolved,
+      paired: pairedBrierComparison(paired),
+      observedBaseRate: meanBrier(points.map((p) => Number(p.outcome))),
+      baseRateBenchmark: "in-sample descriptive only; not evidence of forecasting skill",
+      confidenceInterval: null,
+      confidenceIntervalReason: "Event dependence is unknown; no independence-based interval is claimed.",
       meanBrier: meanBrier(scores),
       expectedCalibrationError: expectedCalibrationError(buckets),
       randomBaseline: BRIER_RANDOM_BASELINE,
@@ -252,16 +357,9 @@ export const calibration = query({
   },
 });
 
-// The resolver cron.
-//
-// This is the one function in the backend that crosses tenants, and it is an
-// internalMutation for exactly that reason: no client can reach it. It sweeps
-// every book's due calls in one pass because a per-tenant cron would mean a
-// cron per signup.
-//
-// An observation comes from the freshest balance row carrying a price for the
-// symbol, which is what the sync worker keeps current. No observation means the
-// call stays open rather than being scored on a guess.
+// A balance is a current valuation, not historical settlement evidence. Keep
+// the cron API for existing deployments, but never infer an outcome from it.
+// Historical evidence enters through settle, under the tenant gate and audit.
 export const resolveDue = internalMutation({
   args: { now: v.optional(v.number()), limit: v.optional(v.number()) },
   handler: async (ctx, args) => {
@@ -271,56 +369,7 @@ export const resolveDue = internalMutation({
       .query("forecasts")
       .withIndex("by_status_due", (q) => q.eq("status", "open").lte("dueAt", now))
       .take(limit);
-
-    let resolved = 0;
-    let unobserved = 0;
-    let human = 0;
-
-    for (const row of due) {
-      const symbol = criterionSymbol(row.resolutionCriterion);
-      if (!symbol) {
-        human += 1;
-        continue;
-      }
-      const priced = await ctx.db
-        .query("balances")
-        .withIndex("by_tenant_symbol", (q) => q.eq("tenantId", row.tenantId).eq("symbol", symbol))
-        .collect();
-      const withPrice = priced.filter((balance) => typeof balance.lastPrice === "number");
-      const freshest = highestBy(withPrice, (balance) => balance.asOf);
-      const observed = freshest?.lastPrice;
-      if (observed === undefined) {
-        unobserved += 1;
-        continue;
-      }
-      const resolution = resolveFromObservation(row.probability, row.resolutionCriterion, observed);
-      if (!resolution) {
-        human += 1;
-        continue;
-      }
-      await ctx.db.patch(row._id, {
-        status: "resolved",
-        resolvedAt: now,
-        outcome: resolution.outcome,
-        brier: resolution.brier,
-        observedValue: observed,
-        resolutionNote: `auto-resolved from ${freshest?.accountKey ?? "balances"} @ ${observed}`,
-      });
-      // Written inline rather than through appendAudit: the cron has no caller
-      // and therefore no tenant scope, and inventing one would put a fake actor
-      // in the only record of what the system did unattended.
-      await ctx.db.insert("auditLog", {
-        tenantId: row.tenantId,
-        at: now,
-        kind: "forecast.resolved",
-        actor: "cron:resolver",
-        actorType: "agent",
-        subject: row.subject,
-        detail: `outcome=${resolution.outcome} brier=${resolution.brier.toFixed(4)} observed=${observed}`,
-      });
-      resolved += 1;
-    }
-
-    return { seen: due.length, resolved, unobserved, human };
+    const human = due.filter((row) => !criterionSymbol(row.resolutionCriterion)).length;
+    return { seen: due.length, resolved: 0, unobserved: due.length - human, human };
   },
 });

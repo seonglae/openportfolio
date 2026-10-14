@@ -3,8 +3,7 @@ import Charts
 
 // The scored record. The reliability diagram sits at the top because it is the
 // product: what was said, what happened, and the gap between them. A mean Brier
-// above the 0.25 baseline means the calls were worse than a coin, and the
-// screen says so rather than showing the number without its yardstick.
+// is descriptive. A 0.25 constant-50% reference is not a test of skill.
 struct CallsView: View {
     @EnvironmentObject var state: AppState
     @State private var calls: [Forecast] = []
@@ -106,12 +105,8 @@ struct CallsView: View {
         guard let mean = c.meanBrier else { return "-" }
         return String(format: "%.3f", mean)
     }
-    // Green only when it beats the random baseline the backend ships with it.
-    func brierColor(_ c: Calibration) -> Color {
-        guard let mean = c.meanBrier else { return .secondary }
-        if mean <= c.randomBaseline { return .green }
-        return .red
-    }
+    // Unknown event dependence and base rates do not justify a skill badge.
+    func brierColor(_ c: Calibration) -> Color { .secondary }
     func errorText(_ c: Calibration) -> String {
         guard let ece = c.expectedCalibrationError else { return "-" }
         return String(format: "%.3f", ece)

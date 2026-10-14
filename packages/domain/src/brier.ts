@@ -1,9 +1,8 @@
 // Brier scoring and the reliability diagram behind it.
 //
 // The Brier score is the squared error of a probability against what happened:
-// (p - outcome)^2, lower is better. Always predicting the base rate of a coin
-// flip scores 0.25, which is the line a track record has to beat before any of
-// it counts as skill.
+// (p - outcome)^2, lower is better. Constant p=0.5 scores 0.25 for every
+// outcome. This is a neutral reference, not a universal test of skill.
 
 export const BRIER_RANDOM_BASELINE = 0.25;
 const DEFAULT_BUCKET_COUNT = 10;
@@ -46,6 +45,9 @@ export function reliabilityBuckets(
   points: readonly CalibrationPoint[],
   bucketCount: number = DEFAULT_BUCKET_COUNT,
 ): ReliabilityBucket[] {
+  if (!Number.isInteger(bucketCount) || bucketCount < 1 || bucketCount > 100) {
+    throw new Error("bucketCount must be an integer from 1 to 100");
+  }
   const width = 1 / bucketCount;
   const sums = new Array<number>(bucketCount).fill(0);
   const hits = new Array<number>(bucketCount).fill(0);
@@ -91,4 +93,21 @@ export function expectedCalibrationError(buckets: readonly ReliabilityBucket[]):
   }
   if (total === 0) return null;
   return weighted / total;
+}
+
+export type PairedBrierPoint = CalibrationPoint & { baselineProbability: number };
+
+// Compare the same resolved calls, with a baseline registered before outcomes.
+// A positive difference means the forecast lost to that baseline. Heterogeneous
+// events can be dependent, so neither significance nor a CI follows from n.
+export function pairedBrierComparison(points: readonly PairedBrierPoint[]) {
+  const forecast = points.map((point) => brierScore(point.probability, point.outcome));
+  const baseline = points.map((point) => brierScore(point.baselineProbability, point.outcome));
+  const deltas = forecast.map((score, index) => score - baseline[index]);
+  return {
+    n: points.length,
+    meanBrier: meanBrier(forecast),
+    baselineMeanBrier: meanBrier(baseline),
+    meanDifference: meanBrier(deltas),
+  };
 }

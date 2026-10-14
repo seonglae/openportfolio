@@ -152,7 +152,14 @@
               </tr>
               <tr>
                 <td><code>turnoverValue</code></td>
-                <td>Session turnover. Stored on the same row on purpose.</td>
+                <td>Traded turnover where the source publishes it. Never open interest.</td>
+              </tr>
+              <tr>
+                <td><code>openInterestContracts</code></td>
+                <td>
+                  CFTC open interest, distinct from turnover. COT measures weekly net-position change in contracts and
+                  retains commercial, non-commercial and non-reportable classes; non-reportable does not mean retail.
+                </td>
               </tr>
               <tr>
                 <td><code>source</code></td>

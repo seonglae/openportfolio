@@ -22,6 +22,7 @@ import {
   createNotifier,
   formatNeedsReading,
   loadEnvLocal,
+  needsReading as readerQueue,
   resolveConvexUrl,
   resolveServiceKey,
   unannounced,
@@ -84,7 +85,13 @@ async function call<T>(fn: string, args: Record<string, unknown> = {}): Promise<
 }
 
 type Decision = { key: string; title: string; triggerCondition: string; dueAt?: number };
-type DueForecast = { id: string; subject: string; resolutionCriterion: string; symbol: string | null };
+type DueForecast = {
+  id: string;
+  subject: string;
+  resolutionCriterion: string;
+  symbol: string | null;
+  requiresHistoricalEvidence: boolean;
+};
 
 function buildPrompt(decisions: Decision[], forecasts: DueForecast[]): string {
   const lines = [
@@ -110,13 +117,14 @@ function buildPrompt(decisions: Decision[], forecasts: DueForecast[]): string {
     );
   }
   if (forecasts.length > 0) {
-    lines.push(`Forecasts past their horizon that no parser can settle:`);
+    lines.push(`Forecasts past their horizon that no worker can settle:`);
     for (const forecast of forecasts.slice(0, MAX_LISTED)) {
       lines.push(`- ${forecast.id}: ${forecast.subject} (criterion: ${forecast.resolutionCriterion})`);
     }
     lines.push(
       `For each: establish whether the criterion was met, then call settle_forecast with an explicit`,
-      `outcome. If the criterion became unresolvable, void_forecast with the reason instead. Do not`,
+      `outcome and a note naming the source that shows it; a manual outcome without that note is`,
+      `refused. If the criterion became unresolvable, void_forecast with the reason instead. Do not`,
       `guess: an unresolvable call is voided, not scored.`,
       ``,
     );
@@ -150,7 +158,7 @@ async function drain(): Promise<void> {
   try {
     const decisions = await call<Decision[]>("decisions:overdue", {});
     const due = await call<DueForecast[]>("forecasts:listDue", {});
-    const needsReading = due.filter((row) => row.symbol === null);
+    const needsReading = readerQueue(due);
     if (decisions.length === 0 && needsReading.length === 0) return;
 
     lastRunAt = Date.now();

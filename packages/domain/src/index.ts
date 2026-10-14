@@ -4,3 +4,4 @@ export * from "./criterion.ts";
 export * from "./forecast.ts";
 export * from "./adapter.ts";
 export * from "./agent-tools.ts";
+export * from "./flow.ts";

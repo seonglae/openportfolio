@@ -89,3 +89,27 @@ describe("the reliability diagram", () => {
     expect(expectedCalibrationError(reliabilityBuckets([], 10))).toBeNull();
   });
 });
+
+// The base rate can be easier than the constant-50% reference. These identical
+// events are a numerical illustration, not a claim of independent evidence.
+describe("paired preregistered baselines", () => {
+  it("exposes a forecast below 0.25 that still loses to its base-rate comparator", async () => {
+    const { pairedBrierComparison } = await import("../src/brier.ts");
+    const points = Array.from({ length: 10 }, (_, i) => ({
+      probability: 0.8,
+      baselineProbability: 0.9,
+      outcome: i < 9,
+    }));
+    expect(pairedBrierComparison(points)).toMatchObject({
+      n: 10,
+      meanBrier: expect.closeTo(0.1),
+      baselineMeanBrier: expect.closeTo(0.09),
+      meanDifference: expect.closeTo(0.01),
+    });
+  });
+  it("keeps empty comparisons null and rejects an invalid baseline", async () => {
+    const { pairedBrierComparison } = await import("../src/brier.ts");
+    expect(pairedBrierComparison([])).toEqual({ n: 0, meanBrier: null, baselineMeanBrier: null, meanDifference: null });
+    expect(() => pairedBrierComparison([{ probability: 0.5, outcome: true, baselineProbability: 1.1 }])).toThrow();
+  });
+});
