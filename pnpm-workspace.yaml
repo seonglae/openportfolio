@@ -18,3 +18,6 @@ allowBuilds:
 # that hides a real one. Pinned forward to the patched line instead.
 overrides:
   '@clerk/clerk-react': '^5.61.6'
+  # CVE-2026-93749: Tailwind's transitive copy stayed on 1.2.1 after a
+  # targeted pnpm update. Keep every source-map-js consumer on the fixed patch.
+  source-map-js: '1.2.2'
