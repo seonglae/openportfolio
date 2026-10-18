@@ -58,7 +58,7 @@
   "devDependencies": {
     "@edge-runtime/vm": "^5.0.0",
     "@types/node": "^26.6.5",
-    "convex-test": "^0.0.61",
+    "convex-test": "^0.0.62",
     "happy-dom": "^21.0.1",
     "prettier": "^3.9.10",
     "tsx": "^4.23.15",
