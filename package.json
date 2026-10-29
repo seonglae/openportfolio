@@ -59,7 +59,7 @@
     "@edge-runtime/vm": "^5.0.0",
     "@types/node": "^26.6.5",
     "convex-test": "^0.0.61",
-    "happy-dom": "^21.0.1",
+    "happy-dom": "^21.0.4",
     "prettier": "^3.9.10",
     "tsx": "^4.23.15",
     "typescript": "^7.0.2",
